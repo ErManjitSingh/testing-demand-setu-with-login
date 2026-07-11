@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page { size: A4; margin: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: #1a1a2e;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page:last-child { page-break-after: avoid; }
+
+  /* ── COVER ── */
+  .cover {
+    background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 40%, #0d2137 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0;
+  }
+
+  .cover-hero {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 65%;
+    background: url('https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1200&q=80') center/cover no-repeat;
+  }
+
+  .cover-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10,22,40,0.3) 0%, rgba(10,22,40,0.95) 100%);
+  }
+
+  .cover-content {
+    position: relative;
+    z-index: 2;
+    padding: 40px 50px 50px;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #c9a84c, #e8d5a3);
+    color: #0a1628;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  .cover h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .cover-subtitle {
+    font-size: 18px;
+    font-weight: 300;
+    color: #c9d6e3;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .cover-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cover-meta-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #c9a84c;
+    font-weight: 600;
+  }
+
+  .cover-meta-value {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .cover-company {
+    position: absolute;
+    top: 40px;
+    left: 50px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cover-logo {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #c9a84c, #e8d5a3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0a1628;
+  }
+
+  .cover-company-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .cover-company-tag {
+    font-size: 10px;
+    color: #c9a84c;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── SHARED ── */
+  .page-header {
+    background: linear-gradient(135deg, #0a1628, #1a3a5c);
+    padding: 28px 50px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .page-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 600;
+  }
+
+  .page-header .ref {
+    font-size: 10px;
+    color: #c9a84c;
+    letter-spacing: 1px;
+  }
+
+  .page-body { padding: 35px 50px; }
+
+  .section-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #c9a84c;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .gold-line {
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, #c9a84c, #e8d5a3);
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  /* ── WELCOME ── */
+  .welcome-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 10px;
+  }
+
+  .welcome-card {
+    background: linear-gradient(135deg, #f8f6f0, #fff);
+    border: 1px solid #e8e0d0;
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .welcome-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #0a1628;
+  }
+
+  .welcome-card p {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #555;
+  }
+
+  .welcome-greeting {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: #0a1628;
+    margin-bottom: 16px;
+  }
+
+  .welcome-text {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 24px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+  }
+
+  .info-row .label { color: #888; font-weight: 500; }
+  .info-row .value { color: #1a1a2e; font-weight: 600; }
+
+  /* ── TRIP SUMMARY ── */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+
+  .summary-card {
+    background: linear-gradient(135deg, #0a1628, #1a3a5c);
+    color: #fff;
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+  }
+
+  .summary-card .icon { font-size: 28px; margin-bottom: 8px; }
+  .summary-card .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #c9a84c;
+  }
+  .summary-card .lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #a0b4c8;
+    margin-top: 4px;
+  }
+
+  .route-bar {
+    background: linear-gradient(135deg, #f8f6f0, #fff);
+    border: 1px solid #e8e0d0;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-top: 10px;
+  }
+
+  .route-bar h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    margin-bottom: 14px;
+    color: #0a1628;
+  }
+
+  .route-flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1a3a5c;
+  }
+
+  .route-dot {
+    width: 8px;
+    height: 8px;
+    background: #c9a84c;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .route-arrow { color: #c9a84c; font-size: 14px; margin: 0 2px; }
+
+  /* ── ROUTE MAP ── */
+  .map-container {
+    background: linear-gradient(135deg, #e8f0f8, #d4e4f0);
+    border-radius: 16px;
+    padding: 30px;
+    margin-top: 10px;
+    position: relative;
+    min-height: 380px;
+  }
+
+  .map-route {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .map-stop {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    position: relative;
+  }
+
+  .map-stop::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    background: #c9a84c;
+    border: 3px solid #0a1628;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+
+  .map-stop::after {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    width: 2px;
+    height: 100%;
+    background: #c9a84c;
+    z-index: 1;
+  }
+
+  .map-stop:last-child::after { display: none; }
+
+  .map-stop-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #0a1628;
+    min-width: 80px;
+  }
+
+  .map-stop-nights {
+    font-size: 11px;
+    color: #fff;
+    background: #1a3a5c;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .map-stop-day {
+    font-size: 10px;
+    color: #888;
+    margin-left: auto;
+  }
+
+  /* ── HOTELS ── */
+  .hotel-card {
+    display: flex;
+    gap: 20px;
+    background: #fff;
+    border: 1px solid #e8e0d0;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+  }
+
+  .hotel-img {
+    width: 160px;
+    min-height: 120px;
+    background: linear-gradient(135deg, #1a3a5c, #0a1628);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c9a84c;
+    font-size: 36px;
+    overflow: hidden;
+  }
+
+  .hotel-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hotel-info { padding: 18px 20px 18px 0; flex: 1; }
+
+  .hotel-day-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #c9a84c, #e8d5a3);
+    color: #0a1628;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+
+  .hotel-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0a1628;
+    margin-bottom: 4px;
+  }
+
+  .hotel-city { font-size: 11px; color: #888; margin-bottom: 8px; }
+
+  .hotel-details {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: #555;
+  }
+
+  .hotel-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .hotel-price {
+    font-weight: 700;
+    color: #c9a84c;
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  /* ── ITINERARY TIMELINE ── */
+  .timeline-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 22px;
+    page-break-inside: avoid;
+  }
+
+  .timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+  }
+
+  .timeline-day {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #0a1628, #1a3a5c);
+    color: #c9a84c;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .timeline-line {
+    width: 2px;
+    flex: 1;
+    background: linear-gradient(180deg, #c9a84c, #e8e0d0);
+    margin-top: 6px;
+    min-height: 20px;
+  }
+
+  .timeline-content {
+    flex: 1;
+    background: #f8f6f0;
+    border-radius: 12px;
+    padding: 18px 22px;
+    border-left: 3px solid #c9a84c;
+  }
+
+  .timeline-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0a1628;
+    margin-bottom: 4px;
+  }
+
+  .timeline-city {
+    font-size: 10px;
+    color: #c9a84c;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-desc {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #555;
+  }
+
+  .timeline-desc p { margin-bottom: 6px; }
+
+  /* ── CAB ── */
+  .cab-card {
+    background: linear-gradient(135deg, #0a1628, #1a3a5c);
+    border-radius: 16px;
+    padding: 30px;
+    color: #fff;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .cab-icon { font-size: 64px; }
+
+  .cab-details h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .cab-specs {
+    display: flex;
+    gap: 20px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .cab-spec {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 11px;
+  }
+
+  .cab-spec strong { color: #c9a84c; display: block; font-size: 14px; margin-bottom: 2px; }
+
+  .cab-price {
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .cab-price .amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: #c9a84c;
+    font-weight: 700;
+  }
+
+  .cab-price .lbl { font-size: 10px; color: #a0b4c8; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── PRICING ── */
+  .pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .pricing-table th {
+    background: linear-gradient(135deg, #0a1628, #1a3a5c);
+    color: #fff;
+    padding: 14px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .pricing-table th:last-child { text-align: right; }
+
+  .pricing-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .pricing-table td:last-child { text-align: right; font-weight: 600; }
+
+  .pricing-table tr:nth-child(even) td { background: #f8f6f0; }
+
+  .pricing-total {
+    background: linear-gradient(135deg, #0a1628, #1a3a5c) !important;
+    color: #fff;
+  }
+
+  .pricing-total td {
+    padding: 18px 20px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    border: none !important;
+  }
+
+  .pricing-total .gold { color: #c9a84c; }
+
+  .pricing-final {
+    background: linear-gradient(135deg, #c9a84c, #e8d5a3) !important;
+    color: #0a1628;
+  }
+
+  .pricing-final td {
+    padding: 20px !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    border: none !important;
+  }
+
+  /* ── INCLUSIONS / POLICIES ── */
+  .policy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  .policy-box {
+    background: #f8f6f0;
+    border-radius: 14px;
+    padding: 22px;
+    border: 1px solid #e8e0d0;
+    page-break-inside: avoid;
+  }
+
+  .policy-box.inclusions { border-left: 4px solid #2ecc71; }
+  .policy-box.exclusions { border-left: 4px solid #e74c3c; }
+
+  .policy-box h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #0a1628;
+  }
+
+  .policy-box ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .policy-box li {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #444;
+    padding: 5px 0 5px 18px;
+    position: relative;
+  }
+
+  .policy-box.inclusions li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #2ecc71;
+    font-weight: 700;
+  }
+
+  .policy-box.exclusions li::before {
+    content: '✕';
+    position: absolute;
+    left: 0;
+    color: #e74c3c;
+    font-weight: 700;
+  }
+
+  .policy-section {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+
+  .policy-section h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: #0a1628;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #c9a84c;
+    display: inline-block;
+  }
+
+  .policy-section ol {
+    padding-left: 20px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #444;
+  }
+
+  .policy-section ol li { margin-bottom: 6px; }
+
+  /* ── CONTACT ── */
+  .contact-page {
+    background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 50px;
+  }
+
+  .contact-logo {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #c9a84c, #e8d5a3);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #0a1628;
+    margin-bottom: 20px;
+  }
+
+  .contact-page h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .contact-tagline {
+    color: #c9a84c;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 40px;
+  }
+
+  .contact-item {
+    background: rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .contact-item .icon { font-size: 24px; margin-bottom: 8px; }
+  .contact-item .lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #a0b4c8; margin-bottom: 4px; }
+  .contact-item .val { font-size: 12px; font-weight: 600; }
+
+  .contact-footer {
+    font-size: 11px;
+    color: #a0b4c8;
+    margin-top: 30px;
+    line-height: 1.6;
+  }
+
+  .page-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 50px;
+    right: 50px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #aaa;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+
+  .page-footer.dark { color: #5a7a9a; border-color: rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="page cover">
+  <div class="cover-hero"></div>
+  <div class="cover-company">
+    <div class="cover-logo">H</div>
+    <div>
+      <div class="cover-company-name">Himalaya Escapes</div>
+      <div class="cover-company-tag">Crafting Unforgettable Journeys</div>
+    </div>
+  </div>
+  <div class="cover-content">
+    <div class="cover-badge">best seller</div>
+    <h1>Spitti Valley</h1>
+    <div class="cover-subtitle">Himachal Pradesh • 9D/8N Adventure</div>
+    <div class="cover-meta">
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Prepared For</span>
+        <span class="cover-meta-value">Harshit fdsdfsd</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Duration</span>
+        <span class="cover-meta-value">9D/8N</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Travel Dates</span>
+        <span class="cover-meta-value">Flexible</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Package Price</span>
+        <span class="cover-meta-value">₹85,612.8</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Trip Leader</span>
+        <span class="cover-meta-value">Kartik attri</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: WELCOME -->
+<div class="page">
+  <div class="page-header">
+    <h2>Welcome</h2>
+    <span class="ref">Ref: 4E725588</span>
+  </div>
+  <div class="page-body">
+    <div class="section-label">Personalized For You</div>
+    <div class="gold-line"></div>
+    <div class="welcome-greeting">Dear Harshit fdsdfsd,</div>
+    <div class="welcome-text">
+      Thank you for choosing <strong>Himalaya Escapes</strong> for your upcoming Himalayan adventure. 
+      We are delighted to present this carefully curated <strong>Spitti Valley</strong> itinerary — 
+      a 9D/8N journey through some of India's most breathtaking landscapes, 
+      from the colonial charm of Shimla to the mystical valleys of Spiti and the vibrant town of Manali.
+      <br><br>
+      This proposal has been custom-designed for your Friends group, 
+      featuring handpicked accommodations, comfortable transfers, and an expertly planned day-by-day itinerary. 
+      Our team, led by <strong>Kartik attri</strong>, is committed to making this an unforgettable experience.
+    </div>
+    <div class="welcome-grid">
+      <div class="welcome-card">
+        <h3>📋 Trip Details</h3>
+        <div class="info-row"><span class="label">Package</span><span class="value">Spitti Valley</span></div>
+        <div class="info-row"><span class="label">Duration</span><span class="value">9D/8N</span></div>
+        <div class="info-row"><span class="label">State</span><span class="value">Himachal Pradesh</span></div>
+        <div class="info-row"><span class="label">Type</span><span class="value">Friends</span></div>
+        <div class="info-row"><span class="label">Theme</span><span class="value">family</span></div>
+      </div>
+      <div class="welcome-card">
+        <h3>🚗 Transfer Details</h3>
+        <div class="info-row"><span class="label">Pickup</span><span class="value">Delhi</span></div>
+        <div class="info-row"><span class="label">Drop</span><span class="value">Delhi</span></div>
+        <div class="info-row"><span class="label">Vehicle</span><span class="value">Sedan (4 Seater)</span></div>
+        <div class="info-row"><span class="label">Proposal Date</span><span class="value">23 June 2026</span></div>
+        <div class="info-row"><span class="label">Total Price</span><span class="value">₹85,612.8</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 2</span></div>
+</div>
+
+<!-- PAGE 3: TRIP SUMMARY -->
+<div class="page">
+  <div class="page-header">
+    <h2>Trip Summary</h2>
+    <span class="ref">9D/8N</span>
+  </div>
+  <div class="page-body">
+    <div class="section-label">At a Glance</div>
+    <div class="gold-line"></div>
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="icon">📅</div>
+        <div class="num">9</div>
+        <div class="lbl">Days</div>
+      </div>
+      <div class="summary-card">
+        <div class="icon">🏨</div>
+        <div class="num">8</div>
+        <div class="lbl">Nights</div>
+      </div>
+      <div class="summary-card">
+        <div class="icon">📍</div>
+        <div class="num">7</div>
+        <div class="lbl">Destinations</div>
+      </div>
+    </div>
+    <div class="route-bar">
+      <h4>🗺️ Your Journey Route</h4>
+      <div class="route-flow">
+        <span class="route-dot"></span> Shimla (1N)<span class="route-arrow">→</span> <span class="route-dot"></span> Sangla (1N)<span class="route-arrow">→</span> <span class="route-dot"></span> Chitkul (1N)<span class="route-arrow">→</span> <span class="route-dot"></span> Kalpa (1N)<span class="route-arrow">→</span> <span class="route-dot"></span> Tabo (1N)<span class="route-arrow">→</span> <span class="route-dot"></span> Kaza (2N)<span class="route-arrow">→</span> <span class="route-dot"></span> Manali (1N)
+      </div>
+    </div>
+    <div style="margin-top: 24px;">
+      <div class="section-label">Destinations Covered</div>
+      <div class="gold-line"></div>
+      <div class="summary-cards" style="grid-template-columns: repeat(4, 1fr);">
+        
+        <div class="summary-card" style="padding: 16px;">
+          <div class="num" style="font-size: 20px;">1</div>
+          <div class="lbl">Shimla</div>
+        </div>
+        <div class="summary-card" style="padding: 16px;">
+          <div class="num" style="font-size: 20px;">1</div>
+          <div class="lbl">Sangla</div>
+        </div>
+        <div class="summary-card" style="padding: 16px;">
+          <div class="num" style="font-size: 20px;">1</div>
+          <div class="lbl">Chitkul</div>
+        </div>
+        <div class="summary-card" style="padding: 16px;">
+          <div class="num" style="font-size: 20px;">1</div>
+          <div class="lbl">Kalpa</div>
+        </div>
+        <div class="summary-card" style="padding: 16px;">
+          <div class="num" style="font-size: 20px;">1</div>
+          <div class="lbl">Tabo</div>
+        </div>
+        <div class="summary-card" style="padding: 16px;">
+          <div class="num" style="font-size: 20px;">2</div>
+          <div class="lbl">Kaza</div>
+        </div>
+        <div class="summary-card" style="padding: 16px;">
+          <div class="num" style="font-size: 20px;">1</div>
+          <div class="lbl">Manali</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 3</span></div>
+</div>
+
+<!-- PAGE 4: ROUTE MAP -->
+<div class="page">
+  <div class="page-header">
+    <h2>Route Map</h2>
+    <span class="ref">Delhi → Delhi</span>
+  </div>
+  <div class="page-body">
+    <div class="section-label">Your Complete Journey</div>
+    <div class="gold-line"></div>
+    <div class="map-container">
+      <div class="map-route">
+        <div class="map-stop">
+          <span class="map-stop-name">🛫 Delhi</span>
+          <span class="map-stop-nights">Start</span>
+          <span class="map-stop-day">Day 1</span>
+        </div>
+        
+        <div class="map-stop">
+          <span class="map-stop-name">📍 Shimla</span>
+          <span class="map-stop-nights">1 Night</span>
+          <span class="map-stop-day">Day 1</span>
+        </div>
+        <div class="map-stop">
+          <span class="map-stop-name">📍 Sangla</span>
+          <span class="map-stop-nights">1 Night</span>
+          <span class="map-stop-day">Day 2</span>
+        </div>
+        <div class="map-stop">
+          <span class="map-stop-name">📍 Chitkul</span>
+          <span class="map-stop-nights">1 Night</span>
+          <span class="map-stop-day">Day 3</span>
+        </div>
+        <div class="map-stop">
+          <span class="map-stop-name">📍 Kalpa</span>
+          <span class="map-stop-nights">1 Night</span>
+          <span class="map-stop-day">Day 4</span>
+        </div>
+        <div class="map-stop">
+          <span class="map-stop-name">📍 Tabo</span>
+          <span class="map-stop-nights">1 Night</span>
+          <span class="map-stop-day">Day 5</span>
+        </div>
+        <div class="map-stop">
+          <span class="map-stop-name">📍 Kaza</span>
+          <span class="map-stop-nights">2 Nights</span>
+          <span class="map-stop-day">Day 6-7</span>
+        </div>
+        <div class="map-stop">
+          <span class="map-stop-name">📍 Manali</span>
+          <span class="map-stop-nights">1 Night</span>
+          <span class="map-stop-day">Day 8</span>
+        </div>
+        <div class="map-stop">
+          <span class="map-stop-name">🛬 Delhi</span>
+          <span class="map-stop-nights">End</span>
+          <span class="map-stop-day">Day 9</span>
+        </div>
+      </div>
+    </div>
+    <div class="route-bar" style="margin-top: 20px;">
+      <h4>Full Route</h4>
+      <div class="route-flow">Delhi <span class="route-arrow">→</span> Shimla (1N) → Sangla (1N) → Chitkul (1N) → Kalpa (1N) → Tabo (1N) → Kaza (2N) → Manali (1N) <span class="route-arrow">→</span> Delhi</div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 4</span></div>
+</div>
+
+<!-- PAGE 5-6: HOTELS -->
+<div class="page">
+  <div class="page-header">
+    <h2>Hotel Showcase</h2>
+    <span class="ref">8 Properties</span>
+  </div>
+  <div class="page-body">
+    <div class="section-label">Your Accommodations</div>
+    <div class="gold-line"></div>
+    
+    <div class="hotel-card">
+      <div class="hotel-img">
+        <img src="https://firebasestorage.googleapis.com/v0/b/mern-estate-1b3d0.appspot.com/o/roomImages%2Fhydrangea%20heights%20shimla.jpg?alt=media&token=f3725a0d-9e74-41e6-8b77-d24f00cd78e5" alt="Hydrangea Heights Shimla" />
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 1</div>
+        <div class="hotel-name">Hydrangea Heights Shimla</div>
+        <div class="hotel-city">📍 Shimla</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Deluxe Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹3,000</div>
+      </div>
+    </div>
+    <div class="hotel-card">
+      <div class="hotel-img">
+        🏨
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 2</div>
+        <div class="hotel-name">Negi Cottage Sangla</div>
+        <div class="hotel-city">📍 Sangla</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Standard Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹2,800</div>
+      </div>
+    </div>
+    <div class="hotel-card">
+      <div class="hotel-img">
+        🏨
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 3</div>
+        <div class="hotel-name">Mannat Home Stay</div>
+        <div class="hotel-city">📍 Chitkul</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Standard Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹2,500</div>
+      </div>
+    </div>
+    <div class="hotel-card">
+      <div class="hotel-img">
+        🏨
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 4</div>
+        <div class="hotel-name">Abhishek Home Stay</div>
+        <div class="hotel-city">📍 Kalpa</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Standard Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹2,600</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 5</span></div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <h2>Hotel Showcase</h2>
+    <span class="ref">Continued</span>
+  </div>
+  <div class="page-body">
+    
+    <div class="hotel-card">
+      <div class="hotel-img">
+        🏨
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 5</div>
+        <div class="hotel-name">Namsay Homestay Tabo</div>
+        <div class="hotel-city">📍 Tabo</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Standard Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹2,700</div>
+      </div>
+    </div>
+    <div class="hotel-card">
+      <div class="hotel-img">
+        🏨
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 6</div>
+        <div class="hotel-name">SPITI VALLEY HOTEL KAZA</div>
+        <div class="hotel-city">📍 Kaza</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Standard Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹3,200</div>
+      </div>
+    </div>
+    <div class="hotel-card">
+      <div class="hotel-img">
+        🏨
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 7</div>
+        <div class="hotel-name">SPITI VALLEY HOTEL KAZA</div>
+        <div class="hotel-city">📍 Kaza</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Standard Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹3,200</div>
+      </div>
+    </div>
+    <div class="hotel-card">
+      <div class="hotel-img">
+        🏨
+      </div>
+      <div class="hotel-info">
+        <div class="hotel-day-badge">DAY 8</div>
+        <div class="hotel-name">Jamla Inn Hotel Manali</div>
+        <div class="hotel-city">📍 Manali</div>
+        <div class="hotel-details">
+          <span class="hotel-detail-item">🛏️ Deluxe Room</span>
+          <span class="hotel-detail-item">🍽️ MAP</span>
+          <span class="hotel-detail-item">🚪 1 Room</span>
+        </div>
+        <div class="hotel-price">₹2,700</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 6</span></div>
+</div>
+
+<!-- PAGE 7-9: ITINERARY -->
+<div class="page">
+  <div class="page-header">
+    <h2>Day-wise Itinerary</h2>
+    <span class="ref">Days 1-3</span>
+  </div>
+  <div class="page-body">
+    
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">1</div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Shimla</div>
+        <div class="timeline-title">Arrival in Delhi &amp; Transfer to Shimla</div>
+        <div class="timeline-desc"><p>Arrive in Delhi—India's bustling capital—and begin your scenic transfer to Shimla, the charming hill town once known as the &quot;Summer Capital of British India.&quot;</p><p>As you leave behind the urban landscape, the road gradually winds upward into Himachal Pradesh. Pass through towns like Karnal, Chandigarh, and Solan, with changing views from flat farmlands to misty pine forests and hillside hamlets.</p><p>Optionally, stop for lunch at a roadside dhaba for a taste of North Indian flavors, or refresh at a viewpoint as the hills draw closer.</p><p>Reach Shimla by evening. Known for its colonial architecture, Mall Road charm, and views of the snow-dusted Shivalik ranges, Shimla offers the perfect welcome to the mountains.</p><p>Take a short evening stroll on The Ridge or enjoy a hot cup of tea with valley views as the hill town lights up under the twilight.</p><p>Overnight stay in Shimla, breathing in the crisp mountain air and preparing for the adventures ahead.</p></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">2</div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Sangla</div>
+        <div class="timeline-title">Shimla to Sangla via Narkanda</div>
+        <div class="timeline-desc"><p>Depart Shimla after breakfast and drive through the scenic mountain roads towards Sangla Valley. En route, pass through Narkanda — a charming hill station known for apple orchards and panoramic Himalayan views.</p><p>As you descend into the Baspa Valley, witness the landscape transform into lush green meadows, pine forests, and the gushing Baspa River. Arrive in Sangla by evening and check into your cozy cottage.</p><p>Overnight stay in Sangla.</p></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">3</div>
+        
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Chitkul</div>
+        <div class="timeline-title">Sangla to Chitkul</div>
+        <div class="timeline-desc"><p>After breakfast, embark on a scenic drive to Chitkul — the last inhabited village near the Indo-Tibet border. Known as the 'Last Village of India', Chitkul offers breathtaking views of snow-capped peaks and the pristine Baspa River.</p><p>Explore the quaint village, visit the ancient Mathi Temple, and soak in the untouched beauty of this remote Himalayan hamlet.</p><p>Overnight stay in Chitkul.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 7</span></div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <h2>Day-wise Itinerary</h2>
+    <span class="ref">Days 4-6</span>
+  </div>
+  <div class="page-body">
+    
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">4</div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Kalpa</div>
+        <div class="timeline-title">Chitkul to Kalpa</div>
+        <div class="timeline-desc"><p>Drive from Chitkul to Kalpa, one of the most picturesque villages in Kinnaur district. Kalpa is famous for its stunning views of the Kinner Kailash mountain range and traditional Kinnauri architecture.</p><p>Visit the Suicide Point for dramatic cliff-edge views, explore the ancient Narayan-Nagini Temple, and stroll through apple orchards.</p><p>Overnight stay in Kalpa.</p></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">5</div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Tabo</div>
+        <div class="timeline-title">Kalpa to Tabo</div>
+        <div class="timeline-desc"><p>Begin your journey into the mystical Spiti Valley. Drive through the dramatic landscapes of Kinnaur, crossing high-altitude passes with breathtaking views of barren mountains and deep gorges.</p><p>Arrive in Tabo — home to the ancient Tabo Monastery, over 1000 years old and often called the 'Ajanta of the Himalayas'. Explore the monastery's exquisite murals and meditation caves.</p><p>Overnight stay in Tabo.</p></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">6</div>
+        
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Kaza</div>
+        <div class="timeline-title">Tabo to Kaza</div>
+        <div class="timeline-desc"><p>Continue your Spiti adventure with a drive to Kaza — the capital of Spiti Valley. En route, visit Dhankar Monastery perched dramatically on a cliff, and the fossil-rich village of Langza.</p><p>Arrive in Kaza by evening. This bustling town serves as the perfect base for exploring the wonders of Spiti Valley.</p><p>Overnight stay in Kaza.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 8</span></div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <h2>Day-wise Itinerary</h2>
+    <span class="ref">Days 7-9</span>
+  </div>
+  <div class="page-body">
+    
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">7</div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Kaza</div>
+        <div class="timeline-title">Kaza Complete Local Sightseeing</div>
+        <div class="timeline-desc"><p>Full day of local sightseeing around Kaza. Visit the iconic Key Monastery — one of the largest and oldest Buddhist monasteries in Spiti, perched at 4,166 meters.</p><p>Explore Kibber Village — one of the highest inhabited villages in the world, visit the picturesque Hikkim village (home to the world's highest post office), and the beautiful Komik village.</p><p>Return to Kaza for overnight stay.</p></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">8</div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Manali</div>
+        <div class="timeline-title">Kaza to Manali via Chandratal</div>
+        <div class="timeline-desc"><p>Embark on one of the most adventurous drives — crossing the Kunzum Pass and optionally visiting the stunning Chandratal Lake (Moon Lake) with its crystal-clear blue waters surrounded by snow peaks.</p><p>Continue through the dramatic Spiti-Lahaul landscape to Manali, crossing the famous Rohtang Pass.</p><p>Overnight stay in Manali.</p></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-marker">
+        <div class="timeline-day">9</div>
+        
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-city">Delhi</div>
+        <div class="timeline-title">Departure from Manali to Delhi</div>
+        <div class="timeline-desc"><p>After breakfast, check out from your hotel and begin your return journey to Delhi. Drive through the scenic Kullu Valley with views of the Beas River and pine-covered hills.</p><p>Arrive in Delhi by evening with unforgettable memories of your Spiti Valley adventure. Tour concludes with cherished Himalayan experiences.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 9</span></div>
+</div>
+
+<!-- PAGE 10: CAB -->
+<div class="page">
+  <div class="page-header">
+    <h2>Transfer Details</h2>
+    <span class="ref">Private Vehicle</span>
+  </div>
+  <div class="page-body">
+    <div class="section-label">Your Private Cab</div>
+    <div class="gold-line"></div>
+    <div class="cab-card">
+      <div class="cab-icon">🚗</div>
+      <div class="cab-details">
+        <h3>Sedan Cab</h3>
+        <p style="font-size: 12px; color: #a0b4c8;">Dedicated private vehicle for your entire 9D/8N journey from Delhi to Delhi.</p>
+        <div class="cab-specs">
+          <div class="cab-spec"><strong>Sedan</strong>Vehicle Type</div>
+          <div class="cab-spec"><strong>4</strong>Seating Capacity</div>
+          <div class="cab-spec"><strong>AC</strong>Air Conditioned</div>
+          <div class="cab-spec"><strong>Private</strong>Exclusive Use</div>
+        </div>
+      </div>
+      <div class="cab-price">
+        <div class="lbl">Transfer Cost</div>
+        <div class="amount">₹41,000</div>
+      </div>
+    </div>
+    <div style="margin-top: 30px;">
+      <div class="section-label">What's Included in Transfer</div>
+      <div class="gold-line"></div>
+      <div class="policy-grid">
+        <div class="policy-box inclusions">
+          <h4>✅ Included</h4>
+          <ul>
+            <li>Toll tax & parking charges</li>
+            <li>Driver night charges</li>
+            <li>Fuel charges for entire route</li>
+            <li>All sightseeing transfers as per itinerary</li>
+            <li>Pickup from Delhi</li>
+            <li>Drop at Delhi</li>
+          </ul>
+        </div>
+        <div class="policy-box exclusions">
+          <h4>❌ Not Included</h4>
+          <ul>
+            <li>Monument entry fees</li>
+            <li>Guide charges at sightseeing points</li>
+            <li>Personal expenses during travel</li>
+            <li>Additional detours not in itinerary</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 10</span></div>
+</div>
+
+<!-- PAGE 11: COST BREAKDOWN -->
+<div class="page">
+  <div class="page-header">
+    <h2>Cost Breakdown</h2>
+    <span class="ref">Transparent Pricing</span>
+  </div>
+  <div class="page-body">
+    <div class="section-label">Package Pricing</div>
+    <div class="gold-line"></div>
+    <table class="pricing-table">
+      <thead>
+        <tr><th>Component</th><th>Amount</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>🏨 Hotel Accommodation (8 Nights)</td><td>₹22,700</td></tr>
+        <tr><td>🚗 Private Transfer (Sedan)</td><td>₹41,000</td></tr>
+        <tr><td>🎯 Activities</td><td>₹0</td></tr>
+        <tr class="pricing-total"><td>Subtotal (incl. 5% GST)</td><td class="gold">₹63,700</td></tr>
+        <tr><td>Service Margin (28%)</td><td>₹21,912.8</td></tr>
+        <tr class="pricing-final"><td>💰 Total Package Price</td><td>₹85,612.8</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top: 30px;">
+      <div class="section-label">Hotel-wise Breakdown</div>
+      <div class="gold-line"></div>
+      <table class="pricing-table">
+        <thead>
+          <tr><th>Day</th><th>Hotel</th><th>City</th><th>Amount</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Day 1</td><td>Hydrangea Heights Shimla</td><td>Shimla</td><td>₹3,000</td></tr><tr><td>Day 2</td><td>Negi Cottage Sangla</td><td>Sangla</td><td>₹2,800</td></tr><tr><td>Day 3</td><td>Mannat Home Stay</td><td>Chitkul</td><td>₹2,500</td></tr><tr><td>Day 4</td><td>Abhishek Home Stay</td><td>Kalpa</td><td>₹2,600</td></tr><tr><td>Day 5</td><td>Namsay Homestay Tabo</td><td>Tabo</td><td>₹2,700</td></tr><tr><td>Day 6</td><td>SPITI VALLEY HOTEL KAZA</td><td>Kaza</td><td>₹3,200</td></tr><tr><td>Day 7</td><td>SPITI VALLEY HOTEL KAZA</td><td>Kaza</td><td>₹3,200</td></tr><tr><td>Day 8</td><td>Jamla Inn Hotel Manali</td><td>Manali</td><td>₹2,700</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 11</span></div>
+</div>
+
+<!-- PAGE 12: INCLUSIONS & EXCLUSIONS -->
+<div class="page">
+  <div class="page-header">
+    <h2>Inclusions & Exclusions</h2>
+    <span class="ref">What's Covered</span>
+  </div>
+  <div class="page-body">
+    <div class="policy-grid">
+      <div class="policy-box inclusions">
+        <h4>✅ Package Inclusions</h4>
+        <ul><li>Accommodation for all nights in a hotel as per itinerary.</li><li>Meals as specified in the itinerary plan.</li><li>Toll tax, driver night charges, parking charges, etc.</li><li>Sightseeing and transfers as per the mentioned itinerary.</li><li>Continuous on-call assistance will be provided by our support team throughout the tour.</li><li>5% GST is included in the total package price.</li></ul>
+      </div>
+      <div class="policy-box exclusions">
+        <h4>❌ Package Exclusions</h4>
+        <ul><li>Monument entry fees, camera fees, and guide charges.</li><li>Meals not mentioned in the itinerary plan.</li><li>Airfare, train fare, and optional activities.</li><li>Personal expenses like drinks, laundry, phone calls, etc.</li><li>Anything not specifically mentioned under &quot;Package Inclusions.&quot;</li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 12</span></div>
+</div>
+
+<!-- PAGE 13-14: POLICIES -->
+<div class="page">
+  <div class="page-header">
+    <h2>Policies</h2>
+    <span class="ref">Terms & Conditions</span>
+  </div>
+  <div class="page-body">
+    <div class="policy-section">
+      <h4>💳 Payment Policy</h4>
+      <ol><li>The package can be booked by paying a 40% token amount of the total cost.</li><li>Remaining 60% must be paid on the 1st day of the tour; failing which services will be cancelled without refund.</li><li>Alternatively, booking can be hold with ₹5,000 or 25%, but 40% must be paid within 1 month of booking.</li><li>For 4-star and 5-star properties, 100% advance payment is required at the time of booking.</li><li>All payments must be completed as per the scheduled plan. Delays may result in tour cancellation or services being withheld.</li><li>Advance payments can be adjusted against future bookings within 1 year if cancellation occurs due to unavoidable circumstances.</li><li>If the guest does not clear the minimum 40% payment at least 10 days prior to the travel date, the total package cost may increase by 10% to 40%, depending on the availability and revised rates of hotels and transportation at the time of booking.</li><li>Any extra charges levied by the payment gateway or payment link will be charged additionally and shall be payable by the guest over and above the total package cost.</li></ol>
+    </div>
+    <div class="policy-section">
+      <h4>🚫 Cancellation Policy</h4>
+      <ol><li>Cancellation made 30+ days before travel: 40% of total booking value cancellation charge applies.</li><li>Cancellation made 15 to 29 days before travel: 70% of total booking value cancellation charge applies.</li><li>Cancellation made 0 to 10 days before travel: 100% of total booking value cancellation charge applies (No refund).</li></ol>
+    </div>
+    <div class="policy-section">
+      <h4>💰 Refund Policy</h4>
+      <ol><li>Refunds, if applicable, will be processed within 7-14 business days after cancellation approval.</li><li>Refund amount will be credited to the original payment method used during booking.</li><li>No refund will be provided for no-shows or early check-outs.</li><li>Force majeure events (natural disasters, road closures, government restrictions) will be handled on a case-by-case basis.</li></ol>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 13</span></div>
+</div>
+
+<div class="page">
+  <div class="page-header">
+    <h2>Important Notes</h2>
+    <span class="ref">Please Read Carefully</span>
+  </div>
+  <div class="page-body">
+    <div class="policy-section">
+      <h4>📌 Points to Note</h4>
+      <ol><li>Valid government-issued photo ID is mandatory for all travelers.</li><li>Spiti Valley involves high-altitude travel; acclimatization is recommended.</li><li>Road conditions in Spiti can be challenging; travel times may vary due to weather.</li><li>Mobile network connectivity is limited in remote areas of Spiti Valley.</li><li>Warm clothing is essential regardless of travel season.</li><li>Itinerary is subject to change due to weather, road conditions, or unforeseen circumstances.</li></ol>
+    </div>
+    <div class="welcome-card" style="margin-top: 30px;">
+      <h3>⚠️ Disclaimer</h3>
+      <p style="font-size: 11px; line-height: 1.7; color: #555;">
+        This proposal is valid for 7 days from the date of issue. Prices are subject to change based on hotel availability and seasonal rates. 
+        Himalaya Escapes reserves the right to modify the itinerary due to unforeseen circumstances including weather conditions, 
+        road closures, or government restrictions. Alternative arrangements of similar standard will be provided wherever possible.
+        All disputes are subject to Delhi jurisdiction.
+      </p>
+    </div>
+  </div>
+  <div class="page-footer"><span>Himalaya Escapes</span><span>Page 14</span></div>
+</div>
+
+<!-- PAGE 15: CONTACT -->
+<div class="page contact-page">
+  <div class="contact-logo">H</div>
+  <h2>Himalaya Escapes</h2>
+  <div class="contact-tagline">Crafting Unforgettable Journeys</div>
+  <div class="contact-grid">
+    <div class="contact-item">
+      <div class="icon">📞</div>
+      <div class="lbl">Phone</div>
+      <div class="val">+91 98765 43210</div>
+    </div>
+    <div class="contact-item">
+      <div class="icon">✉️</div>
+      <div class="lbl">Email</div>
+      <div class="val">hello@himalayaescapes.com</div>
+    </div>
+    <div class="contact-item">
+      <div class="icon">🌐</div>
+      <div class="lbl">Website</div>
+      <div class="val">www.himalayaescapes.com</div>
+    </div>
+  </div>
+  <div style="background: rgba(255,255,255,0.08); border-radius: 14px; padding: 24px 40px; margin-bottom: 20px;">
+    <div style="font-size: 11px; color: #a0b4c8; margin-bottom: 6px;">YOUR TRIP CONSULTANT</div>
+    <div style="font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600;">Kartik attri</div>
+    <div style="font-size: 12px; color: #c9a84c; margin-top: 4px;">Dedicated Support Throughout Your Journey</div>
+  </div>
+  <div class="contact-footer">
+  <p>Thank you for considering Himalaya Escapes for your Spiti Valley adventure.</p>
+  <p style="margin-top: 8px;">Proposal ID: 6a3a293b1b3609424e725588 | Generated: 23 June 2026</p>
+  <p style="margin-top: 8px;">We look forward to crafting your perfect Himalayan escape! 🏔️</p>
+  </div>
+</div>
+
+</body>
+</html>
