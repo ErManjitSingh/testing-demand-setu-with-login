@@ -2,10 +2,23 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LOGO_SRC } from "@/components/Logo";
+import {
+  extractPartnerAuthPayload,
+  savePartnerSession,
+  signupWebsitePackagemaker,
+} from "@/lib/packagemakerPartnerApi";
 
-export default function ListPropertySignupModal({ open, onClose }) {
+export default function ListPropertySignupModal({ open, onClose, onSuccess }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     if (!open) return undefined;
     const prev = document.body.style.overflow;
@@ -19,6 +32,67 @@ export default function ListPropertySignupModal({ open, onClose }) {
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) {
+      setError("");
+      setLoading(false);
+    }
+  }, [open]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    const mobileDigits = mobile.replace(/\D/g, "");
+    if (mobileDigits.length < 10) {
+      setError("Please enter a valid mobile number.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await signupWebsitePackagemaker({
+        name,
+        email,
+        mobile: mobileDigits,
+        password,
+      });
+
+      const { token, user } = extractPartnerAuthPayload(response);
+      if (token || user) {
+        savePartnerSession({
+          token,
+          user: user || {
+            name: name.trim(),
+            email: email.trim(),
+            mobile: mobileDigits,
+          },
+        });
+      }
+
+      onSuccess?.();
+      onClose();
+      setName("");
+      setEmail("");
+      setMobile("");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError(err?.message || "Sign up failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!open) return null;
 
@@ -60,32 +134,51 @@ export default function ListPropertySignupModal({ open, onClose }) {
           </button>
         </div>
 
-        <form
-          className="mt-6 space-y-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-        >
-          <Field label="Your name" id="lp-name" placeholder="First and last name" />
+        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+          <Field
+            label="Your name"
+            id="lp-name"
+            value={name}
+            onChange={setName}
+            placeholder="First and last name"
+            required
+          />
 
           <div>
             <Field
               label="Email address"
               id="lp-email"
               type="email"
+              value={email}
+              onChange={setEmail}
               placeholder="Enter your email address"
+              required
             />
             <p className="mt-1.5 text-xs text-stone-500">
               We will send a confirmation link to your email
             </p>
           </div>
 
+          <Field
+            label="Mobile number"
+            id="lp-mobile"
+            type="tel"
+            value={mobile}
+            onChange={setMobile}
+            placeholder="10-digit mobile number"
+            required
+          />
+
           <div>
             <Field
               label="Password"
               id="lp-password"
               type="password"
+              value={password}
+              onChange={setPassword}
               placeholder="Enter at least 8 characters"
+              required
+              minLength={8}
             />
             <p className="mt-1.5 text-xs text-stone-500">
               Use letters, numbers, and special characters
@@ -96,14 +189,25 @@ export default function ListPropertySignupModal({ open, onClose }) {
             label="Confirm new password"
             id="lp-confirm-password"
             type="password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
             placeholder="Re-enter your password"
+            required
+            minLength={8}
           />
+
+          {error ? (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              {error}
+            </p>
+          ) : null}
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-brand py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark"
+            disabled={loading}
+            className="w-full rounded-xl bg-brand py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark disabled:opacity-70"
           >
-           sign up
+            {loading ? "Creating account…" : "Sign up"}
           </button>
         </form>
 
@@ -122,7 +226,16 @@ export default function ListPropertySignupModal({ open, onClose }) {
   );
 }
 
-function Field({ label, id, type = "text", placeholder }) {
+function Field({
+  label,
+  id,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+  required = false,
+  minLength,
+}) {
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-semibold text-stone-800">
@@ -131,7 +244,11 @@ function Field({ label, id, type = "text", placeholder }) {
       <input
         id={id}
         type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        required={required}
+        minLength={minLength}
         className="mt-1.5 w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/15"
       />
     </div>

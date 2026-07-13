@@ -6,6 +6,12 @@ import { useState } from "react";
 import { LOGO_SRC } from "@/components/Logo";
 import ListPropertyBackground from "@/components/list-property/ListPropertyBackground";
 import ListPropertySignupModal from "@/components/list-property/ListPropertySignupModal";
+import { usePartnerAuth } from "@/hooks/usePartnerAuth";
+import {
+  extractPartnerAuthPayload,
+  savePartnerSession,
+  signinWebsitePackagemaker,
+} from "@/lib/packagemakerPartnerApi";
 
 const PROPERTY_TYPES = ["Hotel", "Villa", "Resort", "Hostel", "Guest house"];
 
@@ -17,10 +23,49 @@ const STATS = [
 ];
 
 export default function ListPropertyLanding() {
+  const { isLoggedIn, user } = usePartnerAuth();
   const [signupOpen, setSignupOpen] = useState(false);
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
+  const [signinLoading, setSigninLoading] = useState(false);
+  const [signinError, setSigninError] = useState("");
+  const [signinSuccess, setSigninSuccess] = useState("");
 
   const openSignup = () => setSignupOpen(true);
   const closeSignup = () => setSignupOpen(false);
+
+  const handleSignin = async (e) => {
+    e.preventDefault();
+    setSigninError("");
+    setSigninSuccess("");
+
+    const trimmedLoginId = loginId.trim();
+    if (!trimmedLoginId || !password) {
+      setSigninError("Login ID and password are required.");
+      return;
+    }
+
+    setSigninLoading(true);
+    try {
+      const response = await signinWebsitePackagemaker({
+        loginId: trimmedLoginId,
+        password,
+      });
+
+      const { token, user: authUser } = extractPartnerAuthPayload(response);
+      savePartnerSession({
+        token,
+        user: authUser || { email: trimmedLoginId, mobile: trimmedLoginId },
+      });
+
+      setSigninSuccess("Signed in successfully.");
+      setPassword("");
+    } catch (err) {
+      setSigninError(err?.message || "Sign in failed. Please try again.");
+    } finally {
+      setSigninLoading(false);
+    }
+  };
 
   return (
     <>
@@ -42,19 +87,8 @@ export default function ListPropertyLanding() {
               </Link>
 
               <nav className="flex items-center gap-2 sm:gap-4">
-                <a
-                  href="#features"
-                  className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 sm:inline-block"
-                >
-                  Features
-                </a>
-                <button
-                  type="button"
-                  className="hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 sm:inline-flex"
-                >
-                  <PhoneAppIcon />
-                  Download App
-                </button>
+                
+              
                 <button
                   type="button"
                   onClick={openSignup}
@@ -104,59 +138,82 @@ export default function ListPropertyLanding() {
 
             <div className="w-full lg:max-w-md lg:shrink-0 xl:max-w-[420px]">
               <div className="rounded-2xl border border-white/20 bg-stone-900/50 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-7">
-                <h2 className="text-xl font-extrabold text-white sm:text-2xl">
-                  Sign in to manage your property
-                </h2>
-                <p className="mt-1 text-sm text-white/65">
-                  Welcome back! Please enter your details.
-                </p>
-
-                <form
-                  className="mt-6 space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                  }}
-                >
-                  <input
-                    id="lp-login-email"
-                    type="text"
-                    placeholder="Enter your username or email address"
-                    aria-label="Username or email address"
-                    className="w-full rounded-xl border border-white/10 bg-white px-4 py-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
-                  />
-                  <input
-                    id="lp-login-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    aria-label="Password"
-                    className="w-full rounded-xl border border-white/10 bg-white px-4 py-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      className="text-sm font-semibold text-white/80 transition hover:text-white hover:underline"
-                    >
-                      Forgot password
-                    </button>
+                {isLoggedIn ? (
+                  <div>
+                    <h2 className="text-xl font-extrabold text-white sm:text-2xl">
+                      Welcome back
+                    </h2>
+                    <p className="mt-2 text-sm text-white/70">
+                      You are signed in as{" "}
+                      <span className="font-semibold text-white">
+                        {user?.name || user?.email || user?.mobile || "Partner"}
+                      </span>
+                      . Property dashboard coming soon.
+                    </p>
                   </div>
-                  <button
-                    type="submit"
-                    className="w-full rounded-xl bg-brand py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark"
-                  >
-                    Sign in
-                  </button>
-                </form>
+                ) : (
+                  <>
+                    <h2 className="text-xl font-extrabold text-white sm:text-2xl">
+                      Sign in to manage your property
+                    </h2>
+                    <p className="mt-1 text-sm text-white/65">
+                      Welcome back! Please enter your details.
+                    </p>
 
-                <p className="mt-5 text-center text-sm text-white/70">
-                  New to Demand Setu?{" "}
-                  <button
-                    type="button"
-                    onClick={openSignup}
-                    className="font-bold text-white transition hover:text-brand-light hover:underline"
-                  >
-                    Create an account
-                  </button>
-                </p>
+                    <form className="mt-6 space-y-4" onSubmit={handleSignin}>
+                      <input
+                        id="lp-login-email"
+                        type="text"
+                        value={loginId}
+                        onChange={(e) => setLoginId(e.target.value)}
+                        placeholder="Enter your email or mobile number"
+                        aria-label="Email or mobile number"
+                        autoComplete="username"
+                        className="w-full rounded-xl border border-white/10 bg-white px-4 py-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      />
+                      <input
+                        id="lp-login-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        aria-label="Password"
+                        autoComplete="current-password"
+                        className="w-full rounded-xl border border-white/10 bg-white px-4 py-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
+                      />
+
+                      {signinError ? (
+                        <p className="rounded-xl border border-red-300/40 bg-red-500/15 px-4 py-3 text-sm font-semibold text-red-100">
+                          {signinError}
+                        </p>
+                      ) : null}
+                      {signinSuccess ? (
+                        <p className="rounded-xl border border-emerald-300/40 bg-emerald-500/15 px-4 py-3 text-sm font-semibold text-emerald-100">
+                          {signinSuccess}
+                        </p>
+                      ) : null}
+
+                      <button
+                        type="submit"
+                        disabled={signinLoading}
+                        className="w-full rounded-xl bg-brand py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark disabled:opacity-70"
+                      >
+                        {signinLoading ? "Signing in…" : "Sign in"}
+                      </button>
+                    </form>
+
+                    <p className="mt-5 text-center text-sm text-white/70">
+                      New to Demand Setu?{" "}
+                      <button
+                        type="button"
+                        onClick={openSignup}
+                        className="font-bold text-white transition hover:text-brand-light hover:underline"
+                      >
+                        Create an account
+                      </button>
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -191,7 +248,11 @@ export default function ListPropertyLanding() {
         </section>
       </div>
 
-      <ListPropertySignupModal open={signupOpen} onClose={closeSignup} />
+      <ListPropertySignupModal
+        open={signupOpen}
+        onClose={closeSignup}
+        onSuccess={() => setSigninSuccess("Account created successfully. You are now signed in.")}
+      />
     </>
   );
 }
