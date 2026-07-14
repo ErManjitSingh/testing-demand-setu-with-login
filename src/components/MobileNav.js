@@ -41,7 +41,8 @@ export default function MobileNav() {
     pathname?.endsWith("/book") ||
     pathname === "/signin" ||
     pathname === "/signup" ||
-    pathname === "/list-your-property"
+    pathname === "/list-your-property" ||
+    pathname?.startsWith("/partner")
   ) {
     return null;
   }

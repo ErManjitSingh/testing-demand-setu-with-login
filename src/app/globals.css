@@ -742,6 +742,19 @@ html.list-property-page main {
   flex: 1 0 auto;
 }
 
+/* Partner hotel manager — hide main site header on dashboard (keep partner header) */
+html.partner-portal header.sticky:not(.partner-header) {
+  display: none;
+}
+
+html.partner-portal main {
+  flex: 1 0 auto;
+}
+
+html.partner-portal footer {
+  display: none;
+}
+
 @keyframes list-property-kenburns {
   0% {
     transform: scale(1.05) translate3d(0, 0, 0);

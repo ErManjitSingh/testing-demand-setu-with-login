@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { LOGO_SRC } from "@/components/Logo";
 import {
   extractPartnerAuthPayload,
+  normalizePartnerMobile,
   savePartnerSession,
   signupWebsitePackagemaker,
 } from "@/lib/packagemakerPartnerApi";
@@ -53,9 +54,9 @@ export default function ListPropertySignupModal({ open, onClose, onSuccess }) {
       return;
     }
 
-    const mobileDigits = mobile.replace(/\D/g, "");
+    const mobileDigits = normalizePartnerMobile(mobile);
     if (mobileDigits.length < 10) {
-      setError("Please enter a valid mobile number.");
+      setError("Please enter a valid 10-digit mobile number.");
       return;
     }
 
@@ -68,13 +69,17 @@ export default function ListPropertySignupModal({ open, onClose, onSuccess }) {
         password,
       });
 
-      const { token, user } = extractPartnerAuthPayload(response);
-      if (token || user) {
+      const { token, user, propertyId, websitePartnerId } =
+        extractPartnerAuthPayload(response);
+      if (token || user || propertyId || websitePartnerId) {
         savePartnerSession({
           token,
+          propertyId,
+          websitePartnerId,
+          loginId: mobileDigits,
           user: user || {
             name: name.trim(),
-            email: email.trim(),
+            email: email.trim().toLowerCase(),
             mobile: mobileDigits,
           },
         });

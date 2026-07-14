@@ -25,7 +25,7 @@ export function usePartnerAuth() {
   return {
     ready,
     session,
-    isLoggedIn: Boolean(session?.token),
+    isLoggedIn: Boolean(session?.token || session?.propertyId || session?.loginId),
     user: session?.user || null,
   };
 }

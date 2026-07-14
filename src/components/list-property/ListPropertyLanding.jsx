@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LOGO_SRC } from "@/components/Logo";
 import ListPropertyBackground from "@/components/list-property/ListPropertyBackground";
@@ -9,6 +10,7 @@ import ListPropertySignupModal from "@/components/list-property/ListPropertySign
 import { usePartnerAuth } from "@/hooks/usePartnerAuth";
 import {
   extractPartnerAuthPayload,
+  normalizePartnerLoginId,
   savePartnerSession,
   signinWebsitePackagemaker,
 } from "@/lib/packagemakerPartnerApi";
@@ -23,7 +25,8 @@ const STATS = [
 ];
 
 export default function ListPropertyLanding() {
-  const { isLoggedIn, user } = usePartnerAuth();
+  const router = useRouter();
+  const { isLoggedIn, user, ready } = usePartnerAuth();
   const [signupOpen, setSignupOpen] = useState(false);
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -39,7 +42,7 @@ export default function ListPropertyLanding() {
     setSigninError("");
     setSigninSuccess("");
 
-    const trimmedLoginId = loginId.trim();
+    const trimmedLoginId = normalizePartnerLoginId(loginId);
     if (!trimmedLoginId || !password) {
       setSigninError("Login ID and password are required.");
       return;
@@ -52,14 +55,23 @@ export default function ListPropertyLanding() {
         password,
       });
 
-      const { token, user: authUser } = extractPartnerAuthPayload(response);
+      const { token, user: authUser, propertyId, websitePartnerId } =
+        extractPartnerAuthPayload(response);
       savePartnerSession({
         token,
-        user: authUser || { email: trimmedLoginId, mobile: trimmedLoginId },
+        propertyId,
+        websitePartnerId,
+        loginId: trimmedLoginId,
+        user:
+          authUser ||
+          (trimmedLoginId.includes("@")
+            ? { email: trimmedLoginId }
+            : { mobile: trimmedLoginId }),
       });
 
       setSigninSuccess("Signed in successfully.");
       setPassword("");
+      router.push("/partner/hotels");
     } catch (err) {
       setSigninError(err?.message || "Sign in failed. Please try again.");
     } finally {
@@ -138,18 +150,31 @@ export default function ListPropertyLanding() {
 
             <div className="w-full lg:max-w-md lg:shrink-0 xl:max-w-[420px]">
               <div className="rounded-2xl border border-white/20 bg-stone-900/50 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-7">
-                {isLoggedIn ? (
+                {!ready ? (
+                  <div className="animate-pulse space-y-4" aria-hidden>
+                    <div className="h-7 w-3/4 rounded-lg bg-white/10" />
+                    <div className="h-4 w-1/2 rounded bg-white/10" />
+                    <div className="h-12 w-full rounded-xl bg-white/10" />
+                    <div className="h-12 w-full rounded-xl bg-white/10" />
+                    <div className="h-12 w-full rounded-xl bg-white/15" />
+                  </div>
+                ) : isLoggedIn ? (
                   <div>
                     <h2 className="text-xl font-extrabold text-white sm:text-2xl">
                       Welcome back
                     </h2>
                     <p className="mt-2 text-sm text-white/70">
-                      You are signed in as{" "}
+                      Signed in as{" "}
                       <span className="font-semibold text-white">
                         {user?.name || user?.email || user?.mobile || "Partner"}
                       </span>
-                      . Property dashboard coming soon.
                     </p>
+                    <Link
+                      href="/partner/hotels"
+                      className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand py-3.5 text-sm font-extrabold text-white shadow-lg shadow-brand/25 transition hover:bg-brand-dark"
+                    >
+                      Go to property dashboard
+                    </Link>
                   </div>
                 ) : (
                   <>
@@ -166,7 +191,7 @@ export default function ListPropertyLanding() {
                         type="text"
                         value={loginId}
                         onChange={(e) => setLoginId(e.target.value)}
-                        placeholder="Enter your email or mobile number"
+                        placeholder="Email or 10-digit mobile (without +91)"
                         aria-label="Email or mobile number"
                         autoComplete="username"
                         className="w-full rounded-xl border border-white/10 bg-white px-4 py-3 text-sm text-stone-900 outline-none placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
@@ -251,7 +276,7 @@ export default function ListPropertyLanding() {
       <ListPropertySignupModal
         open={signupOpen}
         onClose={closeSignup}
-        onSuccess={() => setSigninSuccess("Account created successfully. You are now signed in.")}
+        onSuccess={() => router.push("/partner/hotels")}
       />
     </>
   );
