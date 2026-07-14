@@ -16,7 +16,13 @@ import {
   nightsBetween,
   toDateParam,
 } from "@/lib/dates";
-import { calculateBookingPrice, formatGstSummaryLabel } from "@/lib/bookingPricing";
+import {
+  applyPropertyPriceMarkup,
+  calculateBookingPrice,
+  fetchPropertyPriceMarkupMultiplier,
+  formatGstSummaryLabel,
+  setRuntimePriceMarkupMultiplier,
+} from "@/lib/bookingPricing";
 import { buildPropertyUrl, normalizeGuests } from "@/lib/bookingSearch";
 import { serializeChildAgesParam } from "@/lib/guestOccupancy";
 import { useGuestAuth } from "@/hooks/useGuestAuth";
@@ -64,15 +70,23 @@ function BookingCheckoutFormClient({
   listing,
   initialTrip,
   propertyHref,
+  priceMarkupMultiplier,
 }) {
   const urlParams = useSearchParams();
   const trip = useTripSearch(initialTrip);
   const [roomBooking, setRoomBooking] = useState(null);
+  const [markupMultiplier, setMarkupMultiplier] = useState(
+    Number(priceMarkupMultiplier) > 0 ? Number(priceMarkupMultiplier) : null
+  );
 
   const checkIn = trip.checkIn;
   const checkOut = trip.checkOut;
   const { adults, children, rooms } = trip.guests;
-  const nightly = Number(urlParams.get("price")) || listing.price;
+  const markedListingPrice = applyPropertyPriceMarkup(
+    listing.price,
+    markupMultiplier || undefined
+  );
+  const nightly = Number(urlParams.get("price")) || markedListingPrice;
   const isInventoryBooking = urlParams.get("inventory") === "1";
 
   const inventoryQueryKey = [
@@ -82,6 +96,26 @@ function BookingCheckoutFormClient({
     urlParams.get("checkOut"),
     urlParams.get("rooms"),
   ].join("|");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMarkup() {
+      if (Number(priceMarkupMultiplier) > 0) {
+        setRuntimePriceMarkupMultiplier(priceMarkupMultiplier);
+        setMarkupMultiplier(Number(priceMarkupMultiplier));
+        return;
+      }
+      const multiplier = await fetchPropertyPriceMarkupMultiplier();
+      if (cancelled) return;
+      setRuntimePriceMarkupMultiplier(multiplier);
+      setMarkupMultiplier(multiplier);
+    }
+    loadMarkup();
+    return () => {
+      cancelled = true;
+      setRuntimePriceMarkupMultiplier(null);
+    };
+  }, [priceMarkupMultiplier]);
 
   useEffect(() => {
     setRoomBooking(loadRoomSelection(listing.slug));
@@ -217,6 +251,7 @@ function BookingCheckoutFormClient({
       total,
       nightly,
       websiteid,
+      markupMultiplier,
       guest: {
         firstName,
         lastName,

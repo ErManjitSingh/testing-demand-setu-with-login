@@ -191,6 +191,7 @@ export function buildHotelBookingCreatePayload({
     totalamountwith25: getBaseTotalWithGst(Number(pricing.subtotal ?? 0), {
       nights,
       nightlyTariff: lineItems.length ? null : nightly,
+      multiplier: submitPayload.markupMultiplier,
     }),
     bookingresponse: "pending",
     websiteid: submitPayload.websiteid || "",

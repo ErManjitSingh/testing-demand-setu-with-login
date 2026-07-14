@@ -7,6 +7,7 @@ import {
   parseTripFromSearchParams,
   serializeTripForClient,
 } from "@/lib/bookingSearch";
+import { fetchPropertyPriceMarkupMultiplier } from "@/lib/bookingPricing";
 import { resolvePropertyByRouteParams } from "@/lib/propertyData";
 
 export async function generateMetadata({ params }) {
@@ -33,6 +34,7 @@ export default async function PropertyBookSlugPage({ params, searchParams }) {
     category: trip.category !== "all" ? trip.category : listing.category,
   });
   const propertyHref = buildPropertyUrl(listing, trip);
+  const priceMarkupMultiplier = await fetchPropertyPriceMarkupMultiplier();
 
   return (
     <div className="min-h-screen bg-stone-100">
@@ -61,6 +63,7 @@ export default async function PropertyBookSlugPage({ params, searchParams }) {
           listing={listing}
           initialTrip={initialTrip}
           propertyHref={propertyHref}
+          priceMarkupMultiplier={priceMarkupMultiplier}
         />
       </div>
     </div>

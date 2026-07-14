@@ -32,6 +32,7 @@ export function PropertyRoomSelectionProvider({
   rooms,
   initialTrip,
   propertyState = "",
+  priceMarkupMultiplier,
   children,
 }) {
   const [selections, setSelections] = useState({});
@@ -511,7 +512,17 @@ export function PropertyRoomSelectionProvider({
         rooms,
         customRoomSlots
       ),
-    [selections, inventoryB2c, nightDates, guests, rooms, customRoomSlots]
+    // priceMarkupMultiplier rebinds runtime markup used inside inventory pricing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional recompute on API %
+    [
+      selections,
+      inventoryB2c,
+      nightDates,
+      guests,
+      rooms,
+      customRoomSlots,
+      priceMarkupMultiplier,
+    ]
   );
 
   const totalSelectedRooms = useMemo(() => {

@@ -51,8 +51,10 @@ export function buildCheckoutApiPayload({
   nightly,
   guest = {},
   websiteid = "",
+  markupMultiplier,
 }) {
   const hotelId = listing.hotelId || parseHotelIdFromSlug(listing.slug) || null;
+  const multiplier = markupMultiplier;
 
   return {
     property: {
@@ -88,6 +90,7 @@ export function buildCheckoutApiPayload({
       total,
       payableTotal: total,
     },
+    markupMultiplier: multiplier,
     guest: {
       firstName: guest.firstName || "",
       lastName: guest.lastName || "",
@@ -97,7 +100,7 @@ export function buildCheckoutApiPayload({
       mobile: guest.mobile || "",
       password: guest.password || "",
     },
-    totalamountwith25: getBaseTotalWithGst(subtotal, { nights }),
+    totalamountwith25: getBaseTotalWithGst(subtotal, { nights, multiplier }),
     websiteid: websiteid || "",
   };
 }

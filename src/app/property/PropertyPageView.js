@@ -28,22 +28,25 @@ import {
   getApiPropertyRooms,
 } from "@/lib/propertyFromApi";
 import { attachInventoryToRooms } from "@/lib/propertyInventory";
-import { applyPropertyPriceMarkup } from "@/lib/bookingPricing";
+import {
+  applyPropertyPriceMarkup,
+  fetchPropertyPriceMarkupMultiplier,
+} from "@/lib/bookingPricing";
 
-function withPropertyListingPrices(listing) {
+function withPropertyListingPrices(listing, markupMultiplier) {
   return {
     ...listing,
-    price: applyPropertyPriceMarkup(listing.price),
+    price: applyPropertyPriceMarkup(listing.price, markupMultiplier),
     originalPrice: listing.originalPrice
-      ? applyPropertyPriceMarkup(listing.originalPrice)
+      ? applyPropertyPriceMarkup(listing.originalPrice, markupMultiplier)
       : listing.originalPrice,
   };
 }
 
-function withPropertyRoomPrices(room) {
+function withPropertyRoomPrices(room, markupMultiplier) {
   return {
     ...room,
-    price: applyPropertyPriceMarkup(room.price),
+    price: applyPropertyPriceMarkup(room.price, markupMultiplier),
   };
 }
 
@@ -68,6 +71,7 @@ export default async function PropertyPageView({ resolved, searchParams }) {
   const query = await searchParams;
   const { listing, hotel, source } = resolved;
   const isApi = source === "api";
+  const markupMultiplier = await fetchPropertyPriceMarkupMultiplier();
   const propertyState = isApi
     ? String(hotel?.location?.state || listing.region || "").trim()
     : String(listing.region || "").trim();
@@ -98,7 +102,7 @@ export default async function PropertyPageView({ resolved, searchParams }) {
   const rooms = (isApi
     ? attachInventoryToRooms(getApiPropertyRooms(hotel, listing), hotel?.inventory?.b2c)
     : getPropertyRooms(listing)
-  ).map(withPropertyRoomPrices);
+  ).map((room) => withPropertyRoomPrices(room, markupMultiplier));
   const inventoryB2c = isApi ? hotel?.inventory?.b2c || null : null;
   const amenityGroups = isApi
     ? getApiPropertyAmenityGroups(hotel)
@@ -114,10 +118,13 @@ export default async function PropertyPageView({ resolved, searchParams }) {
     (max, room) => Math.max(max, room.guests || 0),
     listing.guests || 2
   );
-  const listingForBooking = withPropertyListingPrices({
-    ...listing,
-    guests: maxRoomGuests,
-  });
+  const listingForBooking = withPropertyListingPrices(
+    {
+      ...listing,
+      guests: maxRoomGuests,
+    },
+    markupMultiplier
+  );
 
   const similar = isApi
     ? []
@@ -156,6 +163,7 @@ export default async function PropertyPageView({ resolved, searchParams }) {
           rooms={rooms}
           initialTrip={initialTrip}
           propertyState={propertyState}
+          priceMarkupMultiplier={markupMultiplier}
         >
           <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
             <div className="min-w-0">
