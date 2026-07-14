@@ -64,7 +64,11 @@ export default async function AccommodationsPage() {
           </div>
 
           <div id="hero-search" className="relative z-20 mt-10 scroll-mt-28 overflow-visible pb-4 sm:mt-12 sm:pb-6">
-            <SearchBar elevated defaultBookingDates />
+            <SearchBar
+              elevated
+              defaultBookingDates
+              defaultCity="Dharamshala"
+            />
           </div>
         </div>
       </section>

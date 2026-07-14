@@ -22,9 +22,18 @@ function SearchBarClient({
   category,
   listingsPage = false,
   defaultBookingDates = false,
+  defaultCity = "",
+  defaultState = "",
 }) {
   const router = useRouter();
-  const tripFallback = useMemo(() => ({ category }), [category]);
+  const tripFallback = useMemo(
+    () => ({
+      category,
+      city: defaultCity,
+      state: defaultState,
+    }),
+    [category, defaultCity, defaultState]
+  );
   const trip = useTripSearch(tripFallback);
   const tripRef = useRef(trip);
   tripRef.current = trip;
