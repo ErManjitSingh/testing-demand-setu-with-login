@@ -20,7 +20,11 @@ function buildEnquiryRows(data = {}) {
 
   add(
     "Enquiry type",
-    data.leadKind === "stay" ? "Stay / group enquiry" : "Tour package enquiry"
+    data.leadKind === "stay"
+      ? "Stay / group enquiry"
+      : data.bookingRef
+        ? "Tour package BOOKING request"
+        : "Tour package enquiry"
   );
   add("Name", data.name);
   add("Email", data.email);
@@ -30,6 +34,19 @@ function buildEnquiryRows(data = {}) {
   add("Tour type", data.tourType);
   add("Travel date", data.travelDate);
   add("Adults / rooms", data.adults || data.rooms);
+  add("Children", data.children && data.children !== "0" ? data.children : "");
+  add("Child ages", data.childAges);
+  add("Infants", data.infants && data.infants !== "0" ? data.infants : "");
+  add("Rooms needed", data.leadKind === "stay" ? "" : data.rooms);
+  add("Hotel category", data.hotelCategory);
+  add("Departure city", data.departureCity);
+  add("Estimated total", data.estimatedTotal);
+  add("Booking reference", data.bookingRef);
+  add("Payment plan", data.paymentPlan);
+  add("Payment method", data.paymentMethod);
+  add("Co-travellers", data.coTravellers);
+  add("Special requests", data.specialRequests);
+  add("Trip notes", data.tripNotes);
   add("Guest summary", data.guestSummary);
   add("Tickets booked", data.flightTrainTicketBooked);
   add("City", data.city);

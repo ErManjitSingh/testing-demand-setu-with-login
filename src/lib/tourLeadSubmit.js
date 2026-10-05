@@ -29,7 +29,9 @@ export function normalizeTourLeadInput(input = {}) {
     mobile: input.mobile?.trim() || "",
     adults: String(input.adults ?? ""),
     destination,
-    tourType: input.tourType?.trim() || "",
+    // Children, ages, rooms and hotel grade ride along in the free-text tour type so the
+    // CRM schema stays unchanged (adults remains a plain count).
+    tourType: [input.tourType?.trim(), input.tripNotes?.trim()].filter(Boolean).join(" | "),
     source: "website",
     sourceFormName: destination,
     travelDate: input.travelDate || null,

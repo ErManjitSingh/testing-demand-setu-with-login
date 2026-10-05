@@ -1,68 +1,36 @@
-"use client";
-
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import Link from "next/link";
 import AllPackagesCatalog from "@/components/packages/AllPackagesCatalog";
-import PackageEnquiryForm from "@/components/booking/PackageEnquiryForm";
 import FamousPackagesSection from "@/components/packages/FamousPackagesSection";
 import PackagesContentMarquee from "@/components/packages/PackagesContentMarquee";
 import PackagesExploreCountries from "@/components/packages/PackagesExploreCountries";
 import PackagesExploreStates from "@/components/packages/PackagesExploreStates";
 import PackagesFAQ from "@/components/packages/PackagesFAQ";
 import PackagesHeroSearch from "@/components/packages/PackagesHeroSearch";
+import PackagesHowItWorks from "@/components/packages/PackagesHowItWorks";
 import PackagesPopularCities from "@/components/packages/PackagesPopularCities";
 import PackagesPromoBanner from "@/components/packages/PackagesPromoBanner";
-import { DEFAULT_PACKAGE_IMAGE, getFamousPackages } from "@/lib/tourPackages";
+import PackagesThemeTiles from "@/components/packages/PackagesThemeTiles";
+import { buildListingHref } from "@/lib/packageBooking";
+import { getFamousPackages } from "@/lib/tourPackages";
 import { formatFromPrice, getCityImage, getCityMeta } from "@/lib/tourDestinations";
-import { buildEnquiryDestination } from "@/lib/tourEnquiryTypes";
 
+/**
+ * Home page. Every destination, theme and package tile is a real link into the
+ * listing (`/packages?...`) or product (`/packages/[slug]`) pages — no popups.
+ */
 export default function PackagesPageClient({ states = [], cities = [] }) {
-  const [enquiryPackage, setEnquiryPackage] = useState(null);
   const famousPackages = getFamousPackages();
-
-  const openEnquiry = useCallback((pkg) => {
-    setEnquiryPackage(pkg);
-  }, []);
-
-  const openLocationEnquiry = useCallback(
-    ({ country, state, city, label, adults, travelDate, tourType }) => {
-      const enquiryCountry = country || "India";
-      const enquiryState = state || "";
-      const enquiryCity = city || "";
-      const enquiryLocation = [enquiryCity, enquiryState, enquiryCountry].filter(Boolean).join(", ");
-
-      setEnquiryPackage({
-        id: "custom-enquiry",
-        title: label || enquiryCity || enquiryState || enquiryCountry || "Custom tour",
-        duration: "Flexible",
-        location: enquiryLocation || "India",
-        destination: buildEnquiryDestination({
-          city: enquiryCity,
-          state: enquiryState,
-          country: enquiryCountry,
-          location: enquiryLocation,
-          title: label,
-        }),
-        city: enquiryCity,
-        state: enquiryState,
-        country: enquiryCountry,
-        image: DEFAULT_PACKAGE_IMAGE,
-        defaultTravellers: adults ?? 2,
-        defaultTravelDate: travelDate ?? "",
-        defaultTourType: tourType ?? "",
-      });
-    },
-    []
-  );
 
   return (
     <div className="bg-[#f6f3ee]">
       <PackagesHeroSearch states={states} cities={cities} />
       <PackagesContentMarquee />
-      <FamousPackagesSection packages={famousPackages} onViewDetails={openEnquiry} />
-      <PackagesExploreStates states={states} onEnquire={openLocationEnquiry} />
-      <CityChoiceBridge onEnquire={openLocationEnquiry} />
-      <PackagesPopularCities cities={cities} onEnquire={openLocationEnquiry} />
+      <FamousPackagesSection packages={famousPackages} />
+      <PackagesThemeTiles />
+      <PackagesExploreStates states={states} />
+      <CityChoiceBridge />
+      <PackagesPopularCities cities={cities} />
       <PlaceBridge
         dark
         videoSrc="/videos/beyond-india.mp4"
@@ -70,16 +38,11 @@ export default function PackagesPageClient({ states = [], cities = [] }) {
         title="The same plan, a little further from home."
         detail="A wider set of countries we already know how to run. The desk writes the days either way."
       />
-      <PackagesExploreCountries onEnquire={openLocationEnquiry} />
-      <AllPackagesCatalog onViewDetails={openEnquiry} />
-      <PackagesPromoBanner onEnquire={() => openLocationEnquiry({ label: "Promo package enquiry" })} />
+      <PackagesExploreCountries />
+      <AllPackagesCatalog />
+      <PackagesHowItWorks />
+      <PackagesPromoBanner />
       <PackagesFAQ />
-
-      <PackageEnquiryForm
-        open={Boolean(enquiryPackage)}
-        onClose={() => setEnquiryPackage(null)}
-        tourPackage={enquiryPackage}
-      />
     </div>
   );
 }
@@ -90,7 +53,7 @@ const CITY_CHOICES = [
   { city: "Goa", kind: "Coast", frame: "h-38 sm:mt-3 sm:h-[220px]" },
 ];
 
-function CityChoiceBridge({ onEnquire }) {
+function CityChoiceBridge() {
   return (
     <section className="px-4 py-8 sm:px-6 sm:py-10 ">
       <div className="mx-auto grid max-w-7xl  items-center gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10">
@@ -118,12 +81,10 @@ function CityChoiceBridge({ onEnquire }) {
           {CITY_CHOICES.map((item) => {
             const meta = getCityMeta(item.city);
             return (
-              <button
+              <Link
                 key={item.city}
-                type="button"
-                onClick={() =>
-                  onEnquire?.({ city: item.city, country: "India", label: `${item.city} city tour` })
-                }
+                href={buildListingHref({ q: item.city })}
+                aria-label={`${item.city} tour packages`}
                 className={`group relative overflow-hidden rounded-2xl text-left shadow-md ring-2 ring-white transition duration-500 hover:-translate-y-1 ${item.frame}`}
               >
                 <Image
@@ -146,7 +107,7 @@ function CityChoiceBridge({ onEnquire }) {
                     {formatFromPrice(meta.fromPrice)}
                   </span>
                 </span>
-              </button>
+              </Link>
             );
           })}
         </div>

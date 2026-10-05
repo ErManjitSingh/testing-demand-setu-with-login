@@ -17,6 +17,7 @@ import { useGuestAuth } from "@/hooks/useGuestAuth";
 
 const navLinks = [
   { href: "/", label: "Home", explore: null, icon: "home" },
+  { href: "/packages", label: "Packages", explore: null, icon: "package" },
   { href: "/accommodations", label: "Stays", explore: null, icon: "bed" },
   { href: "/listings", label: "Explore", explore: "all", icon: "compass" },
   { href: null, label: "Hotels", explore: "hotel", icon: "hotel" },
@@ -258,6 +259,13 @@ function NavIcon({ name }) {
     return (
       <svg {...common}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5Z" />
+      </svg>
+    );
+  }
+  if (name === "package") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M4.5 7h15A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-9A1.5 1.5 0 0 1 4.5 7ZM3 12.5h18" />
       </svg>
     );
   }

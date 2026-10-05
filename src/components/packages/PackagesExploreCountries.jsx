@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { buildListingHref } from "@/lib/packageBooking";
 import ExploreSectionHeader from "@/components/packages/ExploreSectionHeader";
 import { snapRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
 import {
@@ -17,7 +19,7 @@ const TRUST_ITEMS = [
   "Easy EMI Options",
 ];
 
-export default function PackagesExploreCountries({ onEnquire }) {
+export default function PackagesExploreCountries() {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
   const all = getInternationalCountries();
   const countries = [...all.filter((c) => c.featured), ...all.filter((c) => !c.featured)].slice(0, 8);
@@ -37,7 +39,7 @@ export default function PackagesExploreCountries({ onEnquire }) {
         <div ref={scrollerRef} className={`${snapRowClass} lg:grid-cols-4`}>
           {countries.map((country) => (
             <div key={country.name} data-snap-card className="w-[calc(100vw-3.25rem)] shrink-0 snap-start sm:w-[250px] lg:w-auto">
-              <CountryCard country={country} onEnquire={onEnquire} />
+              <CountryCard country={country} />
             </div>
           ))}
         </div>
@@ -57,17 +59,12 @@ export default function PackagesExploreCountries({ onEnquire }) {
   );
 }
 
-function CountryCard({ country, onEnquire }) {
+function CountryCard({ country }) {
   return (
     <article>
-      <button
-        type="button"
-        onClick={() =>
-          onEnquire?.({
-            country: country.name,
-            label: `${country.name} international tour`,
-          })
-        }
+      <Link
+        href={buildListingHref({ q: country.name })}
+        aria-label={`${country.name} tour packages`}
         className="group relative block h-full w-full overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-xl"
       >
         <div className="relative aspect-[4/5]">
@@ -95,7 +92,7 @@ function CountryCard({ country, onEnquire }) {
             </div>
           </div>
         </div>
-      </button>
+      </Link>
     </article>
   );
 }

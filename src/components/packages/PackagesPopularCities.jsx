@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { buildListingHref } from "@/lib/packageBooking";
 import { useMemo } from "react";
 import ExploreSectionHeader from "@/components/packages/ExploreSectionHeader";
 import { sliderRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
@@ -11,7 +13,7 @@ import {
   getPopularCities,
 } from "@/lib/tourDestinations";
 
-export default function PackagesPopularCities({ cities = [], onEnquire }) {
+export default function PackagesPopularCities({ cities = [] }) {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
   const displayCities = useMemo(() => getPopularCities(cities, 8), [cities]);
 
@@ -34,13 +36,11 @@ export default function PackagesPopularCities({ cities = [], onEnquire }) {
           {displayCities.map((cityName) => {
             const meta = getCityMeta(cityName);
             return (
-              <button
+              <Link
                 key={cityName}
                 data-snap-card
-                type="button"
-                onClick={() =>
-                  onEnquire?.({ city: cityName, country: "India", label: `${cityName} city tour` })
-                }
+                href={buildListingHref({ q: cityName })}
+                aria-label={`${cityName} tour packages`}
                 className="group w-[196px] shrink-0 snap-start text-center"
               >
                 <span className="relative mx-auto block aspect-square w-full overflow-hidden rounded-full shadow-md ring-4 ring-white transition duration-500 group-hover:-translate-y-1 group-hover:ring-brand group-hover:shadow-xl">
@@ -58,7 +58,7 @@ export default function PackagesPopularCities({ cities = [], onEnquire }) {
                 <span className="mt-1 block text-xs font-semibold text-brand">
                   {formatFromPrice(meta.fromPrice)}
                 </span>
-              </button>
+              </Link>
             );
           })}
         </div>

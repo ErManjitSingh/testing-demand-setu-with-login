@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 
-export default function PackagesPromoBanner({ onEnquire }) {
+export default function PackagesPromoBanner() {
   return (
     <section className="px-4 py-10 sm:px-6 sm:py-14">
       <div className="relative mx-auto grid max-w-6xl overflow-hidden rounded-[28px] bg-[#ea580c] text-white sm:grid-cols-2">
@@ -20,13 +21,12 @@ export default function PackagesPromoBanner({ onEnquire }) {
             Book any famous package this season and unlock exclusive group discounts.
           </p>
           <div className="mt-8 flex items-center gap-5">
-            <button
-              type="button"
-              onClick={onEnquire}
+            <Link
+              href="/packages?sort=discount"
               className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#c2410c] transition hover:bg-orange-50"
             >
-              Book now
-            </button>
+              Explore offers
+            </Link>
             <p className="font-serif text-5xl leading-none text-white">25%</p>
           </div>
           <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/75">Off this season</p>

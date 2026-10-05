@@ -1,66 +1,69 @@
-"use client";
-
-import AnimateIn from "@/components/packages/AnimateIn";
+import Link from "next/link";
+import { ArrowRight, CalendarCheck, Compass, CreditCard, Plane } from "lucide-react";
 
 const STEPS = [
   {
-    step: "01",
-    title: "Search & enquire",
-    desc: "Pick a country, state, city, or famous package. Tell us your dates and group size.",
-    icon: "🔍",
+    icon: Compass,
+    title: "Find your trip",
+    text: "Search by place, dates and travellers. Every package is priced for exactly who is going.",
   },
   {
-    step: "02",
-    title: "Get custom quote",
-    desc: "Our specialists share a detailed itinerary with hotels, transfers, and transparent pricing.",
-    icon: "📋",
+    icon: CalendarCheck,
+    title: "Customise it",
+    text: "Pick a departure, hotel grade and room setup — the total updates live, GST included.",
   },
   {
-    step: "03",
-    title: "Confirm & pack",
-    desc: "Pay securely, receive vouchers, driver contacts, and a dedicated trip coordinator.",
-    icon: "✈️",
+    icon: CreditCard,
+    title: "Reserve in minutes",
+    text: "Share traveller details on our booking page and pay just 25% to lock your seats.",
   },
   {
-    step: "04",
-    title: "Travel worry-free",
-    desc: "24/7 orange-line support on-ground — we're with you from departure to homecoming.",
-    icon: "🌏",
+    icon: Plane,
+    title: "Travel stress-free",
+    text: "A trip coordinator stays one call away from your first transfer to your last.",
   },
 ];
 
 export default function PackagesHowItWorks() {
   return (
-    <section className="bg-stone-900 py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <AnimateIn className="text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
-            Simple process
-          </p>
-          <h2 className="mt-3 text-3xl font-extrabold text-white sm:text-4xl">
-            How booking works
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-stone-400">
-            Four easy steps from your first enquiry to an unforgettable journey.
-          </p>
-        </AnimateIn>
-
-        <div className="relative mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="pointer-events-none absolute left-0 right-0 top-12 hidden h-0.5 bg-gradient-to-r from-transparent via-brand/50 to-transparent lg:block" />
-
-          {STEPS.map((item, i) => (
-            <AnimateIn key={item.step} delay={i * 100} direction="scale">
-              <div className="relative rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition hover:border-brand/40 hover:bg-white/10">
-                <span className="text-3xl">{item.icon}</span>
-                <p className="mt-4 text-xs font-bold uppercase tracking-wider text-brand">
-                  Step {item.step}
-                </p>
-                <h3 className="mt-2 text-lg font-bold text-white">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-stone-400">{item.desc}</p>
-              </div>
-            </AnimateIn>
-          ))}
+    <section className="bg-white py-14 sm:py-24" aria-labelledby="how-it-works">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-serif text-xl italic text-brand">Simple by design</p>
+            <h2 id="how-it-works" className="mt-1 font-serif text-4xl font-medium tracking-tight text-stone-900 sm:text-5xl">
+              From idea to boarding pass
+            </h2>
+          </div>
+          <Link
+            href="/packages"
+            className="group inline-flex items-center gap-2 self-start rounded-full bg-stone-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand sm:self-auto"
+          >
+            Browse all packages
+            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+          </Link>
         </div>
+
+        <ol className="relative mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((step, i) => (
+            <li
+              key={step.title}
+              className="group relative overflow-hidden rounded-3xl border border-stone-200 bg-[#fbf8f3] p-6 transition duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-xl"
+            >
+              <span
+                aria-hidden
+                className="absolute -right-2 -top-4 font-serif text-[6rem] font-medium leading-none text-stone-900/[0.05] transition group-hover:text-brand/10"
+              >
+                {i + 1}
+              </span>
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/30 transition group-hover:rotate-6 group-hover:scale-105">
+                <step.icon className="h-6 w-6" />
+              </span>
+              <h3 className="mt-5 text-lg font-extrabold text-stone-900">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-stone-600">{step.text}</p>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

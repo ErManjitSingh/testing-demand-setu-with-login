@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import AnimateIn from "@/components/packages/AnimateIn";
 import { snapRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
@@ -12,7 +13,7 @@ import {
   getPackageImage,
 } from "@/lib/tourPackages";
 
-export default function AllPackagesCatalog({ onViewDetails }) {
+export default function AllPackagesCatalog() {
   const [category, setCategory] = useState("All");
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
   const allPackages = getAllPackages();
@@ -98,19 +99,25 @@ export default function AllPackagesCatalog({ onViewDetails }) {
                     <p className="text-sm font-semibold text-orange-200">
                       {formatPackagePrice(pkg.price)}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => onViewDetails?.(pkg)}
-                      className="shrink-0 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-stone-950"
+                    <Link
+                      href={`/packages/${pkg.slug}`}
+                      className="shrink-0 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-stone-950 transition group-hover:bg-brand group-hover:text-white after:absolute after:inset-0 after:content-['']"
                     >
                       View detail
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
             </article>
           ))}
         </div>
+
+        <Link
+          href="/packages"
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-stone-950 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand"
+        >
+          Browse all {allPackages.length} packages with filters →
+        </Link>
       </div>
     </section>
   );

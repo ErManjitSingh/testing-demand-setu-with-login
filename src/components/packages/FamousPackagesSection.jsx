@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import ExploreSectionHeader from "@/components/packages/ExploreSectionHeader";
 import { snapRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
 import { formatPackagePrice, getAllPackages, getPackageImage } from "@/lib/tourPackages";
 
-export default function FamousPackagesSection({ packages = [], onViewDetails }) {
+export default function FamousPackagesSection({ packages = [] }) {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
   if (packages.length === 0) return null;
 
@@ -36,9 +37,8 @@ export default function FamousPackagesSection({ packages = [], onViewDetails }) 
                 lead ? "lg:col-span-2 lg:row-span-2" : wide ? "lg:col-span-2" : ""
               }`}
             >
-              <button
-                type="button"
-                onClick={() => onViewDetails?.(pkg)}
+              <Link
+                href={`/packages/${pkg.slug}`}
                 className="group relative block h-full w-full overflow-hidden rounded-[2rem] text-left shadow-md transition duration-500 hover:-translate-y-1 hover:shadow-2xl"
               >
                 <div className="relative h-[300px] w-full sm:h-[380px] lg:h-full">
@@ -76,15 +76,15 @@ export default function FamousPackagesSection({ packages = [], onViewDetails }) 
                     </div>
                   </div>
                 </div>
-              </button>
+              </Link>
             </article>
             );
           })}
         </div>
 
-        <a href="#all-packages" className="mt-6 inline-block text-sm font-semibold text-brand">
+        <Link href="/packages" className="mt-6 inline-block text-sm font-semibold text-brand">
           Browse all {totalCount} packages →
-        </a>
+        </Link>
       </div>
     </section>
   );

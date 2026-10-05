@@ -5,6 +5,13 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { getPackageImage } from "@/lib/tourPackages";
 import PhoneNumberField from "@/components/booking/PhoneNumberField";
+import TravellersPicker from "@/components/packages/shared/TravellersPicker";
+import {
+  buildTripNotes,
+  getRoomsNeeded,
+  syncChildAges,
+  todayInputValue,
+} from "@/lib/tourTravellers";
 import { submitTourLeadFromClient } from "@/lib/tourLeadClient";
 import {
   DEFAULT_PHONE_COUNTRY_ISO,
@@ -41,10 +48,10 @@ export default function PackageEnquiryForm({
     name: "",
     email: "",
     travelDate: "",
-    travellers: "2",
     tourType: "private",
     ticketBooked: "no",
   });
+  const [travellers, setTravellers] = useState({ adults: 2, children: 0, infants: 0, childAges: [] });
   const [phoneCountryIso, setPhoneCountryIso] = useState(DEFAULT_PHONE_COUNTRY_ISO);
   const [phone, setPhone] = useState("");
 
@@ -65,9 +72,15 @@ export default function PackageEnquiryForm({
       name: "",
       email: "",
       travelDate: tourPackage.defaultTravelDate || "",
-      travellers: String(tourPackage.defaultTravellers ?? 2),
       tourType: defaultTourTypeValue(tourPackage),
       ticketBooked: "no",
+    });
+    const defaultChildren = Number(tourPackage.defaultChildren ?? 0);
+    setTravellers({
+      adults: Number(tourPackage.defaultTravellers ?? 2) || 2,
+      children: defaultChildren,
+      infants: Number(tourPackage.defaultInfants ?? 0),
+      childAges: syncChildAges(tourPackage.defaultChildAges ?? [], defaultChildren),
     });
     setPhoneCountryIso(DEFAULT_PHONE_COUNTRY_ISO);
     setPhone("");
@@ -96,7 +109,8 @@ export default function PackageEnquiryForm({
     e.preventDefault();
     if (submitting) return;
 
-    const travellers = Number.parseInt(form.travellers, 10) || 2;
+    const { adults, children, infants, childAges } = travellers;
+    const rooms = getRoomsNeeded(adults);
     const phoneForApi = parseStoredPhone(phone, phoneCountryIso).local;
 
     if (!phoneForApi) {
@@ -132,7 +146,15 @@ export default function PackageEnquiryForm({
         name: form.name.trim(),
         email: form.email.trim(),
         mobile: phoneForApi,
-        adults: String(travellers),
+        adults: String(adults),
+        children: String(children),
+        infants: String(infants),
+        childAges: childAges.join(","),
+        rooms: String(rooms),
+        tripNotes:
+          children > 0 || infants > 0
+            ? buildTripNotes({ adults, children, infants, childAges, rooms })
+            : "",
         city: packageCity,
         state: packageState,
         country: packageCountry,
@@ -289,7 +311,7 @@ export default function PackageEnquiryForm({
                 value={form.travelDate}
                 onChange={(e) => setForm((f) => ({ ...f, travelDate: e.target.value }))}
                 className={inputClass}
-                min={new Date().toISOString().split("T")[0]}
+                min={todayInputValue()}
               />
             </Field>
 
@@ -332,17 +354,12 @@ export default function PackageEnquiryForm({
               </Field>
             </div>
 
-            <Field label="Number of adults" required>
-              <input
-                type="number"
-                required
-                min={1}
-                max={50}
-                value={form.travellers}
-                onChange={(e) => setForm((f) => ({ ...f, travellers: e.target.value }))}
-                className={inputClass}
-              />
-            </Field>
+            <div>
+              <span className="mb-1 block text-xs font-bold text-foreground">
+                Travellers <span className="text-brand">*</span>
+              </span>
+              <TravellersPicker inline value={travellers} onChange={setTravellers} />
+            </div>
 
             {submitError && (
               <p className="rounded-xl bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600">

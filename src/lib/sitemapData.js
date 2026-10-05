@@ -4,6 +4,7 @@ import { buildListingsSlugPath } from "@/lib/listingsSlug";
 import { fetchHotelCitiesList, fetchHotelStatesList } from "@/lib/locationResolve";
 import { buildPropertyPath } from "@/lib/propertySlug";
 import { getSiteUrl } from "@/lib/siteConfig";
+import { TOUR_PACKAGES } from "@/lib/tourPackages";
 
 const LISTING_CATEGORIES = ["all", ...CATEGORIES.map((category) => category.id)];
 
@@ -35,6 +36,9 @@ export async function getSitemapEntries() {
   add("/explore", { priority: 0.9, changeFrequency: "daily" });
   add("/listings", { priority: 0.8, changeFrequency: "weekly" });
   add("/packages", { priority: 0.8, changeFrequency: "weekly" });
+  for (const pkg of TOUR_PACKAGES) {
+    add(`/packages/${pkg.slug}`, { priority: 0.7, changeFrequency: "weekly" });
+  }
 
   const [cities, states] = await Promise.all([
     fetchHotelCitiesList(),

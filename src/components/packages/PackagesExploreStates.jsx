@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { buildListingHref } from "@/lib/packageBooking";
 import ExploreSectionHeader from "@/components/packages/ExploreSectionHeader";
 import { snapRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
 import { getStateImage } from "@/components/state/stateImageMap";
@@ -44,7 +46,7 @@ function pickStates(states, limit = 5) {
   return picked.slice(0, limit);
 }
 
-export default function PackagesExploreStates({ states = [], onEnquire }) {
+export default function PackagesExploreStates({ states = [] }) {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
   const shown = pickStates(states, 8);
   if (shown.length === 0) return null;
@@ -78,13 +80,11 @@ export default function PackagesExploreStates({ states = [], onEnquire }) {
             ][index];
 
             return (
-              <button
+              <Link
                 key={stateName}
                 data-snap-card
-                type="button"
-                onClick={() =>
-                  onEnquire?.({ state: stateName, country: "India", label: `${stateName} tour` })
-                }
+                href={buildListingHref({ q: stateName })}
+                aria-label={`${stateName} tour packages`}
                 className={`group relative w-[calc(100vw-3.25rem)] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-xl sm:w-[280px] lg:h-full lg:w-auto ${place || ""}`}
               >
                 <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full">
@@ -111,7 +111,7 @@ export default function PackagesExploreStates({ states = [], onEnquire }) {
                     </div>
                   </div>
                 </div>
-              </button>
+              </Link>
             );
           })}
         </div>
