@@ -24,6 +24,7 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --font-sans: var(--font-jakarta);
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
 }
 
 html {

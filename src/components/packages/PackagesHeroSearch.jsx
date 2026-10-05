@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { getCountrySearchOptions } from "@/lib/tourDestinations";
 import { getDefaultBookingDates } from "@/lib/dates";
 import PackageLocationCombobox from "@/components/packages/PackageLocationCombobox";
@@ -17,24 +16,8 @@ import {
   resolveTourTypeLabel,
 } from "@/lib/tourEnquiryTypes";
 
-const HERO_SLIDES = [
-  {
-    src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=85",
-    alt: "Himalayan mountains",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1600&q=85",
-    alt: "Taj Mahal",
-  },
-  {
-    src: "https://images.pexels.com/photos/37839625/pexels-photo-37839625.jpeg",
-    alt: "Ladakh",
-  },
-  {
-    src: "https://images.pexels.com/photos/6904721/pexels-photo-6904721.jpeg",
-    alt: "Nepal",
-  },
-];
+const HERO_POSTER =
+  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
 
 const TABS = [
   { id: "country", label: "All Country" },
@@ -50,8 +33,6 @@ const HERO_PERKS = [
 
 const TOUR_TYPES = TOUR_ENQUIRY_TYPES;
 
-const SLIDE_INTERVAL_MS = 5000;
-
 function toDateInputValue(date) {
   if (!date) return "";
   const d = date instanceof Date ? date : new Date(date);
@@ -59,74 +40,29 @@ function toDateInputValue(date) {
   return d.toISOString().split("T")[0];
 }
 
-function HeroSlideImage({ slide, priority = false, kenBurns = false }) {
+function HeroBackground() {
   return (
-    <Image
-      src={slide.src}
-      alt=""
-      fill
-      priority={priority}
-      sizes="100vw"
-      className={`object-cover ${kenBurns ? "packages-hero-bg-active" : ""}`}
-    />
-  );
-}
-
-function HeroBackground({ activeIndex }) {
-  const [baseIndex, setBaseIndex] = useState(0);
-  const [overlayIndex, setOverlayIndex] = useState(null);
-  const [overlayVisible, setOverlayVisible] = useState(false);
-  const prevActiveRef = useRef(activeIndex);
-
-  useEffect(() => {
-    HERO_SLIDES.forEach((slide) => {
-      const img = new window.Image();
-      img.src = slide.src;
-    });
-  }, []);
-
-  useEffect(() => {
-    if (activeIndex === prevActiveRef.current) return;
-    setOverlayIndex(activeIndex);
-    setOverlayVisible(false);
-    prevActiveRef.current = activeIndex;
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setOverlayVisible(true));
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [activeIndex]);
-
-  useEffect(() => {
-    if (overlayIndex === null || !overlayVisible) return;
-    const timer = window.setTimeout(() => {
-      setBaseIndex(overlayIndex);
-      setOverlayIndex(null);
-      setOverlayVisible(false);
-    }, 1500);
-    return () => window.clearTimeout(timer);
-  }, [overlayIndex, overlayVisible]);
-
-  return (
-    <div className="pointer-events-none absolute inset-0 bg-stone-800" aria-hidden>
-      <div className="absolute inset-0">
-        <HeroSlideImage slide={HERO_SLIDES[baseIndex]} priority kenBurns />
-      </div>
-      {overlayIndex !== null && (
-        <div
-          className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${
-            overlayVisible ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <HeroSlideImage slide={HERO_SLIDES[overlayIndex]} priority />
-        </div>
-      )}
+    <div
+      className="pointer-events-none absolute inset-0 bg-stone-900 bg-cover bg-center"
+      style={{ backgroundImage: `url(${HERO_POSTER})` }}
+      aria-hidden
+    >
+      <video
+        className="h-full w-full object-cover motion-reduce:hidden"
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster={HERO_POSTER}
+      >
+        <source src="/videos/enquiry-hero.mp4" type="video/mp4" />
+      </video>
     </div>
   );
 }
 
 export default function PackagesHeroSearch({ states = [], cities = [] }) {
   const defaultDates = useMemo(() => getDefaultBookingDates(), []);
-  const [slideIndex, setSlideIndex] = useState(0);
   const [tab, setTab] = useState("country");
   const [country, setCountry] = useState("India");
   const [state, setState] = useState("");
@@ -160,13 +96,6 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
       : tab === "state"
         ? "Search state…"
         : "Search city…";
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setSlideIndex((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, SLIDE_INTERVAL_MS);
-    return () => window.clearInterval(timer);
-  }, []);
 
   const onTabChange = (nextTab) => {
     setTab(nextTab);
@@ -260,33 +189,32 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
   };
 
   return (
-    <section className="relative min-h-[min(100vh,880px)] overflow-hidden">
-      <HeroBackground activeIndex={slideIndex} />
+    <section className="relative isolate -mt-24 overflow-hidden bg-stone-950">
+      <HeroBackground />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(12,10,9,0.88)_0%,rgba(12,10,9,0.58)_46%,rgba(12,10,9,0.38)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/30" />
 
-      <div className="relative z-10 mx-auto flex min-h-[min(100vh,880px)] max-w-6xl flex-col justify-center px-4 py-14 sm:px-6 sm:py-16 lg:py-20">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-          {/* Left — content */}
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-10 pt-28 sm:px-6 sm:pb-14 sm:pt-32 lg:min-h-screen lg:grid-cols-[1fr_0.92fr] lg:gap-10 lg:pb-12 lg:pt-36">
           <div className="animate-hero-enter">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand" />
               Tour packages
             </span>
 
-            <h1 className="mt-5 text-4xl font-extrabold leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:text-5xl lg:text-[3.25rem]">
-              Every Country. Every State.
-              <span className="mt-1 block">Every City.</span>
+            <h1 className="mt-5 font-serif text-5xl font-medium leading-[0.98] tracking-tight text-white sm:text-6xl">
+              <span className="block">Every Country.</span>
+              <span className="block">Every State.</span>
+              <span className="block">Every City.</span>
             </h1>
 
-            <p className="mt-4 font-serif text-3xl italic text-orange-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] sm:text-4xl">
+            <p className="mt-5 font-serif text-3xl font-medium italic text-orange-100 sm:text-4xl">
               One Journey.
             </p>
 
-          
-
             <ul className="mt-8 space-y-3">
               {HERO_PERKS.map((perk) => (
-                <li key={perk} className="flex items-center gap-3 text-sm font-medium text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.45)]">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-xs text-white shadow-md">
+                <li key={perk} className="flex items-center gap-2 text-sm font-medium text-white/90">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-brand">
                     ✓
                   </span>
                   {perk}
@@ -294,43 +222,32 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
               ))}
             </ul>
 
-            <div className="mt-10 flex items-center gap-2">
-              {HERO_SLIDES.map((slide, i) => (
-                <button
-                  key={slide.src}
-                  type="button"
-                  onClick={() => setSlideIndex(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === slideIndex ? "w-8 bg-brand" : "w-2 bg-white/50 hover:bg-white/70"
-                  }`}
-                  aria-label={`Show slide ${i + 1}`}
-                />
-              ))}
-            </div>
           </div>
 
-          {/* Right — enquiry form */}
-          <div className="animate-hero-enter-delay-2 w-full lg:justify-self-end">
-            <div className="overflow-hidden rounded-2xl border border-white/20 bg-white shadow-[0_32px_80px_-20px_rgba(0,0,0,0.45)] ring-1 ring-stone-900/5">
-              <div className="border-b border-stone-100 bg-gradient-to-r from-brand-muted to-white px-5 py-4">
-                <p className="text-lg font-extrabold text-stone-900">Plan your trip</p>
+          <div className="w-full">
+            <div className="overflow-hidden rounded-[28px] bg-white shadow-[0_30px_80px_-24px_rgba(0,0,0,0.55)]">
+              <div className="flex flex-wrap items-end justify-between gap-2 border-b border-stone-100 px-5 py-4 sm:px-6">
+                <div>
+                  <p className="text-xl font-semibold tracking-tight text-stone-950">Plan your trip</p>
+                  <p className="mt-0.5 text-sm text-stone-500">Share the trip. We send the plan.</p>
+                </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-3 p-5">
+              <form onSubmit={handleSubmit} className="space-y-3 p-5 sm:p-6">
                 <div>
-                  <span className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-stone-500">
+                  <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-stone-500">
                     Destination type
                   </span>
-                  <div className="grid grid-cols-3 gap-1 rounded-xl border border-stone-200 bg-stone-50 p-1">
+                  <div className="grid grid-cols-3 gap-1 rounded-2xl bg-stone-100 p-1">
                     {TABS.map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => onTabChange(item.id)}
-                        className={`rounded-lg px-2 py-2.5 text-xs font-bold transition sm:text-sm ${
+                        className={`rounded-xl px-2 py-2.5 text-xs font-semibold transition sm:text-sm ${
                           tab === item.id
-                            ? "bg-brand text-white shadow-sm"
-                            : "text-stone-600 hover:bg-white hover:text-stone-900"
+                            ? "bg-white text-stone-950 shadow-sm"
+                            : "text-stone-500 hover:text-stone-900"
                         }`}
                       >
                         {item.label}
@@ -359,7 +276,7 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
                   </FormField>
 
                   <FormField label="Flight / Train Ticket Booked?">
-                    <div className="grid grid-cols-2 gap-1 rounded-xl border border-stone-200 bg-stone-50 p-1">
+                    <div className="grid grid-cols-2 gap-1 rounded-2xl bg-stone-100 p-1">
                       {[
                         { value: "yes", label: "Yes" },
                         { value: "no", label: "No" },
@@ -371,10 +288,10 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
                             setTicketBooked(option.value);
                             if (error) setError("");
                           }}
-                          className={`rounded-lg px-2 py-2.5 text-sm font-bold transition ${
+                          className={`rounded-xl px-2 py-2.5 text-sm font-semibold transition ${
                             ticketBooked === option.value
-                              ? "bg-brand text-white shadow-sm"
-                              : "text-stone-600 hover:bg-white hover:text-stone-900"
+                              ? "bg-white text-stone-950 shadow-sm"
+                              : "text-stone-500 hover:text-stone-900"
                           }`}
                         >
                           {option.label}
@@ -435,7 +352,7 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
                   />
 
                   <FormField label="Adults" className="min-w-0">
-                    <div className="flex h-[42px] items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-1.5">
+                    <div className="flex h-11 items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-1.5">
                       <button
                         type="button"
                         onClick={() => setAdults((n) => Math.max(1, n - 1))}
@@ -508,7 +425,7 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full rounded-xl bg-brand py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand/30 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="w-full rounded-2xl bg-brand py-3.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {submitting ? "Submitting…" : "Submit enquiry"}
                 </button>
@@ -519,19 +436,18 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
               </form>
             </div>
           </div>
-        </div>
       </div>
     </section>
   );
 }
 
 const inputClass =
-  "w-full rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-base font-medium text-stone-900 outline-none ring-brand/30 transition focus:border-brand focus:ring-2";
+  "h-11 w-full rounded-xl border border-stone-200 bg-stone-50 px-3 text-base font-medium text-stone-950 outline-none transition focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20";
 
 function FormField({ label, children, className = "" }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1 block text-sm font-bold text-stone-800">{label}</span>
+      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-stone-500">{label}</span>
       {children}
     </label>
   );

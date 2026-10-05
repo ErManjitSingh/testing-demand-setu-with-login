@@ -1,26 +1,31 @@
 const MARQUEE_ITEMS = [
-  "🏔️ 18+ curated tour packages",
-  "🌏 6 countries covered",
-  "⭐ 4.9 average guest rating",
-  "🛡️ Verified local partners",
-  "📞 24/7 orange-line support",
-  "✈️ International & domestic",
-  "💰 Best price guarantee",
-  "🎯 Custom itineraries",
+  "18+ curated tour packages",
+  "6 countries covered",
+  "4.9 average guest rating",
+  "Verified local partners",
+  "24/7 orange-line support",
+  "International & domestic",
+  "Best price guarantee",
+  "Custom itineraries",
 ];
 
 export default function PackagesContentMarquee() {
   return (
-    <div className="overflow-hidden border-y border-brand/15 bg-gradient-to-r from-brand-muted via-orange-50 to-brand-muted py-3">
-      <div className="animate-marquee flex w-max gap-10 whitespace-nowrap px-4 text-sm font-bold text-stone-700">
-        {[...Array(2)].map((_, set) => (
-          <span key={set} className="flex gap-10">
-            {MARQUEE_ITEMS.map((item) => (
-              <span key={`${set}-${item}`}>{item}</span>
-            ))}
-          </span>
+    <section className="bg-[#f6f3ee] px-4 pb-4 pt-8 sm:px-6">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 overflow-hidden rounded-3xl border border-stone-200 bg-white sm:grid-cols-4">
+        {MARQUEE_ITEMS.map((item, index) => (
+          <p
+            key={item}
+            className={`px-4 py-4 text-sm font-semibold text-stone-800 ${
+              index % 4 !== 0 ? "sm:border-l sm:border-stone-100" : ""
+            } ${index >= 4 ? "border-t border-stone-100" : ""} ${
+              index % 2 === 1 ? "border-l border-stone-100 sm:border-l" : ""
+            }`}
+          >
+            {item}
+          </p>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

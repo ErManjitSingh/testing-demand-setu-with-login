@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LogoLink } from "@/components/Logo";
 import HeaderSearchBar from "@/components/HeaderSearchBar";
 import { getListingBySlug } from "@/lib/listings";
 import { SEGMENT_TO_CATEGORY, fromLocationSlug } from "@/lib/listingsSlug";
@@ -15,12 +16,12 @@ import { useCategoryExplore } from "@/hooks/useCategoryExplore";
 import { useGuestAuth } from "@/hooks/useGuestAuth";
 
 const navLinks = [
-  { href: "/", label: "Home", explore: null },
-  { href: "/accommodations", label: "Stays", explore: null },
-  { href: "/listings", label: "Explore", explore: "all" },
-  { href: null, label: "Hotels", explore: "hotel" },
-  { href: null, label: "Airbnb", explore: "airbnb" },
-  { href: null, label: "Villas", explore: "homestay" },
+  { href: "/", label: "Home", explore: null, icon: "home" },
+  { href: "/accommodations", label: "Stays", explore: null, icon: "bed" },
+  { href: "/listings", label: "Explore", explore: "all", icon: "compass" },
+  { href: null, label: "Hotels", explore: "hotel", icon: "hotel" },
+  { href: null, label: "Airbnb", explore: "airbnb", icon: "key" },
+  { href: null, label: "Villas", explore: "homestay", icon: "villa" },
 ];
 
 export default function Header() {
@@ -56,124 +57,284 @@ export default function Header() {
     }
   }
 
+  const isHome = pathname === "/";
   const isPropertyStyleHeader = isPropertyDetailPage || isPropertySlugPath(pathname);
+  const { isLoggedIn } = useGuestAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  const closeMenu = () => setMenuOpen(false);
+  const onDark = isHome && !isPropertyStyleHeader;
+
+  const bar = (
+    <div className="grid h-[80px] grid-cols-[auto_1fr_auto] items-center gap-3">
+      <Link href="/" className="relative z-10 inline-flex shrink-0 items-center">
+        <span className="relative block h-14 w-[129px] sm:h-16 sm:w-[148px]">
+          <Image
+            src={onDark ? "/logo-on-dark.png" : "/logo.png"}
+            alt="Demand Setu Tours"
+            fill
+            priority
+            sizes="148px"
+            className="object-contain object-left"
+          />
+        </span>
+      </Link>
+
+      <nav className="hidden min-w-0 items-center justify-center gap-0.5 lg:flex">
+        {navLinks.map((link) => (
+          <NavItem key={link.label} link={link} pathname={pathname} onExplore={openExplore} dark={onDark} />
+        ))}
+      </nav>
+
+      <div className="relative z-10 ml-auto flex items-center gap-2">
+        <a
+          href="tel:+918353056000"
+          className={`hidden items-center gap-2 rounded-full py-1 pl-1 pr-3 text-[13px] font-semibold xl:inline-flex ${
+            onDark ? "bg-white/10 text-white" : "bg-[#fff1e6] text-stone-950"
+          }`}
+        >
+          <IconBadge dark={onDark}>
+            <NavIcon name="phone" />
+          </IconBadge>
+          +91 83530 56000
+        </a>
+        <Link
+          href="/list-your-property"
+          className={`hidden items-center gap-2 rounded-full px-2 py-1 text-[13px] font-medium xl:inline-flex ${
+            onDark ? "text-orange-200 hover:text-white" : "text-brand hover:text-brand-dark"
+          }`}
+        >
+          <NavIcon name="list" />
+          List property
+        </Link>
+        <Link
+          href={isLoggedIn ? "/my-bookings" : "/signin"}
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-4 text-[13px] font-semibold text-white shadow-[0_8px_18px_rgba(234,88,12,0.45)] transition hover:bg-brand-dark"
+        >
+          <NavIcon name={isLoggedIn ? "ticket" : "user"} />
+          {isLoggedIn ? "My Bookings" : "Sign in"}
+        </Link>
+        <button
+          type="button"
+          className={`inline-flex h-10 w-10 items-center justify-center rounded-full lg:hidden ${
+            onDark ? "bg-white/10 text-white" : "bg-[#fff1e6] text-brand"
+          }`}
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          <MenuIcon open={menuOpen} />
+        </button>
+      </div>
+    </div>
+  );
+
+  const menu = menuOpen ? (
+    <div className={`px-2 py-3 lg:hidden ${onDark ? "border-t border-white/10" : "border-t border-stone-200/80"}`}>
+      <nav className="flex flex-col gap-1">
+        {navLinks.map((link) => (
+          <NavItem
+            key={link.label}
+            link={link}
+            pathname={pathname}
+            mobile
+            dark={onDark}
+            onExplore={(key) => {
+              closeMenu();
+              openExplore(key);
+            }}
+            onNavigate={closeMenu}
+          />
+        ))}
+      </nav>
+      <div className="mt-2 flex items-center justify-between px-3 pt-3 text-sm">
+        <a href="tel:+918353056000" className={`inline-flex items-center gap-2 font-semibold ${onDark ? "text-white" : "text-stone-950"}`}>
+          <NavIcon name="phone" />
+          +91 83530 56000
+        </a>
+        <Link href="/list-your-property" onClick={closeMenu} className={`inline-flex items-center gap-2 font-medium ${onDark ? "text-orange-200" : "text-brand"}`}>
+          <NavIcon name="list" />
+          List property
+        </Link>
+      </div>
+    </div>
+  ) : null;
+
   return (
     <header className="sticky top-0 z-50">
-      <div
-        className={`overflow-visible border-b shadow-sm ${
-          isPropertyStyleHeader
-            ? "border-[#e0e0e0] bg-white"
-            : "glass border-white/60 shadow-stone-200/40"
-        }`}
-      >
-        <div className="mx-auto max-w-6xl overflow-visible px-4 sm:px-6">
-          {/* Main navbar row */}
-          <div className="flex h-14 items-center justify-between gap-3 sm:h-16">
-            <LogoLink size="md" className="max-w-[140px] sm:max-w-[180px]" />
-
-            <nav className="hidden items-center gap-0.5 rounded-full border border-border/80 bg-stone-50/80 p-1 lg:flex">
-              {navLinks.map((link) => {
-                const isActive =
-                  link.href &&
-                  (link.href === "/"
-                    ? pathname === "/"
-                    : pathname === link.href || pathname.startsWith(`${link.href}/`));
-
-                if (link.explore) {
-                  return (
-                    <button
-                      key={link.label}
-                      type="button"
-                      onClick={() => openExplore(link.explore)}
-                      className="rounded-full px-3.5 py-2 text-sm font-medium text-stone-600 transition hover:bg-white hover:text-brand-dark hover:shadow-sm"
-                    >
-                      {link.label}
-                    </button>
-                  );
-                }
-
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`rounded-full px-3.5 py-2 text-sm font-medium transition ${
-                      isActive
-                        ? "bg-white text-brand-dark shadow-sm"
-                        : "text-stone-600 hover:bg-white hover:text-brand-dark hover:shadow-sm"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <HeaderActions />
+      {isHome && !isPropertyStyleHeader ? (
+        <div className="px-3 pt-3 sm:px-5 sm:pt-4">
+          <div
+            className={`mx-auto max-w-7xl bg-[#1a120e]/90 px-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] ring-1 ring-orange-400/30 backdrop-blur-2xl sm:px-3 ${
+              menuOpen ? "rounded-[28px]" : "rounded-full"
+            }`}
+          >
+            {bar}
+            {menu}
           </div>
-
-          {/* Search bar — property detail only (not checkout) */}
-          {isPropertyDetailPage && (
-            <div className="overflow-visible border-t border-stone-200/80 py-3">
-              <HeaderSearchBar
-                defaultState={defaultState}
-                defaultCity={defaultCity}
-                category={category}
-              />
-            </div>
-          )}
         </div>
-      </div>
+      ) : (
+        <div className="border-b border-stone-200/80 bg-white/92 backdrop-blur-xl">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            {bar}
+            {menu}
+            {isPropertyDetailPage ? (
+              <div className="overflow-visible border-t border-stone-200/80 py-3">
+                <HeaderSearchBar defaultState={defaultState} defaultCity={defaultCity} category={category} />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
       {modal}
     </header>
   );
 }
 
-function HeaderActions() {
-  const { isLoggedIn } = useGuestAuth();
+function NavItem({ link, pathname, onExplore, onNavigate, mobile = false, dark = false }) {
+  const isActive =
+    link.href &&
+    (link.href === "/" ? pathname === "/" : pathname === link.href || pathname.startsWith(`${link.href}/`));
+
+  const className = mobile
+    ? `flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-[15px] font-medium ${
+        isActive
+          ? "bg-brand text-white"
+          : dark
+            ? "text-white hover:bg-white/10"
+            : "text-stone-800 hover:bg-[#fff1e6]"
+      }`
+    : `flex items-center gap-2 rounded-full py-1 pl-1 pr-3 text-[13px] font-semibold transition ${
+        isActive
+          ? "bg-brand text-white"
+          : dark
+            ? "text-white/85 hover:bg-white/10 hover:text-white"
+            : "text-stone-700 hover:bg-[#fff1e6] hover:text-brand-dark"
+      }`;
+
+  const content = (
+    <>
+      <IconBadge active={isActive} dark={dark}>
+        <NavIcon name={link.icon} />
+      </IconBadge>
+      {link.label}
+    </>
+  );
+
+  if (link.explore) {
+    return (
+      <button type="button" onClick={() => onExplore(link.explore)} className={className}>
+        {content}
+      </button>
+    );
+  }
 
   return (
-    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-      <a
-        href="tel:+918353056000"
-        className="flex items-center gap-2 rounded-full border border-border/80 bg-white/90 px-2.5 py-1.5 transition hover:border-brand/40 sm:px-3.5 sm:py-2"
-      >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-muted text-brand sm:h-9 sm:w-9">
-          <PhoneIcon />
-        </span>
-        <span className="hidden min-w-0 text-left leading-tight sm:block">
-          <span className="block text-[9px] font-bold uppercase tracking-wide text-muted sm:text-[10px]">
-            Customer Service
-          </span>
-          <span className="block text-xs font-extrabold text-brand sm:text-sm">
-            +91 8353056000
-          </span>
-        </span>
-      </a>
-      <Link
-        href="/list-your-property"
-        className="inline-flex rounded-full border border-brand/30 bg-brand-muted/40 px-2.5 py-2 text-[11px] font-semibold text-brand-dark transition hover:border-brand/50 hover:bg-brand-muted sm:px-4 sm:py-2.5 sm:text-sm"
-      >
-        <span className="sm:hidden">List property</span>
-        <span className="hidden sm:inline">List your property</span>
-      </Link>
-      <Link
-        href={isLoggedIn ? "/my-bookings" : "/signin"}
-        className="inline-flex rounded-full border border-border bg-white px-3 py-2 text-xs font-semibold text-foreground transition hover:border-brand/40 sm:px-5 sm:py-2.5 sm:text-sm"
-      >
-        {isLoggedIn ? "My Bookings" : "Sign in"}
-      </Link>
-    </div>
+    <Link href={link.href} onClick={onNavigate} className={className}>
+      {content}
+    </Link>
   );
 }
 
-function PhoneIcon() {
+function IconBadge({ children, active = false, dark = false }) {
   return (
-    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
-      />
+    <span
+      className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
+        active ? "bg-white/20 text-white" : dark ? "bg-orange-500/20 text-orange-300" : "bg-[#fff1e6] text-brand"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+function NavIcon({ name }) {
+  const common = { className: "h-3.5 w-3.5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 1.8 };
+  if (name === "home") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5Z" />
+      </svg>
+    );
+  }
+  if (name === "bed") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 18V8m0 6h18v5M7 14v-3a2 2 0 0 1 2-2h2v5M21 18V9a2 2 0 0 0-2-2h-5" />
+      </svg>
+    );
+  }
+  if (name === "compass") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m14.8 9.2-1.2 4.4-4.4 1.2 1.2-4.4 4.4-1.2Z" />
+      </svg>
+    );
+  }
+  if (name === "hotel") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 21V5h9v16M13 21V9h7v12M7.5 8.5h2M7.5 12h2M7.5 15.5h2" />
+      </svg>
+    );
+  }
+  if (name === "key") {
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="15" r="3.2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 13.2 20 4.5l-2 2M16 8.5l2 2" />
+      </svg>
+    );
+  }
+  if (name === "villa") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 11.5 12 4l9 7.5M6 10.5V20h12v-9.5M10 20v-5h4v5" />
+      </svg>
+    );
+  }
+  if (name === "phone") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7 3.5h3l1.2 3-2 1.2a12 12 0 0 0 5.1 5.1l1.2-2 3 1.2v3A2 2 0 0 1 16.5 17 13.5 13.5 0 0 1 7 7.5 2 2 0 0 1 7 3.5Z" />
+      </svg>
+    );
+  }
+  if (name === "list") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 20V9l8-5 8 5v11M9 20v-6h6v6" />
+      </svg>
+    );
+  }
+  if (name === "ticket") {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8Z" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <circle cx="12" cy="8" r="3" />
+      <path strokeLinecap="round" d="M5.5 19a6.5 6.5 0 0 1 13 0" />
+    </svg>
+  );
+}
+
+function MenuIcon({ open }) {
+  return (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      {open ? (
+        <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+      ) : (
+        <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+      )}
     </svg>
   );
 }

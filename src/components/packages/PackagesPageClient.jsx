@@ -55,13 +55,25 @@ export default function PackagesPageClient({ states = [], cities = [] }) {
   );
 
   return (
-    <>
+    <div className="bg-[#f6f3ee]">
       <PackagesHeroSearch states={states} cities={cities} />
       <PackagesContentMarquee />
-      <PackagesExploreStates states={states} onEnquire={openLocationEnquiry} />
-      <PackagesExploreCountries onEnquire={openLocationEnquiry} />
-      <PackagesPopularCities cities={cities} onEnquire={openLocationEnquiry} />
       <FamousPackagesSection packages={famousPackages} onViewDetails={openEnquiry} />
+      <PackagesExploreStates states={states} onEnquire={openLocationEnquiry} />
+      <PlaceBridge
+        kicker="The next choice"
+        title="A city is a different trip from a whole state."
+        detail="Hill stations, old capitals, and coasts. The cities people ask for first."
+      />
+      <PackagesPopularCities cities={cities} onEnquire={openLocationEnquiry} />
+      <PlaceBridge
+        dark
+        videoSrc="/videos/beyond-india.mp4"
+        kicker="Beyond India"
+        title="The same plan, a little further from home."
+        detail="A wider set of countries we already know how to run. The desk writes the days either way."
+      />
+      <PackagesExploreCountries onEnquire={openLocationEnquiry} />
       <AllPackagesCatalog onViewDetails={openEnquiry} />
       <PackagesPromoBanner onEnquire={() => openLocationEnquiry({ label: "Promo package enquiry" })} />
       <PackagesWhyTravel />
@@ -72,6 +84,43 @@ export default function PackagesPageClient({ states = [], cities = [] }) {
         onClose={() => setEnquiryPackage(null)}
         tourPackage={enquiryPackage}
       />
-    </>
+    </div>
+  );
+}
+
+function PlaceBridge({ kicker, title, detail, dark = false, videoSrc }) {
+  return (
+    <section
+      className={`relative isolate overflow-hidden ${
+        dark ? "bg-stone-950 text-white" : "bg-[#efe6dc] text-stone-950"
+      }`}
+    >
+      {videoSrc ? (
+        <>
+          <video
+            className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden
+          >
+            <source src={videoSrc} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-stone-950/55" />
+        </>
+      ) : null}
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-6 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.4fr_0.6fr] lg:items-end">
+        <div>
+          <p className={`font-serif text-lg italic ${dark ? "text-orange-200" : "text-brand"}`}>{kicker}</p>
+          <h2 className="mt-2 max-w-xl font-serif text-3xl font-medium leading-tight tracking-tight sm:text-5xl">
+            {title}
+          </h2>
+        </div>
+        <p className={`text-sm leading-relaxed sm:text-base ${dark ? "text-white/70" : "text-stone-600"}`}>
+          {detail}
+        </p>
+      </div>
+    </section>
   );
 }

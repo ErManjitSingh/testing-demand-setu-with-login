@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import ExploreSectionHeader from "@/components/packages/ExploreSectionHeader";
+import { sliderRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
 import {
   formatFromPrice,
   getCityImage,
@@ -11,63 +12,52 @@ import {
 } from "@/lib/tourDestinations";
 
 export default function PackagesPopularCities({ cities = [], onEnquire }) {
-  const trackRef = useRef(null);
-  const displayCities = useMemo(() => getPopularCities(cities, 32), [cities]);
+  const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
+  const displayCities = useMemo(() => getPopularCities(cities, 8), [cities]);
 
   if (displayCities.length === 0) return null;
 
-  const scroll = (dir) => {
-    const el = trackRef.current;
-    if (!el) return;
-    const step = 120;
-    el.scrollBy({ left: dir === "left" ? -step : step, behavior: "smooth" });
-  };
-
   return (
-    <section className="bg-white py-12 sm:py-16">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section className="bg-[#f3ece4] py-20 sm:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Explore India"
           title="Cities"
           subtitle="From metros to hill stations — pick a city and we'll plan the rest"
           count={`${displayCities.length} cities`}
-          onScrollPrev={() => scroll("left")}
-          onScrollNext={() => scroll("right")}
+          onScrollPrev={scrollPrev}
+          onScrollNext={scrollNext}
+          scrollOnDesktop
         />
 
-        <div
-          ref={trackRef}
-          className="no-scrollbar mt-8 flex gap-2 overflow-x-auto scroll-smooth pb-2 sm:gap-2.5"
-        >
+        <div ref={scrollerRef} className={sliderRowClass}>
           {displayCities.map((cityName) => {
             const meta = getCityMeta(cityName);
             return (
               <button
                 key={cityName}
+                data-snap-card
                 type="button"
                 onClick={() =>
                   onEnquire?.({ city: cityName, country: "India", label: `${cityName} city tour` })
                 }
-                className="group w-[108px] shrink-0 text-center sm:w-[118px]"
+                className="group w-[196px] shrink-0 snap-start text-center"
               >
-                <div className="mx-auto w-fit rounded-full p-0.5 ring-2 ring-stone-200/90 transition duration-300 group-hover:ring-brand">
-                  <div className="relative h-[80px] w-[80px] overflow-hidden rounded-full sm:h-[88px] sm:w-[88px]">
-                    <Image
-                      src={getCityImage(cityName)}
-                      alt={cityName}
-                      fill
-                      loading="lazy"
-                      className="object-cover transition duration-500 group-hover:scale-110"
-                      sizes="88px"
-                    />
-                  </div>
-                </div>
-
-                <p className="mt-2 text-[13px] font-bold leading-tight text-stone-900">{cityName}</p>
-                <p className="mt-0.5 line-clamp-1 text-[10px] text-stone-500">{meta.tagline}</p>
-                <p className="mt-1 text-[11px] font-bold text-brand">
-                  From {formatFromPrice(meta.fromPrice)}
-                </p>
+                <span className="relative mx-auto block aspect-square w-full overflow-hidden rounded-full shadow-md ring-4 ring-white transition duration-500 group-hover:-translate-y-1 group-hover:ring-brand group-hover:shadow-xl">
+                  <Image
+                    src={getCityImage(cityName)}
+                    alt={cityName}
+                    fill
+                    loading="lazy"
+                    className="object-cover transition duration-700 group-hover:scale-110"
+                    sizes="150px"
+                  />
+                </span>
+                <span className="mt-4 block font-serif text-lg font-medium text-stone-950">{cityName}</span>
+                <span className="mt-0.5 block line-clamp-1 text-[11px] text-stone-500">{meta.tagline}</span>
+                <span className="mt-1 block text-xs font-semibold text-brand">
+                  {formatFromPrice(meta.fromPrice)}
+                </span>
               </button>
             );
           })}

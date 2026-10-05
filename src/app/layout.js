@@ -1,4 +1,4 @@
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Suspense } from "react";
 import Header from "@/components/Header";
@@ -13,6 +13,12 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["500", "600"],
 });
 
 export const metadata = {
@@ -56,7 +62,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${jakarta.variable} h-full`}>
+    <html lang="en" className={`${jakarta.variable} ${fraunces.variable} h-full`}>
       <body className="flex min-h-full flex-col antialiased">
         <GtmNoscript />
         <SiteTracking />

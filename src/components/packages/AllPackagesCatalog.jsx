@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import AnimateIn from "@/components/packages/AnimateIn";
+import { snapRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
 import {
   filterPackages,
   formatPackagePrice,
@@ -13,36 +14,40 @@ import {
 
 export default function AllPackagesCatalog({ onViewDetails }) {
   const [category, setCategory] = useState("All");
+  const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
   const allPackages = getAllPackages();
   const categories = getPackageCategories();
 
   const filtered = useMemo(
-    () => filterPackages(allPackages, category),
+    () => filterPackages(allPackages, category).slice(0, 8),
     [allPackages, category]
   );
 
   return (
-    <section id="all-packages" className="bg-gradient-to-b from-white to-brand-muted/20 py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+    <section id="all-packages" className="bg-white py-20 sm:py-24">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <AnimateIn className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-brand-dark">
-              Full catalogue
-            </span>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">
+            <p className="font-serif text-lg italic text-brand">Full catalogue</p>
+            <h2 className="mt-1 font-serif text-4xl font-medium tracking-tight text-stone-950 sm:text-5xl">
               All tour packages
             </h2>
             <p className="mt-2 max-w-xl text-sm text-stone-600 sm:text-base">
               {allPackages.length} curated itineraries across India and international destinations —
-              filter by type and find your perfect trip.
+              filter by type and open the one that fits.
             </p>
           </div>
-          <p className="text-sm font-bold text-brand">
-            {filtered.length} package{filtered.length !== 1 ? "s" : ""} shown
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="text-sm font-bold text-brand">
+              {filtered.length} package{filtered.length !== 1 ? "s" : ""}
+            </p>
+            <div className="lg:hidden">
+              <SliderArrows onPrev={scrollPrev} onNext={scrollNext} />
+            </div>
+          </div>
         </AnimateIn>
 
-        <AnimateIn delay={100} className="no-scrollbar mt-8 flex gap-2 overflow-x-auto pb-2">
+        <div className="no-scrollbar mt-8 flex gap-2 overflow-x-auto rounded-full bg-[#fff7ed] p-1.5">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -50,95 +55,90 @@ export default function AllPackagesCatalog({ onViewDetails }) {
               onClick={() => setCategory(cat)}
               className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-bold transition ${
                 category === cat
-                  ? "bg-brand text-white shadow-lg shadow-brand/30"
-                  : "bg-white text-stone-700 ring-1 ring-stone-200 hover:ring-brand/40"
+                  ? "bg-brand text-white shadow-md shadow-brand/30"
+                  : "text-stone-600 hover:bg-white"
               }`}
             >
               {cat}
             </button>
           ))}
-        </AnimateIn>
+        </div>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((pkg, i) => (
-            <AnimateIn key={pkg.id} delay={(i % 6) * 70}>
-              <article className="package-card-hover card-shine group flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-md">
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <Image
-                    src={getPackageImage(pkg)}
-                    alt={pkg.title}
-                    fill
-                    loading="lazy"
-                    className="object-cover transition duration-700 group-hover:scale-110"
-                    sizes="(max-width:640px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  {pkg.badge && (
-                    <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-bold uppercase text-white shadow">
-                      {pkg.badge}
-                    </span>
-                  )}
-                  <span className="absolute bottom-3 left-3 rounded-lg bg-black/50 px-2 py-1 text-[10px] font-bold text-white backdrop-blur">
+        <div ref={scrollerRef} className={`${snapRowClass} lg:grid-cols-4`}>
+          {filtered.map((pkg) => (
+            <article
+              key={pkg.id}
+              data-snap-card
+              className="group w-[86vw] shrink-0 snap-start sm:w-[420px] lg:w-auto"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5 transition duration-500 group-hover:-translate-y-1 group-hover:shadow-xl">
+                <Image
+                  src={getPackageImage(pkg)}
+                  alt={pkg.title}
+                  fill
+                  loading="lazy"
+                  className="object-cover transition duration-700 group-hover:scale-105"
+                  sizes="320px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/15 to-transparent" />
+                {pkg.badge && (
+                  <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-stone-950">
+                    {pkg.badge}
+                  </span>
+                )}
+                <span className="absolute right-4 top-4 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-stone-950">
+                  ★ {pkg.rating}
+                </span>
+                <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
                     {pkg.duration}
-                  </span>
-                  <span className="absolute bottom-3 right-3 flex items-center gap-1 rounded-lg bg-white/95 px-2 py-1 text-xs font-bold text-amber-800">
-                    ★ {pkg.rating}
-                  </span>
-                </div>
-
-                <div className="flex flex-1 flex-col p-5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-brand">
-                    {pkg.subtitle}
                   </p>
-                  <h3 className="mt-1 text-lg font-bold text-stone-900">{pkg.title}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-stone-500">
-                    {pkg.description}
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {pkg.highlights.slice(0, 3).map((h) => (
-                      <span
-                        key={h}
-                        className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-600"
-                      >
-                        {h}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-1.5 border-t border-dashed border-stone-200 pt-4">
-                    {pkg.inclusions.slice(0, 3).map((inc) => (
-                      <span
-                        key={inc}
-                        className="text-[10px] font-semibold text-emerald-700"
-                      >
-                        ✓ {inc}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-stone-400">From</p>
-                      <p className="text-xl font-extrabold text-brand">
-                        {formatPackagePrice(pkg.price)}
-                      </p>
-                      <p className="text-[10px] text-stone-400">{pkg.groupSize}</p>
-                    </div>
+                  <h3 className="mt-1 font-serif text-[1.65rem] font-medium leading-none">{pkg.title}</h3>
+                  <div className="mt-3 flex items-end justify-between gap-2">
+                    <p className="text-sm font-semibold text-orange-200">
+                      {formatPackagePrice(pkg.price)}
+                    </p>
                     <button
                       type="button"
                       onClick={() => onViewDetails?.(pkg)}
-                      className="rounded-full bg-brand px-5 py-2.5 text-xs font-bold text-white transition hover:brightness-105"
+                      className="shrink-0 rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-stone-950"
                     >
                       View detail
                     </button>
                   </div>
                 </div>
-              </article>
-            </AnimateIn>
+              </div>
+            </article>
           ))}
         </div>
       </div>
     </section>
+  );
+}
+
+function SliderArrows({ onPrev, onNext }) {
+  return (
+    <div className="flex gap-2">
+      <button
+        type="button"
+        onClick={onPrev}
+        aria-label="Previous packages"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-700 shadow-sm transition hover:border-brand hover:text-brand"
+      >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={onNext}
+        aria-label="Next packages"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-700 shadow-sm transition hover:border-brand hover:text-brand"
+      >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.25}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ export default function ExploreSectionHeader({
   count,
   onScrollPrev,
   onScrollNext,
+  scrollOnDesktop = false,
   align = "left",
 }) {
   const hasScroll = onScrollPrev || onScrollNext;
@@ -18,7 +19,7 @@ export default function ExploreSectionHeader({
     >
       <div className={align === "center" ? "mx-auto max-w-2xl" : ""}>
         <div className={`flex items-center gap-3 ${align === "center" ? "justify-center" : ""}`}>
-          <p className="font-serif text-lg italic text-brand sm:text-xl">{scriptLabel}</p>
+          <p className="font-serif text-xl italic text-brand">{scriptLabel}</p>
           {count != null && (
             <span className="rounded-full bg-brand-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-dark">
               {count}
@@ -26,7 +27,7 @@ export default function ExploreSectionHeader({
           )}
         </div>
         <h2
-          className={`mt-2 flex items-center gap-2.5 text-2xl font-extrabold tracking-tight sm:text-3xl ${
+          className={`mt-1 flex items-center gap-2.5 font-serif text-4xl font-medium tracking-tight sm:text-5xl ${
             align === "center" ? "justify-center" : ""
           } ${align === "dark" ? "text-white" : "text-stone-900"}`}
         >
@@ -44,21 +45,20 @@ export default function ExploreSectionHeader({
         </h2>
         {subtitle && (
           <p
-            className={`mt-2 max-w-xl text-sm leading-relaxed sm:text-base ${
+            className={`mt-3 max-w-xl text-sm leading-relaxed sm:text-base ${
               align === "center" ? "mx-auto" : ""
             } ${align === "dark" ? "text-stone-400" : "text-stone-500"}`}
           >
             {subtitle}
           </p>
         )}
-        <div
-          className={`mt-4 h-0.5 w-12 rounded-full bg-gradient-to-r from-brand to-brand/20 ${
-            align === "center" ? "mx-auto" : ""
-          }`}
-        />
       </div>
       {hasScroll && (
-        <div className={`flex gap-2 ${align === "center" ? "justify-center sm:justify-end" : ""}`}>
+        <div
+          className={`flex gap-2 ${scrollOnDesktop ? "" : "lg:hidden"} ${
+            align === "center" ? "justify-center sm:justify-end" : ""
+          }`}
+        >
           <ScrollBtn onClick={onScrollPrev} label="Scroll left" direction="left" dark={align === "dark"} />
           <ScrollBtn onClick={onScrollNext} label="Scroll right" direction="right" dark={align === "dark"} />
         </div>
