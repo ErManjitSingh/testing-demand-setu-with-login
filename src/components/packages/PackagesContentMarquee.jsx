@@ -11,19 +11,20 @@ const MARQUEE_ITEMS = [
 
 export default function PackagesContentMarquee() {
   return (
-    <section className="bg-[#f6f3ee] px-4 pb-4 pt-8 sm:px-6">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 overflow-hidden rounded-3xl border border-stone-200 bg-white sm:grid-cols-4">
-        {MARQUEE_ITEMS.map((item, index) => (
-          <p
-            key={item}
-            className={`px-4 py-4 text-sm font-semibold text-stone-800 ${
-              index % 4 !== 0 ? "sm:border-l sm:border-stone-100" : ""
-            } ${index >= 4 ? "border-t border-stone-100" : ""} ${
-              index % 2 === 1 ? "border-l border-stone-100 sm:border-l" : ""
-            }`}
-          >
-            {item}
-          </p>
+    <section className="overflow-hidden py-5" aria-label="Why travellers choose Demand Setu">
+      <div className="animate-marquee-ltr flex w-max">
+        {[0, 1].map((set) => (
+          <div key={set} className="flex items-center gap-10 pr-10">
+            {MARQUEE_ITEMS.map((item) => (
+              <span
+                key={`${set}-${item}`}
+                className="flex items-center gap-3 whitespace-nowrap text-sm font-semibold tracking-wide text-stone-800"
+              >
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand" aria-hidden />
+                {item}
+              </span>
+            ))}
+          </div>
         ))}
       </div>
     </section>

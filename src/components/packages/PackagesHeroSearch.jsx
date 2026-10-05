@@ -189,19 +189,19 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
   };
 
   return (
-    <section className="relative isolate -mt-24 overflow-hidden bg-stone-950">
+    <section className="relative isolate -mt-20 overflow-hidden bg-stone-950 sm:-mt-24">
       <HeroBackground />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(12,10,9,0.88)_0%,rgba(12,10,9,0.58)_46%,rgba(12,10,9,0.38)_100%)]" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/30" />
 
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-8 px-4 pb-10 pt-28 sm:px-6 sm:pb-14 sm:pt-32 lg:min-h-screen lg:grid-cols-[1fr_0.92fr] lg:gap-10 lg:pb-12 lg:pt-36">
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-6 px-4 pb-8 pt-24 sm:gap-8 sm:px-6 sm:pb-14 sm:pt-32 lg:min-h-screen lg:grid-cols-[1fr_0.92fr] lg:gap-10 lg:pb-12 lg:pt-36">
           <div className="animate-hero-enter">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-brand" />
               Tour packages
             </span>
 
-            <h1 className="mt-5 font-serif text-5xl font-medium leading-[0.98] tracking-tight text-white sm:text-6xl">
+            <h1 className="mt-4 font-serif text-[2.65rem] font-medium leading-[0.98] tracking-tight text-white sm:mt-5 sm:text-6xl">
               <span className="block">Every Country.</span>
               <span className="block">Every State.</span>
               <span className="block">Every City.</span>

@@ -50,7 +50,7 @@ export default function PackagesExploreStates({ states = [], onEnquire }) {
   if (shown.length === 0) return null;
 
   return (
-    <section className="bg-[#f6f3ee] py-20 sm:py-24">
+    <section className="bg-white py-14 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Explore India"
@@ -85,7 +85,7 @@ export default function PackagesExploreStates({ states = [], onEnquire }) {
                 onClick={() =>
                   onEnquire?.({ state: stateName, country: "India", label: `${stateName} tour` })
                 }
-                className={`group relative w-[78vw] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-xl sm:w-[280px] lg:h-full lg:w-auto ${place || ""}`}
+                className={`group relative w-[calc(100vw-3.25rem)] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-xl sm:w-[280px] lg:h-full lg:w-auto ${place || ""}`}
               >
                 <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full">
                   <Image

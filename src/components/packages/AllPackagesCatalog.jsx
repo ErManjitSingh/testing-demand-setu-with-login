@@ -24,7 +24,7 @@ export default function AllPackagesCatalog({ onViewDetails }) {
   );
 
   return (
-    <section id="all-packages" className="bg-white py-20 sm:py-24">
+    <section id="all-packages" className="bg-white py-14 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <AnimateIn className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -69,7 +69,7 @@ export default function AllPackagesCatalog({ onViewDetails }) {
             <article
               key={pkg.id}
               data-snap-card
-              className="group w-[86vw] shrink-0 snap-start sm:w-[420px] lg:w-auto"
+              className="group w-[calc(100vw-3.25rem)] shrink-0 snap-start sm:w-[420px] lg:w-auto"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5 transition duration-500 group-hover:-translate-y-1 group-hover:shadow-xl">
                 <Image

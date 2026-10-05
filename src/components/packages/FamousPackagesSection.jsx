@@ -13,7 +13,7 @@ export default function FamousPackagesSection({ packages = [], onViewDetails }) 
   const shown = packages.slice(0, 8);
 
   return (
-    <section id="famous-packages" className="bg-[#f6f3ee] py-20 sm:py-24">
+    <section id="famous-packages" className="bg-white py-14 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Most booked"
@@ -32,7 +32,7 @@ export default function FamousPackagesSection({ packages = [], onViewDetails }) 
             <article
               key={pkg.id}
               data-snap-card
-              className={`w-[78vw] shrink-0 snap-start sm:w-[300px] lg:h-full lg:w-auto ${
+              className={`w-[calc(100vw-3.25rem)] shrink-0 snap-start sm:w-[300px] lg:h-full lg:w-auto ${
                 lead ? "lg:col-span-2 lg:row-span-2" : wide ? "lg:col-span-2" : ""
               }`}
             >
@@ -41,7 +41,7 @@ export default function FamousPackagesSection({ packages = [], onViewDetails }) 
                 onClick={() => onViewDetails?.(pkg)}
                 className="group relative block h-full w-full overflow-hidden rounded-[2rem] text-left shadow-md transition duration-500 hover:-translate-y-1 hover:shadow-2xl"
               >
-                <div className="relative h-[340px] w-full sm:h-[380px] lg:h-full">
+                <div className="relative h-[300px] w-full sm:h-[380px] lg:h-full">
                   <Image
                     src={getPackageImage(pkg)}
                     alt={pkg.title}

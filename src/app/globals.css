@@ -275,6 +275,21 @@ body {
   animation: marquee 28s linear infinite;
 }
 
+@keyframes marquee-ltr {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquee-ltr {
+  animation: marquee-ltr 36s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-ltr {
+    animation: none;
+  }
+}
+
 @keyframes fade-up-in {
   from {
     opacity: 0;

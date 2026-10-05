@@ -23,7 +23,7 @@ export default function PackagesExploreCountries({ onEnquire }) {
   const countries = [...all.filter((c) => c.featured), ...all.filter((c) => !c.featured)].slice(0, 8);
 
   return (
-    <section className="bg-white py-20 sm:py-24">
+    <section className="bg-white py-14 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Explore"
@@ -36,7 +36,7 @@ export default function PackagesExploreCountries({ onEnquire }) {
 
         <div ref={scrollerRef} className={`${snapRowClass} lg:grid-cols-4`}>
           {countries.map((country) => (
-            <div key={country.name} data-snap-card className="w-[70vw] shrink-0 snap-start sm:w-[250px] lg:w-auto">
+            <div key={country.name} data-snap-card className="w-[calc(100vw-3.25rem)] shrink-0 snap-start sm:w-[250px] lg:w-auto">
               <CountryCard country={country} onEnquire={onEnquire} />
             </div>
           ))}

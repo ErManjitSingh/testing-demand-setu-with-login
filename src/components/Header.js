@@ -70,9 +70,9 @@ export default function Header() {
   const onDark = isHome && !isPropertyStyleHeader;
 
   const bar = (
-    <div className="grid h-[80px] grid-cols-[auto_1fr_auto] items-center gap-3">
+    <div className="grid h-[68px] grid-cols-[auto_1fr_auto] items-center gap-2 sm:h-[80px] sm:gap-3">
       <Link href="/" className="relative z-10 inline-flex shrink-0 items-center">
-        <span className="relative block h-14 w-[129px] sm:h-16 sm:w-[148px]">
+        <span className="relative block h-11 w-[102px] sm:h-16 sm:w-[148px]">
           <Image
             src={onDark ? "/logo-on-dark.png" : "/logo.png"}
             alt="Demand Setu Tours"
@@ -113,7 +113,7 @@ export default function Header() {
         </Link>
         <Link
           href={isLoggedIn ? "/my-bookings" : "/signin"}
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-brand px-4 text-[13px] font-semibold text-white shadow-[0_8px_18px_rgba(234,88,12,0.45)] transition hover:bg-brand-dark"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand px-3 text-xs font-semibold text-white shadow-[0_8px_18px_rgba(234,88,12,0.45)] transition hover:bg-brand-dark sm:h-10 sm:gap-2 sm:px-4 sm:text-[13px]"
         >
           <NavIcon name={isLoggedIn ? "ticket" : "user"} />
           {isLoggedIn ? "My Bookings" : "Sign in"}
@@ -169,7 +169,7 @@ export default function Header() {
       {isHome && !isPropertyStyleHeader ? (
         <div className="px-3 pt-3 sm:px-5 sm:pt-4">
           <div
-            className={`mx-auto max-w-7xl bg-[#1a120e]/90 px-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] ring-1 ring-orange-400/30 backdrop-blur-2xl sm:px-3 ${
+            className={`mx-auto max-w-7xl bg-[#1a120e]/90 pl-3.5 pr-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.4)] ring-1 ring-orange-400/30 backdrop-blur-2xl sm:px-3 ${
               menuOpen ? "rounded-[28px]" : "rounded-full"
             }`}
           >

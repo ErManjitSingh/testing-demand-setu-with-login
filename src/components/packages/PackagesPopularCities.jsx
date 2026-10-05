@@ -18,7 +18,7 @@ export default function PackagesPopularCities({ cities = [], onEnquire }) {
   if (displayCities.length === 0) return null;
 
   return (
-    <section className="bg-[#f3ece4] py-20 sm:py-24">
+    <section className="bg-white py-14 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Explore India"
