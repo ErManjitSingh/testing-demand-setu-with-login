@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import BookingFlow from "@/components/packages/booking/BookingFlow";
 import { parseBookingQuery } from "@/lib/packageBooking";
-import { buildDepartures } from "@/lib/tourPackageDetails";
+import { buildDepartures, buildPackageDetail } from "@/lib/tourPackageDetails";
 import { getListingPackages } from "@/lib/tourPackageMeta";
 import { todayInputValue } from "@/lib/tourTravellers";
 
@@ -29,6 +29,7 @@ export default async function PackageBookingRoute({ params, searchParams }) {
 
   const initialBooking = parseBookingQuery(query, todayInputValue());
   const departures = buildDepartures(pkg);
+  const { hotels } = buildPackageDetail(pkg);
 
-  return <BookingFlow pkg={pkg} departures={departures} initialBooking={initialBooking} />;
+  return <BookingFlow pkg={pkg} hotels={hotels} departures={departures} initialBooking={initialBooking} />;
 }

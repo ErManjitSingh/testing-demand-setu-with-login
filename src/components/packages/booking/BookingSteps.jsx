@@ -18,13 +18,13 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import CustomizeTrip from "@/components/packages/detail/CustomizeTrip";
 import { DepartureStrip } from "@/components/packages/detail/DetailSections";
 import PhoneNumberField from "@/components/booking/PhoneNumberField";
 import TravellersPicker from "@/components/packages/shared/TravellersPicker";
 import { PAYMENT_METHODS, PAYMENT_PLANS, SPECIAL_REQUESTS } from "@/lib/packageBooking";
 import { TOUR_ENQUIRY_TYPES } from "@/lib/tourEnquiryTypes";
-import { DEPARTURE_CITIES, HOTEL_CATEGORIES } from "@/lib/tourPackageMeta";
-import { calculateTripPrice } from "@/lib/tourPackageDetails";
+import { DEPARTURE_CITIES } from "@/lib/tourPackageMeta";
 import { formatPackagePrice } from "@/lib/tourPackages";
 import {
   formatDisplayDate,
@@ -82,7 +82,7 @@ function SelectWrap({ children }) {
 
 /* ----------------------------- step 1: trip ----------------------------- */
 
-export function TripStep({ pkg, departures, booking, onChange, errors, dateFactor }) {
+export function TripStep({ pkg, hotels, departures, booking, onChange, errors, dateFactor, pricing }) {
   const minDate = todayInputValue();
   const rooms = getRoomsNeeded(booking.travellers.adults);
 
@@ -109,48 +109,10 @@ export function TripStep({ pkg, departures, booking, onChange, errors, dateFacto
         </div>
       </Panel>
 
-      <Panel eyebrow="How" title="Stay & preferences">
-        <p className="mb-2 text-xs font-extrabold text-stone-700">Hotel category</p>
-        <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Hotel category">
-          {HOTEL_CATEGORIES.map((h) => {
-            const active = booking.hotel === h.id;
-            const total = calculateTripPrice({
-              price: pkg.price,
-              originalPrice: pkg.originalPrice,
-              adults: booking.travellers.adults,
-              childAges: booking.travellers.childAges,
-              infants: booking.travellers.infants,
-              hotelCategory: h.id,
-              dateFactor,
-            }).total;
-            return (
-              <button
-                key={h.id}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                onClick={() => onChange({ hotel: h.id })}
-                className={`relative rounded-2xl border-2 p-4 text-left transition active:scale-[0.98] ${
-                  active ? "border-brand bg-brand-muted shadow-md shadow-brand/10" : "border-stone-200 bg-white hover:border-brand/40"
-                }`}
-              >
-                {active ? (
-                  <span className="pk-pop absolute right-3 top-3 grid h-6 w-6 place-items-center rounded-full bg-brand text-white">
-                    <Check className="h-3.5 w-3.5" strokeWidth={3.5} />
-                  </span>
-                ) : null}
-                <Hotel className={`h-6 w-6 ${active ? "text-brand" : "text-stone-400"}`} />
-                <p className="mt-2 text-base font-extrabold text-stone-900">{h.label}</p>
-                <p className="text-xs font-bold text-amber-600">{"★".repeat(h.stars)}</p>
-                <p className="mt-1 text-xs text-stone-500">{h.blurb}</p>
-                <p className="mt-3 text-sm font-extrabold text-stone-900">{formatPackagePrice(total)}</p>
-                <p className="text-[11px] font-semibold text-stone-400">trip total incl. GST</p>
-              </button>
-            );
-          })}
-        </div>
+      <Panel eyebrow="How" title="Hotels, meals & cab" subtitle="Everything starts from the package as listed — change what you like and the total updates.">
+        <CustomizeTrip pkg={pkg} hotels={hotels} booking={booking} onChange={onChange} pricing={pricing} dateFactor={dateFactor} />
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <Field label="Travelling from">
             <SelectWrap>
               <select value={booking.departureCity} onChange={(e) => onChange({ departureCity: e.target.value })} className={selectClass}>
@@ -410,7 +372,12 @@ export function ReviewStep({
               {booking.date ? formatDisplayDate(booking.date, { weekday: "short", day: "numeric", month: "long", year: "numeric" }) : "Date to be decided"}
             </p>
             <p className="text-stone-500">
-              {pricing.hotel.label} hotels · Ex {booking.departureCity}
+              {pricing.hotel.label}
+              {pricing.hotel.mixed ? "" : " hotels"} · Ex {booking.departureCity}
+            </p>
+            <p className="text-stone-500">
+              {pricing.meal?.plan.label} · {pricing.cab?.vehicles > 1 ? `${pricing.cab.vehicles} × ` : ""}
+              {pricing.cab?.option.label}
             </p>
           </ReviewCard>
           <ReviewCard title="Travellers" onEdit={() => onEdit(0)}>

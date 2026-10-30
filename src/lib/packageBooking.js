@@ -1,6 +1,18 @@
 import { parseFilters } from "@/lib/packageFilters";
 import { DEPARTURE_CITIES, HOTEL_CATEGORIES } from "@/lib/tourPackageMeta";
 import { TOUR_ENQUIRY_TYPES } from "@/lib/tourEnquiryTypes";
+import {
+  CAB_BY_ID,
+  MEAL_BY_ID,
+  parseRooms,
+  parseStays,
+  parseStopMeals,
+  resolveStays,
+  serialiseRooms,
+  serialiseStays,
+  serialiseStopMeals,
+} from "@/lib/tourCustomize";
+import { calculateTripPrice } from "@/lib/tourPackageDetails";
 
 /** Shared helpers for the product page -> booking page hand-off. */
 
@@ -40,6 +52,14 @@ export function buildBookingHref(slug, booking = {}) {
     if (t.infants) p.set("infants", String(t.infants));
   }
   if (booking.hotel && booking.hotel !== "standard") p.set("hotel", booking.hotel);
+  const stays = serialiseStays(booking.stays);
+  if (stays) p.set("stays", stays);
+  const rooms = serialiseRooms(booking.rooms);
+  if (rooms) p.set("rooms", rooms);
+  const stopMeals = serialiseStopMeals(booking.meals);
+  if (stopMeals) p.set("stopmeals", stopMeals);
+  if (booking.meal && booking.meal !== "auto") p.set("meal", booking.meal);
+  if (booking.cab && booking.cab !== "auto") p.set("cab", booking.cab);
   if (booking.departureCity && booking.departureCity !== "Delhi") p.set("from", booking.departureCity);
   if (booking.tourType && booking.tourType !== "private") p.set("type", booking.tourType);
   if (booking.ticketBooked === "yes") p.set("tickets", "yes");
@@ -60,6 +80,11 @@ export function parseBookingQuery(query = {}, today = "") {
     date: parsed.date && (!today || parsed.date >= today) ? parsed.date : "",
     travellers: parsed.travellers,
     hotel: HOTEL_CATEGORIES.some((h) => h.id === hotel) ? hotel : "standard",
+    stays: parseStays(first(query.stays)),
+    rooms: parseRooms(first(query.rooms)),
+    meals: parseStopMeals(first(query.stopmeals)),
+    meal: MEAL_BY_ID[first(query.meal)] ? first(query.meal) : "auto",
+    cab: CAB_BY_ID[first(query.cab)] ? first(query.cab) : "auto",
     departureCity: DEPARTURE_CITIES.includes(from) ? from : "Delhi",
     tourType: TOUR_ENQUIRY_TYPES.some((t) => t.value === type)
       ? type
@@ -93,4 +118,25 @@ export function buildListingHref({ q = "", themes = [], region = "", sort = "" }
   if (sort) p.set("sort", sort);
   const qs = p.toString();
   return `/packages${qs ? `?${qs}` : ""}`;
+}
+
+/** Default customisation state shared by the product page and booking page. */
+export const DEFAULT_CUSTOMISATION = { hotel: "standard", stays: {}, rooms: {}, meals: {}, meal: "auto", cab: "auto" };
+
+/** Price a booking (dates, travellers, hotel grades per stop, meals, vehicle). */
+export function priceBooking({ pkg, hotels, booking, dateFactor = 1 }) {
+  return calculateTripPrice({
+    price: pkg.price,
+    originalPrice: pkg.originalPrice,
+    adults: booking.travellers.adults,
+    childAges: booking.travellers.childAges,
+    infants: booking.travellers.infants,
+    hotelCategory: booking.hotel,
+    dateFactor,
+    stays: resolveStays(hotels, booking.hotel, booking.stays, { rooms: booking.rooms, meals: booking.meals }),
+    meta: pkg.meta,
+    baseStars: pkg.meta.stars,
+    mealId: booking.meal,
+    cabId: booking.cab,
+  });
 }

@@ -21,10 +21,10 @@ import {
   listCoTravellers,
 } from "@/components/packages/booking/BookingSteps";
 import AnimatedPrice from "@/components/packages/shared/AnimatedPrice";
-import { PAYMENT_METHODS, PAYMENT_PLANS, createBookingRef } from "@/lib/packageBooking";
+import { PAYMENT_METHODS, PAYMENT_PLANS, createBookingRef, priceBooking } from "@/lib/packageBooking";
 import { DEFAULT_PHONE_COUNTRY_ISO, parseStoredPhone } from "@/lib/phoneCountryCodes";
 import { submitTourLeadFromClient } from "@/lib/tourLeadClient";
-import { calculateTripPrice } from "@/lib/tourPackageDetails";
+import { resolveStays } from "@/lib/tourCustomize";
 import { buildEnquiryDestination, resolveTourTypeLabel } from "@/lib/tourEnquiryTypes";
 import { formatPackagePrice } from "@/lib/tourPackages";
 import { buildTripNotes, getRoomsNeeded, totalTravellers } from "@/lib/tourTravellers";
@@ -84,7 +84,7 @@ function Stepper({ step, onJump }) {
   );
 }
 
-export default function BookingFlow({ pkg, departures, initialBooking }) {
+export default function BookingFlow({ pkg, hotels, departures, initialBooking }) {
   const topRef = useRef(null);
   const refCode = useRef("");
 
@@ -112,19 +112,7 @@ export default function BookingFlow({ pkg, departures, initialBooking }) {
   const departure = useMemo(() => departures.find((d) => d.date === booking.date) ?? null, [departures, booking.date]);
   const dateFactor = departure?.factor ?? 1;
 
-  const pricing = useMemo(
-    () =>
-      calculateTripPrice({
-        price: pkg.price,
-        originalPrice: pkg.originalPrice,
-        adults: booking.travellers.adults,
-        childAges: booking.travellers.childAges,
-        infants: booking.travellers.infants,
-        hotelCategory: booking.hotel,
-        dateFactor,
-      }),
-    [pkg.price, pkg.originalPrice, booking.travellers, booking.hotel, dateFactor]
-  );
+  const pricing = useMemo(() => priceBooking({ pkg, hotels, booking, dateFactor }), [pkg, hotels, booking, dateFactor]);
 
   const amounts = useMemo(
     () =>
@@ -202,9 +190,23 @@ export default function BookingFlow({ pkg, departures, initialBooking }) {
       .join(", ");
     const specialRequests = [...requests, notes.trim()].filter(Boolean).join("; ");
 
+    const stayList = resolveStays(hotels, booking.hotel, booking.stays, { rooms: booking.rooms, meals: booking.meals });
+    const stayPlan = stayList
+      .map((stay) => `N${stay.index + 1} ${stay.place} ${stay.category}/${stay.room}${stay.meal ? `/${stay.meal} meals` : ""}`)
+      .join(", ");
+    const hasStopChoices =
+      pricing.hotel.mixed || stayList.some((stay) => stay.room !== "standard" || stay.meal);
+    const mealLabel = pricing.meal?.plan.label ?? "";
+    const vehicleLabel = pricing.cab
+      ? `${pricing.cab.vehicles > 1 ? `${pricing.cab.vehicles} x ` : ""}${pricing.cab.option.label}`
+      : "";
+
     const tripNotes = [
       `BOOKING ${bookingRef}`,
-      buildTripNotes({ ...travellers, rooms, hotelCategory: pricing.hotel.label, departureCity: booking.departureCity }),
+      buildTripNotes({ ...travellers, rooms, hotelCategory: pricing.hotel.mixed ? "Mixed grades" : pricing.hotel.label, departureCity: booking.departureCity }),
+      hasStopChoices ? `Hotels by stop - ${stayPlan}` : "",
+      mealLabel ? `Meals: ${mealLabel}${pricing.meal.isBase ? " (as listed)" : ""}` : "",
+      vehicleLabel ? `Vehicle: ${vehicleLabel}${pricing.cab.isRecommended ? " (recommended)" : ""}` : "",
       `${planInfo?.label}: ${formatPackagePrice(payNow)} now of ${formatPackagePrice(pricing.total)}`,
       `Pay via ${methodInfo?.label}`,
       contact.city.trim() ? `Lives in ${contact.city.trim()}` : "",
@@ -224,7 +226,9 @@ export default function BookingFlow({ pkg, departures, initialBooking }) {
         infants: String(travellers.infants),
         childAges: travellers.childAges.join(","),
         rooms: String(rooms),
-        hotelCategory: pricing.hotel.label,
+        hotelCategory: hasStopChoices ? `${pricing.hotel.label} - ${stayPlan}` : pricing.hotel.label,
+        mealPlan: mealLabel,
+        vehicle: vehicleLabel,
         departureCity: booking.departureCity,
         estimatedTotal: formatPackagePrice(pricing.total),
         bookingRef,
@@ -257,7 +261,7 @@ export default function BookingFlow({ pkg, departures, initialBooking }) {
       setSubmitError(err.message || "Something went wrong while submitting. Please try again.");
       setStatus("idle");
     }
-  }, [status, booking, plan, method, guests, requests, notes, contact, pricing, payNow, pkg, scrollTop]);
+  }, [status, booking, hotels, plan, method, guests, requests, notes, contact, pricing, payNow, pkg, scrollTop]);
 
   const next = useCallback(() => {
     if (!validate(step)) return;
@@ -397,6 +401,8 @@ export default function BookingFlow({ pkg, departures, initialBooking }) {
                       onChange={patchBooking}
                       errors={errors}
                       dateFactor={dateFactor}
+                      hotels={hotels}
+                      pricing={pricing}
                     />
                   ) : null}
                   {step === 1 ? (

@@ -10,6 +10,8 @@ import {
   getInternationalCountries,
   STATIC_SEARCH_COUNTRIES,
 } from "@/lib/tourDestinations";
+import { getStateImage } from "@/components/state/stateImageMap";
+import { limitItems } from "@/lib/limitItems";
 
 const TRUST_ITEMS = [
   `${STATIC_SEARCH_COUNTRIES.length}+ Countries`,
@@ -19,17 +21,34 @@ const TRUST_ITEMS = [
   "Easy EMI Options",
 ];
 
-export default function PackagesExploreCountries() {
+// Fills anything the admin left blank from the built-in country list
+function toCountryCard(item, builtIn) {
+  return {
+    name: item.name,
+    tagline: item.tagline || builtIn?.tagline || "",
+    fromPrice: item.fromPrice ?? builtIn?.fromPrice ?? 0,
+    image: item.image || builtIn?.image || getStateImage(""),
+    featured: item.featured,
+  };
+}
+
+export default function PackagesExploreCountries({ config = null }) {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
   const all = getInternationalCountries();
-  const countries = [...all.filter((c) => c.featured), ...all.filter((c) => !c.featured)].slice(0, 8);
+
+  // Admin-managed order when available, otherwise featured first (original behaviour)
+  const countries = config?.items?.length
+    ? limitItems(config.items, config.maxVisible).map((item) =>
+        toCountryCard(item, all.find((c) => c.name.toLowerCase() === item.name.toLowerCase()))
+      )
+    : [...all.filter((c) => c.featured), ...all.filter((c) => !c.featured)].slice(0, 8);
 
   return (
     <section className="bg-white py-14 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Explore"
-          title="Countries"
+          title={config?.title || "Countries"}
           subtitle="International destinations beyond India"
           count={`${countries.length} countries`}
           onScrollPrev={scrollPrev}

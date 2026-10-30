@@ -66,7 +66,9 @@ export default function LeadDialog({ open, onClose, pkg, booking, pricing }) {
 
   const { travellers } = booking;
   const rooms = getRoomsNeeded(travellers.adults);
-  const hotelLabel = pricing.hotel.label;
+  const hotelLabel = pricing.hotel.mixed ? "Mixed grades" : pricing.hotel.label;
+  const mealLabel = pricing.meal?.plan.label ?? "";
+  const vehicleLabel = pricing.cab ? `${pricing.cab.vehicles > 1 ? `${pricing.cab.vehicles} x ` : ""}${pricing.cab.option.label}` : "";
 
   const submit = async (e) => {
     e.preventDefault();
@@ -98,6 +100,8 @@ export default function LeadDialog({ open, onClose, pkg, booking, pricing }) {
         childAges: travellers.childAges.join(","),
         rooms: String(rooms),
         hotelCategory: hotelLabel,
+        mealPlan: mealLabel,
+        vehicle: vehicleLabel,
         departureCity: booking.departureCity,
         estimatedTotal: formatPackagePrice(pricing.total),
         tripNotes: buildTripNotes({
@@ -105,7 +109,7 @@ export default function LeadDialog({ open, onClose, pkg, booking, pricing }) {
           rooms,
           hotelCategory: hotelLabel,
           departureCity: booking.departureCity,
-        }),
+        }) + ` | Meals: ${mealLabel} | Vehicle: ${vehicleLabel}`,
         state: pkg.state,
         country: pkg.country,
         location: pkg.location,
@@ -160,7 +164,11 @@ export default function LeadDialog({ open, onClose, pkg, booking, pricing }) {
                 {travellers.children > 0 ? ` (ages ${travellers.childAges.join(", ")})` : ""}
               </SummaryRow>
               <SummaryRow icon={BedDouble}>
-                {rooms} room{rooms > 1 ? "s" : ""} · {hotelLabel} hotels · Ex {booking.departureCity}
+                {rooms} room{rooms > 1 ? "s" : ""} · {hotelLabel}
+                {pricing.hotel.mixed ? "" : " hotels"} · Ex {booking.departureCity}
+              </SummaryRow>
+              <SummaryRow icon={Utensils}>
+                {mealLabel} · {vehicleLabel}
               </SummaryRow>
             </ul>
             <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-orange-100">

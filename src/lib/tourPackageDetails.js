@@ -6,6 +6,14 @@ import {
   hashString,
 } from "@/lib/tourPackageMeta";
 import { TOUR_PACKAGES, getPackageImage } from "@/lib/tourPackages";
+import {
+  calculateMealDelta,
+  categoryStars,
+  childFactor,
+  cabPassengers,
+  planCab,
+  summariseStays,
+} from "@/lib/tourCustomize";
 
 /**
  * Static product-page content. Everything is derived from the catalogue entry so a
@@ -27,27 +35,9 @@ const THEME_IMAGE_POOL = {
 
 const FILLER_STATES = ["Himachal Pradesh", "Kerala", "Rajasthan", "Goa", "Sikkim", "Uttarakhand", "Karnataka", "Gujarat"];
 
+const HOTEL_AREAS = ["City Centre", "Old Town", "Riverside", "Beachfront", "Hill View", "Lakeside", "Garden District", "Market Quarter"];
+
 const HOTEL_SUFFIXES = ["Residency", "Grand", "Retreat", "Heritage Inn", "Resort & Spa", "Boutique Stay"];
-
-const REVIEWERS = [
-  { name: "Priya Sharma", from: "Mumbai", trip: "Couple" },
-  { name: "Rahul Verma", from: "Delhi", trip: "Friends" },
-  { name: "Ananya Iyer", from: "Bengaluru", trip: "Family" },
-  { name: "Vikram Mehta", from: "Ahmedabad", trip: "Couple" },
-  { name: "Sneha Reddy", from: "Hyderabad", trip: "Family" },
-  { name: "Arjun Kapoor", from: "Pune", trip: "Friends" },
-  { name: "Meera Nair", from: "Chennai", trip: "Solo" },
-  { name: "Kabir Singh", from: "Chandigarh", trip: "Couple" },
-];
-
-const REVIEW_BODIES = [
-  (t) => `Everything on the ${t} trip ran like clockwork. Hotels, cabs and sightseeing were exactly as promised and the coordinator answered every call.`,
-  (t) => `We were nervous about planning ${t} ourselves, so booking a package was the best decision. Great pacing, never rushed, and the stays were spotless.`,
-  (t) => `The itinerary for ${t} balanced big sights with free time. Our driver knew the best viewpoints and local food stops. Would book again.`,
-  (t) => `Took the kids along and the team adjusted the plan without any fuss. Early check-ins and child-friendly meals made ${t} stress-free.`,
-  (t) => `Value for money is excellent. Compared with three other quotes, Demand Setu gave the most complete ${t} plan with no hidden extras.`,
-  (t) => `Loved how personal it felt. They changed two hotels for us on request and still kept the price fair. ${t} is going on our yearly list.`,
-];
 
 function pick(list, seed, offset = 0) {
   return list[(seed + offset) % list.length];
@@ -115,21 +105,51 @@ function buildHotels(pkg, meta, stops, gallery) {
   const seed = hashString(pkg.id);
   const places = stops.slice(0, 4);
   const nightsEach = Math.max(1, Math.floor(meta.nights / Math.max(1, places.length)));
-  return places.map((place, i) => ({
-    id: `${pkg.id}-stay-${i}`,
-    place,
-    name: `${place} ${pick(HOTEL_SUFFIXES, seed, i)}`,
-    stars: meta.stars,
-    nights: i === places.length - 1 ? Math.max(1, meta.nights - nightsEach * (places.length - 1)) : nightsEach,
-    image: gallery[(i + 1) % gallery.length]?.src ?? gallery[0]?.src,
-    amenities: uniq([
+  const amenitiesFor = (stars) =>
+    uniq([
       "Free Wi-Fi",
       meta.mealPlan.toLowerCase().includes("dinner") || meta.mealPlan === "All meals" ? "Restaurant" : "Breakfast",
-      meta.stars >= 4 ? "Room service" : "Hot water 24x7",
-      meta.stars >= 5 ? "Spa & pool" : "Power backup",
-    ]),
-    note: "Or similar property of the same category",
-  }));
+      stars >= 4 ? "Room service" : "Hot water 24x7",
+      stars >= 5 ? "Spa & pool" : "Power backup",
+    ]);
+
+  return places.map((place, i) => {
+    const image = gallery[(i + 1) % gallery.length]?.src ?? gallery[0]?.src;
+    // One property per grade so each stop can be upgraded (or downgraded) independently.
+    const options = Object.fromEntries(
+      HOTEL_CATEGORIES.map((cat, k) => {
+        const stars = categoryStars(meta.stars, cat.id);
+        return [
+          cat.id,
+          {
+            id: cat.id,
+            name: `${place} ${pick(HOTEL_SUFFIXES, seed, i + k * 2)}`,
+            stars,
+            // Pricier grades sit closer to the action.
+            area: pick(HOTEL_AREAS, seed, i + k * 3),
+            distance: `${((((seed + i * 3 + k * 7) % 9) + 1) / 10 + (2 - k) * 0.8).toFixed(1)} km from ${place} centre`,
+            image: gallery[(i + 1 + k * 2) % gallery.length]?.src ?? image,
+            // A small set of photos for the hotel slider (property, rooms, views, pool…).
+            images: uniq(
+              [0, 1, 2, 3, 4].map((j) => gallery[(i + 1 + k * 2 + j) % gallery.length]?.src).filter(Boolean)
+            ),
+            amenities: amenitiesFor(stars),
+          },
+        ];
+      })
+    );
+    return {
+      id: `${pkg.id}-stay-${i}`,
+      place,
+      name: options.standard.name,
+      stars: meta.stars,
+      nights: i === places.length - 1 ? Math.max(1, meta.nights - nightsEach * (places.length - 1)) : nightsEach,
+      image,
+      amenities: amenitiesFor(meta.stars),
+      options,
+      note: "Or similar property of the same category",
+    };
+  });
 }
 
 /* ----------------------------- itinerary ----------------------------- */
@@ -148,6 +168,10 @@ function buildItinerary(pkg, meta, stops, hotels) {
   };
 
   const hotelForStop = (stop) => hotels.find((h) => h.place === stop) ?? hotels[hotels.length - 1];
+  const stayIndexFor = (stop) => {
+    const i = hotels.findIndex((h) => h.place === stop);
+    return i >= 0 ? i : Math.max(0, hotels.length - 1);
+  };
 
   const itinerary = [];
 
@@ -164,6 +188,7 @@ function buildItinerary(pkg, meta, stops, hotels) {
     ],
     meals: mealsFor(true, false),
     stay: hotelForStop(firstStop)?.name,
+    stayIndex: stayIndexFor(firstStop),
     transfer: "Airport / station pickup",
   });
 
@@ -188,6 +213,7 @@ function buildItinerary(pkg, meta, stops, hotels) {
       ]),
       meals: mealsFor(false, false),
       stay: hotelForStop(stop)?.name,
+      stayIndex: stayIndexFor(stop),
       transfer: "Private AC vehicle",
     });
     previousStop = stop;
@@ -304,51 +330,6 @@ function buildPolicies() {
   };
 }
 
-/* ------------------------------ reviews ------------------------------ */
-
-function buildReviews(pkg) {
-  const seed = hashString(pkg.id);
-  const total = pkg.reviews;
-  const avg = pkg.rating;
-  const five = Math.round(total * Math.min(0.9, 0.35 + (avg - 4) * 0.55));
-  const four = Math.round(total * (1 - Math.min(0.9, 0.35 + (avg - 4) * 0.55)) * 0.78);
-  const three = Math.round((total - five - four) * 0.7);
-  const two = Math.max(0, Math.round((total - five - four - three) * 0.6));
-  const one = Math.max(0, total - five - four - three - two);
-  const distribution = [
-    { stars: 5, count: five },
-    { stars: 4, count: four },
-    { stars: 3, count: three },
-    { stars: 2, count: two },
-    { stars: 1, count: one },
-  ];
-
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const items = Array.from({ length: 4 }, (_, i) => {
-    const who = pick(REVIEWERS, seed, i * 2);
-    return {
-      id: `${pkg.id}-review-${i}`,
-      name: who.name,
-      from: who.from,
-      tripType: who.trip,
-      rating: i === 3 ? 4 : 5,
-      month: `${pick(months, seed, i * 3)} ${2025 + (i % 2)}`,
-      text: pick(REVIEW_BODIES, seed, i)(pkg.title),
-      helpful: 4 + ((seed + i * 7) % 29),
-    };
-  });
-
-  const categories = [
-    { label: "Itinerary", score: Math.min(5, avg + 0.0) },
-    { label: "Hotels", score: Math.max(4.2, avg - 0.1) },
-    { label: "Transport", score: Math.min(5, avg + 0.05) },
-    { label: "Value for money", score: Math.max(4.1, avg - 0.2) },
-    { label: "Support", score: Math.min(5, avg + 0.1) },
-  ].map((c) => ({ ...c, score: Math.round(c.score * 10) / 10 }));
-
-  return { average: avg, total, distribution, items, categories };
-}
-
 /* ----------------------------- departures ----------------------------- */
 
 export function buildDepartures(pkg, fromDate = new Date(), count = 10) {
@@ -373,6 +354,34 @@ export function buildDepartures(pkg, fromDate = new Date(), count = 10) {
   });
 }
 
+/**
+ * Each itinerary day (except departure) is one night, and every night has its own hotel choice.
+ * Make the hotels' night counts match the days that actually sleep at them, and drop stops the
+ * route never overnights at, so night N of the trip lines up with day N of the itinerary.
+ */
+function alignStaysToItinerary(hotels, itinerary) {
+  if (itinerary.length < 2) return { hotels, itinerary };
+  const counts = hotels.map(() => 0);
+  itinerary.forEach((day) => {
+    if (Number.isInteger(day.stayIndex) && counts[day.stayIndex] !== undefined) counts[day.stayIndex] += 1;
+  });
+  const remap = new Map();
+  const kept = [];
+  hotels.forEach((hotel, i) => {
+    if (counts[i] > 0) {
+      remap.set(i, kept.length);
+      kept.push({ ...hotel, nights: counts[i] });
+    }
+  });
+  if (!kept.length) return { hotels, itinerary };
+  return {
+    hotels: kept,
+    itinerary: itinerary.map((day) =>
+      Number.isInteger(day.stayIndex) ? { ...day, stayIndex: remap.get(day.stayIndex) } : day
+    ),
+  };
+}
+
 /* ----------------------------- main builder ----------------------------- */
 
 export function buildPackageDetail(pkg, fromDate = new Date()) {
@@ -384,20 +393,20 @@ export function buildPackageDetail(pkg, fromDate = new Date()) {
 
   const gallery = buildGallery(pkg, meta, stops);
   const hotels = buildHotels(pkg, meta, stops, gallery);
-  const itinerary = buildItinerary(pkg, meta, stops, hotels);
+  const rawItinerary = buildItinerary(pkg, meta, stops, hotels);
+  const { hotels: stayHotels, itinerary } = alignStaysToItinerary(hotels, rawItinerary);
 
   return {
     meta,
     stops,
     gallery,
-    hotels,
+    hotels: stayHotels,
     itinerary,
     inclusions: buildInclusions(pkg, meta),
     exclusions: buildExclusions(pkg, meta),
     thingsToCarry: buildThingsToCarry(meta),
     faqs: buildFaqs(pkg, meta),
     policies: buildPolicies(),
-    reviews: buildReviews(pkg),
     departures: buildDepartures(pkg, fromDate),
     quickFacts: [
       { key: "duration", label: "Duration", value: pkg.duration },
@@ -432,9 +441,7 @@ export function getSimilarPackages(pkg, limit = 4) {
 
 const roundTo10 = (n) => Math.round(n / 10) * 10;
 
-export function childFactor(age) {
-  return age <= 5 ? 0.6 : 0.8;
-}
+export { childFactor };
 
 /**
  * Transparent, per-line price estimate. The final quote is always confirmed by the desk;
@@ -448,9 +455,16 @@ export function calculateTripPrice({
   infants = 0,
   hotelCategory = "standard",
   dateFactor = 1,
+  // Optional customisation (all deltas are against what the package price already includes).
+  stays = null, // [{ nights, category }] from resolveStays()
+  meta = null,
+  baseStars,
+  mealId = "auto",
+  cabId = "auto",
 }) {
-  const hotel = HOTEL_CATEGORIES.find((h) => h.id === hotelCategory) ?? HOTEL_CATEGORIES[0];
-  const adultFare = roundTo10(price * hotel.factor * dateFactor);
+  const stayInfo = summariseStays(stays, baseStars ?? meta?.stars, hotelCategory);
+  const hotel = stayInfo;
+  const adultFare = roundTo10(price * stayInfo.factor * dateFactor);
   const lines = [];
 
   lines.push({
@@ -483,6 +497,36 @@ export function calculateTripPrice({
     lines.push({ key: "infants", label: `${infants} Infant${infants === 1 ? "" : "s"}`, detail: "Under 2 years", amount: 0, free: true });
   }
 
+  const baseSubtotal = subtotal;
+
+  let meal = null;
+  let cab = null;
+  if (meta) {
+    meal = calculateMealDelta({ meta, mealId, adults, childAges, stays });
+    if (meal.amount !== 0) {
+      lines.push({
+        key: "meals",
+        label: `Meals · ${meal.plan.label}`,
+        detail: meal.amount > 0 ? "Upgrade from included plan" : "Lower than included plan",
+        amount: meal.amount,
+        adjustment: true,
+      });
+      subtotal += meal.amount;
+    }
+
+    cab = planCab({ meta, cabId, pax: cabPassengers({ adults, childAges }) });
+    if (cab.delta !== 0) {
+      lines.push({
+        key: "cab",
+        label: `Vehicle · ${cab.vehicles > 1 ? `${cab.vehicles} × ` : ""}${cab.option.label}`,
+        detail: cab.delta > 0 ? "Upgrade from recommended" : "Lower than recommended",
+        amount: cab.delta,
+        adjustment: true,
+      });
+      subtotal += cab.delta;
+    }
+  }
+
   const payingTravellers = adults + childAges.length;
   const groupRate = payingTravellers >= 10 ? 0.08 : payingTravellers >= 6 ? 0.05 : 0;
   const groupDiscount = groupRate ? roundTo10(subtotal * groupRate) : 0;
@@ -491,7 +535,7 @@ export function calculateTripPrice({
   const total = taxable + gst;
 
   const listFactor = originalPrice && originalPrice > price ? originalPrice / price : 1;
-  const originalTotal = roundTo10((subtotal) * listFactor);
+  const originalTotal = roundTo10(baseSubtotal * listFactor);
 
   return {
     lines,
@@ -502,7 +546,10 @@ export function calculateTripPrice({
     total,
     perPerson: Math.round(total / Math.max(1, payingTravellers)),
     originalTotal,
-    savings: Math.max(0, originalTotal - subtotal + groupDiscount),
+    savings: Math.max(0, originalTotal - baseSubtotal + groupDiscount),
     hotel,
+    hotelDelta: roundTo10(baseSubtotal * (1 - 1 / (stayInfo.factor || 1))),
+    meal,
+    cab,
   };
 }

@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { Headset, HelpCircle, Mail, MessageCircle, Phone } from "lucide-react";
+import FaqExplorer from "@/components/static/FaqExplorer";
 import StaticPageShell from "@/components/static/StaticPageShell";
+import { EMAIL, PHONE_DISPLAY, PHONE_HREF } from "@/components/static/StaticUi";
 import { SITE_FAQ } from "@/lib/staticPagesContent";
 
 export const metadata = {
@@ -11,42 +14,50 @@ export const metadata = {
 export default function FaqPage() {
   return (
     <StaticPageShell
+      eyebrow="Help centre"
+      icon={HelpCircle}
       title="FAQ"
       subtitle="Quick answers about bookings, cancellations, payments, and support."
     >
-      <div className="mx-auto max-w-3xl space-y-3">
-        {SITE_FAQ.map((item, index) => (
-          <details
-            key={item.q}
-            className="group rounded-2xl border border-stone-200 bg-white shadow-sm"
-            open={index === 0}
-          >
-            <summary className="cursor-pointer list-none px-6 py-5 font-semibold text-stone-900 marker:content-none [&::-webkit-details-marker]:hidden">
-              <span className="flex items-start justify-between gap-4">
-                {item.q}
-                <span className="mt-0.5 text-brand transition group-open:rotate-45">
-                  +
-                </span>
-              </span>
-            </summary>
-            <div className="border-t border-stone-100 px-6 pb-5 pt-4 text-sm leading-relaxed text-stone-600">
-              {item.a}
-            </div>
-          </details>
-        ))}
-      </div>
+      <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:gap-12">
+        <FaqExplorer items={SITE_FAQ} />
 
-      <p className="mx-auto mt-10 max-w-3xl rounded-2xl bg-brand-muted px-6 py-5 text-center text-sm text-stone-700">
-        Still have questions?{" "}
-        <Link href="/contact-us" className="font-semibold text-brand hover:underline">
-          Contact our team
-        </Link>{" "}
-        or call{" "}
-        <a href="tel:+918353056000" className="font-semibold text-brand hover:underline">
-          +91 8353056000
-        </a>
-        .
-      </p>
+        <aside className="h-fit space-y-4 lg:sticky lg:top-28">
+          <div className="relative isolate overflow-hidden rounded-[2rem] bg-stone-950 p-7 text-white">
+            <div aria-hidden className="absolute -right-12 -top-12 -z-10 h-48 w-48 rounded-full bg-brand/40 blur-3xl" />
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/10 text-orange-300">
+              <Headset className="h-6 w-6" />
+            </span>
+            <h2 className="mt-4 text-xl font-extrabold">Still have questions?</h2>
+            <p className="mt-1.5 text-sm font-medium leading-relaxed text-white/70">
+              Our travel specialists are happy to help — real people, no bots.
+            </p>
+            <div className="mt-5 space-y-2.5">
+              <a
+                href={PHONE_HREF}
+                className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-sm font-extrabold transition hover:bg-white/20"
+              >
+                <Phone className="h-4 w-4 text-orange-300" />
+                {PHONE_DISPLAY}
+              </a>
+              <a
+                href={`mailto:${EMAIL}`}
+                className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-sm font-extrabold transition hover:bg-white/20"
+              >
+                <Mail className="h-4 w-4 text-orange-300" />
+                <span className="truncate">{EMAIL}</span>
+              </a>
+            </div>
+            <Link
+              href="/contact-us"
+              className="pk-sweep mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-dark active:scale-[0.98]"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Contact our team
+            </Link>
+          </div>
+        </aside>
+      </div>
     </StaticPageShell>
   );
 }

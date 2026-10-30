@@ -12,10 +12,19 @@ import {
   getCityMeta,
   getPopularCities,
 } from "@/lib/tourDestinations";
+import { limitItems } from "@/lib/limitItems";
 
-export default function PackagesPopularCities({ cities = [] }) {
+export default function PackagesPopularCities({ cities = [], config = null }) {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
-  const displayCities = useMemo(() => getPopularCities(cities, 8), [cities]);
+
+  // Admin-managed cities when available, otherwise the built-in popular list
+  const displayCities = useMemo(
+    () =>
+      config?.items?.length
+        ? limitItems(config.items, config.maxVisible)
+        : getPopularCities(cities, 8).map((name) => ({ name })),
+    [cities, config]
+  );
 
   if (displayCities.length === 0) return null;
 
@@ -24,7 +33,7 @@ export default function PackagesPopularCities({ cities = [] }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Explore India"
-          title="Cities"
+          title={config?.title || "Cities"}
           subtitle="From metros to hill stations — pick a city and we'll plan the rest"
           count={`${displayCities.length} cities`}
           onScrollPrev={scrollPrev}
@@ -33,8 +42,13 @@ export default function PackagesPopularCities({ cities = [] }) {
         />
 
         <div ref={scrollerRef} className={sliderRowClass}>
-          {displayCities.map((cityName) => {
-            const meta = getCityMeta(cityName);
+          {displayCities.map((entry) => {
+            const cityName = entry.name;
+            const builtIn = getCityMeta(cityName);
+            const meta = {
+              tagline: entry.tagline || builtIn.tagline,
+              fromPrice: entry.fromPrice ?? builtIn.fromPrice,
+            };
             return (
               <Link
                 key={cityName}
@@ -45,7 +59,7 @@ export default function PackagesPopularCities({ cities = [] }) {
               >
                 <span className="relative mx-auto block aspect-square w-full overflow-hidden rounded-full shadow-md ring-4 ring-white transition duration-500 group-hover:-translate-y-1 group-hover:ring-brand group-hover:shadow-xl">
                   <Image
-                    src={getCityImage(cityName)}
+                    src={entry.image || getCityImage(cityName)}
                     alt={cityName}
                     fill
                     loading="lazy"

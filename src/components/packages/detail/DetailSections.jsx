@@ -261,103 +261,6 @@ export function DepartureStrip({ departures, selected, onSelect }) {
   );
 }
 
-function RatingBar({ stars, count, total, delay }) {
-  const { ref, inView } = useInView({ rootMargin: "0px" });
-  const pct = total ? (count / total) * 100 : 0;
-  return (
-    <div ref={ref} className="flex items-center gap-3 text-xs font-bold text-stone-600">
-      <span className="flex w-8 items-center gap-0.5">
-        {stars}
-        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-      </span>
-      <span className="h-2 flex-1 overflow-hidden rounded-full bg-stone-200">
-        <span
-          className="block h-full rounded-full bg-gradient-to-r from-amber-300 to-amber-500 transition-all duration-1000 ease-out"
-          style={{ width: inView ? `${pct}%` : "0%", transitionDelay: `${delay}ms` }}
-        />
-      </span>
-      <span className="w-8 text-right tabular-nums text-stone-400">{count}</span>
-    </div>
-  );
-}
-
-function Stars({ value, size = "h-4 w-4" }) {
-  return (
-    <span className="inline-flex" aria-label={`${value} out of 5`}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <Star key={n} className={`${size} ${n <= Math.round(value) ? "fill-amber-400 text-amber-400" : "fill-stone-200 text-stone-200"}`} />
-      ))}
-    </span>
-  );
-}
-
-export function ReviewsSection({ reviews }) {
-  return (
-    <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-      <AnimateIn>
-        <div className="rounded-3xl bg-white p-6 ring-1 ring-stone-200/70">
-          <div className="flex items-end gap-3">
-            <span className="text-6xl font-extrabold leading-none tracking-tight text-stone-900">{reviews.average}</span>
-            <div className="pb-1">
-              <Stars value={reviews.average} size="h-5 w-5" />
-              <p className="mt-1 text-xs font-bold text-stone-500">{reviews.total} verified reviews</p>
-            </div>
-          </div>
-          <div className="mt-5 space-y-2">
-            {reviews.distribution.map((row, i) => (
-              <RatingBar key={row.stars} {...row} total={reviews.total} delay={i * 90} />
-            ))}
-          </div>
-          <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-dashed border-stone-200 pt-5">
-            {reviews.categories.map((c) => (
-              <div key={c.label}>
-                <dt className="text-[11px] font-bold text-stone-500">{c.label}</dt>
-                <dd className="flex items-center gap-1.5 text-sm font-extrabold text-stone-900">
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                  {c.score.toFixed(1)}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </AnimateIn>
-
-      <ul className="grid gap-4 sm:grid-cols-2">
-        {reviews.items.map((r, i) => (
-          <AnimateIn key={r.id} as="li" delay={i * 80}>
-            <figure className="relative h-full overflow-hidden rounded-3xl bg-white p-5 ring-1 ring-stone-200/70 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-              <Quote className="absolute right-4 top-4 h-10 w-10 text-brand/10" />
-              <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-orange-400 to-brand text-sm font-extrabold text-white">
-                  {r.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)}
-                </span>
-                <div>
-                  <p className="text-sm font-extrabold text-stone-900">{r.name}</p>
-                  <p className="text-xs font-semibold text-stone-500">
-                    {r.from} · {r.tripType} · {r.month}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3">
-                <Stars value={r.rating} />
-              </div>
-              <blockquote className="mt-2 text-sm leading-relaxed text-stone-600">{r.text}</blockquote>
-              <figcaption className="mt-4 flex items-center gap-1.5 text-xs font-bold text-stone-400">
-                <ThumbsUp className="h-3.5 w-3.5" />
-                {r.helpful} found this helpful
-              </figcaption>
-            </figure>
-          </AnimateIn>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 const TONE = {
   good: "bg-emerald-500",
   ok: "bg-lime-500",
@@ -516,7 +419,7 @@ export function SectionNav({ sections }) {
   return (
     <nav
       aria-label="Trip sections"
-      className="sticky top-[68px] z-30 -mx-4 border-b border-stone-200/70 bg-[#f6f3ee]/90 px-4 backdrop-blur-xl sm:top-[80px] sm:mx-0 sm:rounded-full sm:border sm:bg-white/90 sm:px-2 sm:shadow-sm"
+      className="sticky top-[68px] z-30 -mx-4 border-b border-stone-200/70 bg-white/90 px-4 backdrop-blur-xl sm:top-[80px] sm:mx-0 sm:rounded-full sm:border sm:bg-white/90 sm:px-2 sm:shadow-sm"
     >
       <div ref={barRef} className="no-scrollbar flex gap-1 overflow-x-auto py-2">
         {sections.map((s) => (

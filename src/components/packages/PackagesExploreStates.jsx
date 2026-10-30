@@ -12,6 +12,7 @@ import {
   getStateCities,
   getStateTagline,
 } from "@/lib/tourDestinations";
+import { limitItems } from "@/lib/limitItems";
 
 const STATE_ORDER = [
   "Rajasthan",
@@ -46,9 +47,16 @@ function pickStates(states, limit = 5) {
   return picked.slice(0, limit);
 }
 
-export default function PackagesExploreStates({ states = [] }) {
+// The 12-column grid below is designed for 8 tiles
+const MAX_STATE_TILES = 8;
+
+export default function PackagesExploreStates({ states = [], config = null }) {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
-  const shown = pickStates(states, 8);
+
+  // Admin-managed tiles when available, otherwise the built-in list
+  const shown = config?.items?.length
+    ? limitItems(config.items, config.maxVisible, MAX_STATE_TILES)
+    : pickStates(states, MAX_STATE_TILES).map((name) => ({ name }));
   if (shown.length === 0) return null;
 
   return (
@@ -56,7 +64,7 @@ export default function PackagesExploreStates({ states = [] }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Explore India"
-          title="States"
+          title={config?.title || "States"}
           subtitle="Discover the diversity of India, state by state"
           count={`${shown.length} states`}
           onScrollPrev={scrollPrev}
@@ -64,8 +72,9 @@ export default function PackagesExploreStates({ states = [] }) {
         />
 
         <div ref={scrollerRef} className={`${snapRowClass} lg:auto-rows-[188px] lg:grid-cols-12 lg:gap-3`}>
-          {shown.map((stateName, index) => {
-            const fromPrice = getStartingPrice(stateName, 4999);
+          {shown.map((entry, index) => {
+            const stateName = entry.name;
+            const fromPrice = entry.fromPrice ?? getStartingPrice(stateName, 4999);
             const cities = getStateCities(stateName);
             const feature = index === 0;
             const place = [
@@ -89,7 +98,7 @@ export default function PackagesExploreStates({ states = [] }) {
               >
                 <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full">
                   <Image
-                    src={getStateImage(stateName)}
+                    src={entry.image || getStateImage(stateName)}
                     alt={stateName}
                     fill
                     loading="lazy"
@@ -103,7 +112,8 @@ export default function PackagesExploreStates({ states = [] }) {
                     </h3>
                     <div className="mt-3 flex items-end justify-between gap-2">
                       <p className="line-clamp-2 text-xs leading-snug text-white/80">
-                        {cities.length > 0 ? cities.slice(0, 2).join(" · ") : getStateTagline(stateName)}
+                        {entry.tagline ||
+                          (cities.length > 0 ? cities.slice(0, 2).join(" · ") : getStateTagline(stateName))}
                       </p>
                       <p className="shrink-0 text-sm font-semibold text-orange-200">
                         {formatFromPrice(fromPrice)}

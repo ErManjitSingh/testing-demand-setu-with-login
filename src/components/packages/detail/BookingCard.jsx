@@ -8,7 +8,9 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
+  Car,
   Hotel,
+  UtensilsCrossed,
   MapPin,
   MessageCircle,
   Phone,
@@ -21,7 +23,7 @@ import {
 import { useMemo, useState } from "react";
 import AnimatedPrice from "@/components/packages/shared/AnimatedPrice";
 import TravellersPicker from "@/components/packages/shared/TravellersPicker";
-import { HOTEL_CATEGORIES, DEPARTURE_CITIES } from "@/lib/tourPackageMeta";
+import { DEPARTURE_CITIES } from "@/lib/tourPackageMeta";
 import { TOUR_ENQUIRY_TYPES } from "@/lib/tourEnquiryTypes";
 import { formatPackagePrice } from "@/lib/tourPackages";
 import { formatDisplayDate, getRoomsNeeded, todayInputValue } from "@/lib/tourTravellers";
@@ -41,12 +43,36 @@ export default function BookingCard({
   departure,
   onReserve,
   onQuote,
+  onCustomize,
   dateError,
   compact = false,
 }) {
   const [showBreakdown, setShowBreakdown] = useState(false);
   const minDate = useMemo(() => todayInputValue(), []);
   const rooms = getRoomsNeeded(booking.travellers.adults);
+  const choices = [
+    {
+      tab: "stays",
+      label: "Hotels",
+      icon: Hotel,
+      value: `${pricing.hotel.label} · ${pricing.hotel.stars}★`,
+      delta: pricing.hotelDelta ?? 0,
+    },
+    {
+      tab: "meals",
+      label: "Meals",
+      icon: UtensilsCrossed,
+      value: pricing.meal?.plan.label ?? "—",
+      delta: pricing.meal?.amount ?? 0,
+    },
+    {
+      tab: "cab",
+      label: "Cab",
+      icon: Car,
+      value: pricing.cab ? `${pricing.cab.vehicles > 1 ? `${pricing.cab.vehicles} × ` : ""}${pricing.cab.option.label}` : "—",
+      delta: pricing.cab?.delta ?? 0,
+    },
+  ];
   const wa = `https://wa.me/918353056000?text=${encodeURIComponent(
     `Hi, I'm interested in the ${pkg.title} (${pkg.duration}) package.`
   )}`;
@@ -155,78 +181,8 @@ export default function BookingCard({
           </div>
         </div>
 
-        {/* Hotel category */}
-        <div>
-          <FieldLabel>Hotel category</FieldLabel>
-          <div className="grid grid-cols-3 gap-2">
-            {HOTEL_CATEGORIES.map((h) => {
-              const active = booking.hotel === h.id;
-              return (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => onChange({ hotel: h.id })}
-                  aria-pressed={active}
-                  title={h.blurb}
-                  className={`relative rounded-xl border px-2 py-2.5 text-center transition active:scale-95 ${
-                    active
-                      ? "border-brand bg-brand-muted shadow-sm"
-                      : "border-stone-200 bg-white hover:border-brand/40"
-                  }`}
-                >
-                  {active ? (
-                    <span className="pk-pop absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-brand text-white shadow">
-                      <Check className="h-3 w-3" strokeWidth={3.5} />
-                    </span>
-                  ) : null}
-                  <Hotel className={`mx-auto h-4 w-4 ${active ? "text-brand" : "text-stone-400"}`} />
-                  <span className="mt-1 block text-xs font-extrabold text-stone-900">{h.label}</span>
-                  <span className="block text-[10px] font-bold text-amber-600">{"★".repeat(h.stars)}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tour type + tickets */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <FieldLabel>Tour type</FieldLabel>
-            <div className="relative">
-              <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand" />
-              <select
-                value={booking.tourType}
-                onChange={(e) => onChange({ tourType: e.target.value })}
-                className={selectClass}
-              >
-                {TOUR_ENQUIRY_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
-            </div>
-          </div>
-          <div>
-            <FieldLabel>Tickets booked?</FieldLabel>
-            <div className="grid grid-cols-2 gap-1 rounded-xl border border-stone-200 bg-stone-50 p-1">
-              {["yes", "no"].map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => onChange({ ticketBooked: v })}
-                  aria-pressed={booking.ticketBooked === v}
-                  className={`rounded-lg py-2 text-xs font-extrabold capitalize transition ${
-                    booking.ticketBooked === v ? "bg-white text-brand shadow-sm" : "text-stone-500 hover:text-stone-800"
-                  }`}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      
+      
       </div>
 
       {/* Price summary */}
@@ -265,7 +221,7 @@ export default function BookingCard({
                     {line.label}
                     <span className="block text-[10px] text-white/45">{line.detail}</span>
                   </dt>
-                  <dd className="font-bold tabular-nums">{line.free ? "Free" : formatPackagePrice(line.amount)}</dd>
+                  <dd className="font-bold tabular-nums">{line.free ? "Free" : `${line.amount < 0 ? "−" : ""}${formatPackagePrice(Math.abs(line.amount))}`}</dd>
                 </div>
               ))}
               {pricing.groupDiscount > 0 ? (

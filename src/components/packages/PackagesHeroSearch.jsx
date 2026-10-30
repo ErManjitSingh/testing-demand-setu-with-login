@@ -65,11 +65,19 @@ function toDateInputValue(date) {
   return d.toISOString().split("T")[0];
 }
 
-function HeroBackground() {
+/** "Every Country. Every State." -> ["Every Country.", "Every State."] */
+function splitHeadline(text) {
+  return String(text || "")
+    .split(/(?<=[.!?])\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function HeroBackground({ poster = HERO_POSTER }) {
   return (
     <div
       className="pointer-events-none absolute inset-0 bg-stone-900 bg-cover bg-center"
-      style={{ backgroundImage: `url(${HERO_POSTER})` }}
+      style={{ backgroundImage: `url("${poster}")` }}
       aria-hidden
     >
       <video
@@ -78,7 +86,7 @@ function HeroBackground() {
         muted
         loop
         playsInline
-        poster={HERO_POSTER}
+        poster={poster}
       >
         <source src="/videos/enquiry-hero.mp4" type="video/mp4" />
       </video>
@@ -495,12 +503,18 @@ function FormField({ label, children, className = "" }) {
   );
 }
 
-export default function PackagesHeroSearch({ states = [], cities = [] }) {
+export default function PackagesHeroSearch({ states = [], cities = [], header = null, stats = null }) {
   const [mode, setMode] = useState("search");
+
+  // Admin-managed hero content; anything missing keeps the built-in copy
+  const headlineParts = splitHeadline(header?.heading);
+  const heroStats = stats?.length
+    ? stats.map((item, index) => ({ ...HERO_STATS[index % HERO_STATS.length], value: item.value, label: item.label }))
+    : HERO_STATS;
 
   return (
     <section className="relative isolate -mt-20 overflow-hidden bg-stone-950 sm:-mt-24">
-      <HeroBackground />
+      <HeroBackground poster={header?.poster || HERO_POSTER} />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(12,10,9,0.9)_0%,rgba(12,10,9,0.6)_46%,rgba(12,10,9,0.35)_100%)]" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/30" />
       <div aria-hidden className="pointer-events-none absolute -left-24 top-1/3 hidden h-72 w-72 rounded-full bg-orange-500/20 blur-3xl pk-drift lg:block" />
@@ -514,11 +528,31 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
           </span>
 
           <h1 className="mt-5 font-serif text-[2.7rem] font-medium leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-7xl">
-            <span className="block">Every Country.</span>
-            <span className="block">Every State.</span>
-            <span className="block">Every City.</span>
-            <span className="text-shimmer mt-2 block italic">One Journey.</span>
+            {headlineParts.length > 0 ? (
+              headlineParts.map((part, index) =>
+                index === headlineParts.length - 1 && headlineParts.length > 1 ? (
+                  <span key={part} className="text-shimmer mt-2 block italic">
+                    {part}
+                  </span>
+                ) : (
+                  <span key={part} className="block">
+                    {part}
+                  </span>
+                )
+              )
+            ) : (
+              <>
+                <span className="block">Every Country.</span>
+                <span className="block">Every State.</span>
+                <span className="block">Every City.</span>
+                <span className="text-shimmer mt-2 block italic">One Journey.</span>
+              </>
+            )}
           </h1>
+
+          {header?.description ? (
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">{header.description}</p>
+          ) : null}
 
           <ul className="mt-7 space-y-3">
             {HERO_PERKS.map((perk) => (
@@ -532,7 +566,7 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
           </ul>
 
           <div className="mt-8 hidden grid-cols-4 gap-4 sm:grid">
-            {HERO_STATS.map((item) => (
+            {heroStats.map((item) => (
               <div key={item.label} className="flex flex-col items-start gap-2.5 border-l border-white/15 pl-4 first:border-l-0 first:pl-0">
                 <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/12 text-orange-200 ring-1 ring-white/15">
                   <item.icon className="h-5 w-5" />
@@ -578,20 +612,7 @@ export default function PackagesHeroSearch({ states = [], cities = [] }) {
                   </div>
                   <TripSearchBar layout="stack" showBudget />
 
-                  <div className="mt-5">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-stone-400">Popular searches</p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {POPULAR_SEARCHES.map((place) => (
-                        <Link
-                          key={place}
-                          href={buildListingHref({ q: place })}
-                          className="rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-bold text-stone-700 transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand-muted hover:text-brand-dark"
-                        >
-                          {place}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+                 
                 </div>
               ) : (
                 <div key="plan" className="pk-fade">

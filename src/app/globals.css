@@ -1133,3 +1133,53 @@ html.partner-portal footer {
     display: none;
   }
 }
+
+/* Admin-managed rich text: tick-style bullet lists (home page theme blocks) */
+.seo-checks ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.seo-checks ul li {
+  position: relative;
+  padding-left: 1.75rem;
+}
+
+.seo-checks ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  height: 1.1rem;
+  width: 1.1rem;
+  border-radius: 9999px;
+  background-color: var(--brand-light);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  background-size: 62%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Two-column long-form copy on wide screens (home page SEO section) */
+@media (min-width: 1024px) {
+  .seo-columns {
+    column-count: 2;
+    column-gap: 3.5rem;
+  }
+
+  .seo-columns h2 {
+    column-span: all;
+  }
+
+  .seo-columns h3 {
+    break-after: avoid;
+  }
+
+  .seo-columns h3 + p {
+    break-before: avoid;
+  }
+
+  .seo-columns p {
+    break-inside: avoid;
+  }
+}

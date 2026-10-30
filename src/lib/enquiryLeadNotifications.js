@@ -39,6 +39,8 @@ function buildEnquiryRows(data = {}) {
   add("Infants", data.infants && data.infants !== "0" ? data.infants : "");
   add("Rooms needed", data.leadKind === "stay" ? "" : data.rooms);
   add("Hotel category", data.hotelCategory);
+  add("Meal plan", data.mealPlan);
+  add("Vehicle", data.vehicle);
   add("Departure city", data.departureCity);
   add("Estimated total", data.estimatedTotal);
   add("Booking reference", data.bookingRef);

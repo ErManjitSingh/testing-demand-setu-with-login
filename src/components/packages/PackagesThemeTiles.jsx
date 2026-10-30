@@ -31,7 +31,20 @@ const LAYOUT = [
   "col-span-2 sm:col-span-3 lg:col-span-4",
 ];
 
-export default function PackagesThemeTiles() {
+export default function PackagesThemeTiles({ config = null }) {
+  // Admin-managed themes (already limited to ids the listing page can filter by)
+  const themes = config?.items?.length
+    ? config.items.slice(0, LAYOUT.length).map((item) => ({
+        id: item.id,
+        label: item.label,
+        cover: item.image || getStateImage(THEME_COVER[item.id] ?? "Kerala"),
+      }))
+    : PACKAGE_THEMES.map((theme) => ({
+        id: theme.id,
+        label: theme.label,
+        cover: getStateImage(THEME_COVER[theme.id] ?? "Kerala"),
+      }));
+
   const counts = {};
   getListingPackages().forEach((p) => p.meta.themes.forEach((t) => (counts[t] = (counts[t] ?? 0) + 1)));
 
@@ -40,13 +53,13 @@ export default function PackagesThemeTiles() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <ExploreSectionHeader
           scriptLabel="Travel your way"
-          title="Trips by mood"
+          title={config?.title || "Trips by mood"}
           subtitle="Mountains or beaches, honeymoon or family — jump straight to the style of trip you want."
-          count={`${PACKAGE_THEMES.length} styles`}
+          count={`${themes.length} styles`}
         />
 
         <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:auto-rows-[190px]">
-          {PACKAGE_THEMES.map((theme, i) => {
+          {themes.map((theme, i) => {
             const Icon = getThemeIcon(theme.id);
             return (
               <Link
@@ -55,7 +68,7 @@ export default function PackagesThemeTiles() {
                 className={`group relative isolate min-h-[170px] overflow-hidden rounded-3xl shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-2xl ${LAYOUT[i] ?? ""}`}
               >
                 <Image
-                  src={getStateImage(THEME_COVER[theme.id] ?? "Kerala")}
+                  src={theme.cover}
                   alt=""
                   fill
                   loading="lazy"

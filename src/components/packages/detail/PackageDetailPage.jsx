@@ -10,6 +10,7 @@ import {
   Eye,
   MapPin,
   Search,
+  Route,
   Share2,
   Star,
   X,
@@ -24,10 +25,8 @@ import {
   InclusionsExclusions,
   PolicyTabs,
   QuickFacts,
-  ReviewsSection,
   SectionHeading,
   SectionNav,
-  StaysList,
   TrustRow,
 } from "@/components/packages/detail/DetailSections";
 import ItineraryTimeline from "@/components/packages/detail/ItineraryTimeline";
@@ -37,8 +36,7 @@ import AnimatedPrice from "@/components/packages/shared/AnimatedPrice";
 import { getThemeIcon } from "@/components/packages/shared/themeIcons";
 import TripSearchBar from "@/components/packages/shared/TripSearchBar";
 import WishlistButton from "@/components/packages/shared/WishlistButton";
-import { buildBookingHref } from "@/lib/packageBooking";
-import { calculateTripPrice } from "@/lib/tourPackageDetails";
+import { DEFAULT_CUSTOMISATION, buildBookingHref, priceBooking } from "@/lib/packageBooking";
 import { THEME_BY_ID } from "@/lib/tourPackageMeta";
 import { formatPackagePrice } from "@/lib/tourPackages";
 import PackageEnquiryForm from "@/components/booking/PackageEnquiryForm";
@@ -48,8 +46,6 @@ const SECTIONS = [
   { id: "itinerary", label: "Itinerary" },
   { id: "dates", label: "Dates & prices" },
   { id: "inclusions", label: "Inclusions" },
-  { id: "stays", label: "Stays" },
-  { id: "reviews", label: "Reviews" },
   { id: "policies", label: "Policies" },
   { id: "faqs", label: "FAQs" },
 ];
@@ -59,7 +55,12 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
   const [booking, setBooking] = useState(() => ({
     date: initialBooking.date,
     travellers: initialBooking.travellers,
-    hotel: "standard",
+    ...DEFAULT_CUSTOMISATION,
+    stays: initialBooking.stays ?? {},
+    rooms: {},
+    meals: {},
+    meal: initialBooking.meal ?? "auto",
+    cab: initialBooking.cab ?? "auto",
     departureCity: "Delhi",
     tourType: initialBooking.travellers.children > 0 ? "family" : "private",
     ticketBooked: "no",
@@ -82,18 +83,16 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
   );
 
   const pricing = useMemo(
-    () =>
-      calculateTripPrice({
-        price: pkg.price,
-        originalPrice: pkg.originalPrice,
-        adults: booking.travellers.adults,
-        childAges: booking.travellers.childAges,
-        infants: booking.travellers.infants,
-        hotelCategory: booking.hotel,
-        dateFactor: departure?.factor ?? 1,
-      }),
-    [pkg.price, pkg.originalPrice, booking.travellers, booking.hotel, departure]
+    () => priceBooking({ pkg, hotels: detail.hotels, booking, dateFactor: departure?.factor ?? 1 }),
+    [pkg, detail.hotels, booking, departure]
   );
+
+  // "Change" links in the booking card take travellers to the itinerary, where hotel / room /
+  // meal / cab changes open in a side drawer.
+  const openCustomize = useCallback(() => {
+    setSheetOpen(false);
+    window.setTimeout(() => document.getElementById("itinerary")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  }, []);
 
   const reserve = useCallback(() => {
     if (!booking.date) {
@@ -158,12 +157,13 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
       departure={departure}
       onReserve={reserve}
       onQuote={quote}
+      onCustomize={openCustomize}
       dateError={dateError}
     />
   );
 
   return (
-    <div className="bg-[#f6f3ee] pb-28 lg:pb-0">
+    <div className="bg-white pb-28 lg:pb-0">
       <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-7">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-1.5 text-xs font-bold text-stone-500">
@@ -211,9 +211,7 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
               <span className="inline-flex items-center gap-1.5">
                 <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                 {pkg.rating}
-                <a href="#reviews" className="font-semibold text-stone-500 underline-offset-2 hover:text-brand hover:underline">
-                  ({pkg.reviews} reviews)
-                </a>
+                <span className="font-semibold text-stone-500">({pkg.reviews} reviews)</span>
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="h-4 w-4 text-brand" />
@@ -252,6 +250,35 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
           <QuickFacts facts={detail.quickFacts} />
         </div>
 
+        {/* Route at a glance */}
+        <div className="pk-fade-up mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 p-4 text-white shadow-lg sm:p-5">
+          <p className="mb-3 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-orange-200">
+            <Route className="h-4 w-4" />
+            Your route · {meta.nights} nights
+          </p>
+          <ol className="no-scrollbar flex items-stretch gap-0 overflow-x-auto pb-1">
+            {detail.hotels.map((h, i) => (
+              <li key={h.id} className="flex shrink-0 items-center">
+                <div className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 ring-1 ring-white/10 backdrop-blur">
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-brand text-sm font-extrabold">{i + 1}</span>
+                  <div>
+                    <p className="text-sm font-extrabold leading-tight">{h.place}</p>
+                    <p className="text-[11px] font-semibold text-white/65">
+                      {h.nights} night{h.nights > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                {i < detail.hotels.length - 1 ? (
+                  <span aria-hidden className="mx-1 flex items-center text-orange-300">
+                    <span className="h-px w-5 bg-orange-300/50 sm:w-8" />
+                    <ChevronRight className="-ml-1 h-4 w-4" />
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </div>
+
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_390px] xl:gap-12">
           {/* Main column */}
           <div className="min-w-0 space-y-14 sm:space-y-16">
@@ -272,7 +299,15 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
                 title="Itinerary"
                 subtitle="A balanced plan — big sights, free time, and a coordinator one call away."
               />
-              <ItineraryTimeline itinerary={detail.itinerary} />
+              <ItineraryTimeline
+                itinerary={detail.itinerary}
+                pkg={pkg}
+                hotels={detail.hotels}
+                booking={booking}
+                onChange={patchBooking}
+                dateFactor={departure?.factor ?? 1}
+                pricing={pricing}
+              />
             </section>
 
             <section>
@@ -291,29 +326,13 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
                 }}
               />
               <p className="mt-2 text-xs font-medium text-stone-500">
-                Prices are per person on twin sharing in Standard hotels. Adjust hotel grade, adults and children in the
-                booking card.
+                Prices are per person on twin sharing in Standard hotels. Customise hotels, meals and your cab below.
               </p>
             </section>
 
             <section>
               <SectionHeading id="inclusions" eyebrow="The details" title="Inclusions & exclusions" />
               <InclusionsExclusions inclusions={detail.inclusions} exclusions={detail.exclusions} />
-            </section>
-
-            <section>
-              <SectionHeading
-                id="stays"
-                eyebrow="Where you'll sleep"
-                title="Your stays"
-                subtitle={`${meta.stars}★ hotels chosen for location, cleanliness and service.`}
-              />
-              <StaysList hotels={detail.hotels} />
-            </section>
-
-            <section>
-              <SectionHeading id="reviews" eyebrow="Real travellers" title="Guest reviews" />
-              <ReviewsSection reviews={detail.reviews} />
             </section>
 
             <section>
@@ -412,6 +431,7 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
                 departure={departure}
                 onReserve={reserve}
                 onQuote={quote}
+                onCustomize={openCustomize}
                 dateError={dateError}
               />
             </div>

@@ -27,24 +27,7 @@ import { formatTravellerSummary, totalTravellers } from "@/lib/tourTravellers";
 
 function Facts({ pkg }) {
   const { meta } = pkg;
-  const items = [
-    { icon: BedDouble, label: `${meta.stars}★ stays` },
-    { icon: Utensils, label: meta.mealPlan === "Breakfast" ? "Breakfast" : meta.mealPlan },
-    { icon: CarFront, label: "Private cab" },
-    meta.flightsIncluded
-      ? { icon: Plane, label: "Flights assist" }
-      : { icon: Camera, label: "Sightseeing" },
-  ];
-  return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-2">
-      {items.map(({ icon: Icon, label }) => (
-        <li key={label} className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600">
-          <Icon className="h-3.5 w-3.5 text-brand" />
-          {label}
-        </li>
-      ))}
-    </ul>
-  );
+ 
 }
 
 function Price({ pkg, filters, estimate }) {
@@ -64,15 +47,8 @@ function Price({ pkg, filters, estimate }) {
         ) : null}
         <span className="text-xs font-semibold text-stone-500">/ person</span>
       </div>
-      <p className="mt-1 text-[11px] font-semibold text-stone-500">
-        <span className="text-stone-700">≈ {formatPackagePrice(estimate.total)}</span> for{" "}
-        {formatTravellerSummary(travellers).toLowerCase().replace(/ · /g, ", ")} · incl. taxes
-      </p>
-      {meta.discount > 0 ? (
-        <span className="mt-1.5 inline-flex rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">
-          You save {meta.discount}%
-        </span>
-      ) : null}
+      
+      
     </div>
   );
 }
@@ -192,16 +168,7 @@ export default function ListingPackageCard({ pkg, filters, view = "grid", index 
             <Facts pkg={pkg} />
           </div>
 
-          <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-bold">
-            <span className="inline-flex items-center gap-1.5 text-rose-600">
-              <span className="pk-ping relative grid h-2 w-2 place-items-center rounded-full bg-rose-500 text-rose-500" />
-              Only {meta.seatsLeft} seats left on next departure
-            </span>
-            <span className="inline-flex items-center gap-1 text-stone-500">
-              <Flame className="h-3.5 w-3.5 text-orange-500" />
-              {meta.bookedThisMonth} booked this month
-            </span>
-          </p>
+        
         </div>
 
         <div

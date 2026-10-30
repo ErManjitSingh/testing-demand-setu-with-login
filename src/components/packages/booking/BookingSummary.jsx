@@ -5,7 +5,9 @@ import {
   BedDouble,
   CalendarDays,
   ChevronDown,
+  Car,
   Hotel,
+  UtensilsCrossed,
   MapPin,
   ShieldCheck,
   Star,
@@ -97,6 +99,14 @@ export default function BookingSummary({ pkg, booking, pricing, payNow, balance,
           <Row icon={Hotel} label="Stay">
             {pricing.hotel.label} · {pricing.hotel.stars}★ hotels
           </Row>
+          <Row icon={UtensilsCrossed} label="Meals">
+            {pricing.meal?.plan.label}
+          </Row>
+          <Row icon={Car} label="Cab">
+            {pricing.cab?.vehicles > 1 ? `${pricing.cab.vehicles} × ` : ""}
+            {pricing.cab?.option.label}
+            <span className="block text-xs font-semibold text-stone-500">Private · AC · driver, fuel &amp; tolls</span>
+          </Row>
           <Row icon={MapPin} label="Travelling from">
             {booking.departureCity}
           </Row>
@@ -121,7 +131,7 @@ export default function BookingSummary({ pkg, booking, pricing, payNow, balance,
                       {line.label}
                       <span className="block text-[10px] text-white/45">{line.detail}</span>
                     </dt>
-                    <dd className="font-bold tabular-nums">{line.free ? "Free" : formatPackagePrice(line.amount)}</dd>
+                    <dd className="font-bold tabular-nums">{line.free ? "Free" : `${line.amount < 0 ? "−" : ""}${formatPackagePrice(Math.abs(line.amount))}`}</dd>
                   </div>
                 ))}
                 {pricing.groupDiscount > 0 ? (

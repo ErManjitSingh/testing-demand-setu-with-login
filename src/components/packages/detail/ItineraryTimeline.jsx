@@ -12,10 +12,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import AnimateIn from "@/components/packages/AnimateIn";
+import { CabCard, StayCard } from "@/components/packages/detail/ItineraryStayControls";
+import { MEAL_BY_ID, resolveMealId, resolveStays } from "@/lib/tourCustomize";
 
 const MEAL_ICON = { Breakfast: Coffee, Lunch: Utensils, Dinner: Utensils };
 
-function DayCard({ item, open, onToggle, isFirst, isLast }) {
+function DayCard({ item, open, onToggle, isFirst, isLast, hotelName, meals, stayNode, cabNode }) {
   const Marker = isFirst ? Plane : isLast ? Sunrise : null;
   return (
     <div className="relative pl-14 sm:pl-20">
@@ -48,6 +50,12 @@ function DayCard({ item, open, onToggle, isFirst, isLast }) {
             {!open ? (
               <span className="mt-1 line-clamp-1 block text-sm text-stone-500">{item.summary}</span>
             ) : null}
+            {hotelName ? (
+              <span className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800">
+                <BedDouble className="h-3 w-3 shrink-0" />
+                <span className="truncate">Stay: {hotelName}</span>
+              </span>
+            ) : null}
           </span>
           <ChevronDown
             className={`mt-1 h-5 w-5 shrink-0 text-stone-400 transition-transform duration-300 ${open ? "rotate-180 text-brand" : ""}`}
@@ -71,8 +79,8 @@ function DayCard({ item, open, onToggle, isFirst, isLast }) {
               </ul>
 
               <div className="mt-5 flex flex-wrap gap-2">
-                {item.meals.length > 0 ? (
-                  item.meals.map((meal) => {
+                {meals.length > 0 ? (
+                  meals.map((meal) => {
                     const Icon = MEAL_ICON[meal] ?? Utensils;
                     return (
                       <span
@@ -90,19 +98,20 @@ function DayCard({ item, open, onToggle, isFirst, isLast }) {
                     Meals on your own
                   </span>
                 )}
-                {item.transfer ? (
+                {item.transfer && !cabNode ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800">
                     <Car className="h-3.5 w-3.5" />
                     {item.transfer}
                   </span>
                 ) : null}
-                {item.stay ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-800">
-                    <BedDouble className="h-3.5 w-3.5" />
-                    {item.stay}
-                  </span>
-                ) : null}
               </div>
+
+              {cabNode || stayNode ? (
+                <div className="mt-4 space-y-3">
+                  {cabNode}
+                  {stayNode}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -111,7 +120,7 @@ function DayCard({ item, open, onToggle, isFirst, isLast }) {
   );
 }
 
-export default function ItineraryTimeline({ itinerary }) {
+export default function ItineraryTimeline({ itinerary, pkg, hotels, booking, onChange, dateFactor = 1, pricing }) {
   const [openDays, setOpenDays] = useState(() => new Set([1]));
   const allOpen = openDays.size === itinerary.length;
 
@@ -123,11 +132,27 @@ export default function ItineraryTimeline({ itinerary }) {
       return next;
     });
 
+  // One entry per night; night N is the hotel for itinerary day N (the departure day has none).
+  const stays = resolveStays(hotels, booking.hotel, booking.stays, { rooms: booking.rooms, meals: booking.meals });
+  const totalNights = stays.length || 1;
+  const globalMealId = resolveMealId(pkg.meta, booking.meal);
+
+  const days = itinerary.map((item, i) => {
+    const stay = stays[i] ?? null;
+    const lastNight = stays[stays.length - 1] ?? null;
+    const isLast = i === itinerary.length - 1 && itinerary.length > 1;
+    const planStay = stay ?? lastNight;
+    const plan = MEAL_BY_ID[(planStay?.meal && MEAL_BY_ID[planStay.meal] ? planStay.meal : null) ?? globalMealId];
+    const meals = isLast ? ["Breakfast"] : i === 0 ? plan.meals.filter((m) => m !== "Breakfast") : plan.meals;
+    const hotel = stay ? hotels[stay.stop] : null;
+    return { stay, hotel, meals, hotelName: hotel ? hotel.options[stay.category].name : null };
+  });
+
   return (
     <div>
       <div className="mb-5 flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-stone-500">
-          {itinerary.length}-day plan · tap a day to see the details
+          {itinerary.length}-day plan · tap a day to see activities, your hotel &amp; cab
         </p>
         <button
           type="button"
@@ -144,17 +169,38 @@ export default function ItineraryTimeline({ itinerary }) {
           className="pk-grow-y absolute bottom-6 left-[21px] top-6 w-0.5 rounded-full bg-gradient-to-b from-brand via-orange-300 to-stone-200 sm:left-[27px]"
         />
         <ol className="space-y-4">
-          {itinerary.map((item, i) => (
-            <AnimateIn as="li" key={item.day} delay={Math.min(i, 4) * 60}>
-              <DayCard
-                item={item}
-                open={openDays.has(item.day)}
-                onToggle={() => toggle(item.day)}
-                isFirst={i === 0}
-                isLast={i === itinerary.length - 1 && itinerary.length > 1}
-              />
-            </AnimateIn>
-          ))}
+          {itinerary.map((item, i) => {
+            const info = days[i];
+            return (
+              <AnimateIn as="li" key={item.day} delay={Math.min(i, 4) * 60}>
+                <DayCard
+                  item={item}
+                  open={openDays.has(item.day)}
+                  onToggle={() => toggle(item.day)}
+                  isFirst={i === 0}
+                  isLast={i === itinerary.length - 1 && itinerary.length > 1}
+                  hotelName={info.hotelName}
+                  meals={info.meals}
+                  cabNode={i === 0 ? <CabCard pkg={pkg} booking={booking} onChange={onChange} pricing={pricing} /> : null}
+                  stayNode={
+                    info.stay ? (
+                      <StayCard
+                        pkg={pkg}
+                        hotel={info.hotel}
+                        stay={info.stay}
+                        day={item.day}
+                        booking={booking}
+                        onChange={onChange}
+                        dateFactor={dateFactor}
+                        totalNights={totalNights}
+                        pricing={pricing}
+                      />
+                    ) : null
+                  }
+                />
+              </AnimateIn>
+            );
+          })}
         </ol>
       </div>
     </div>

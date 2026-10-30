@@ -1,8 +1,11 @@
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import AllPackagesCatalog from "@/components/packages/AllPackagesCatalog";
 import FamousPackagesSection from "@/components/packages/FamousPackagesSection";
+import PackagesAnnouncement from "@/components/packages/PackagesAnnouncement";
 import PackagesContentMarquee from "@/components/packages/PackagesContentMarquee";
+import PackagesCtaBanner from "@/components/packages/PackagesCtaBanner";
 import PackagesExploreCountries from "@/components/packages/PackagesExploreCountries";
 import PackagesExploreStates from "@/components/packages/PackagesExploreStates";
 import PackagesFAQ from "@/components/packages/PackagesFAQ";
@@ -10,39 +13,95 @@ import PackagesHeroSearch from "@/components/packages/PackagesHeroSearch";
 import PackagesHowItWorks from "@/components/packages/PackagesHowItWorks";
 import PackagesPopularCities from "@/components/packages/PackagesPopularCities";
 import PackagesPromoBanner from "@/components/packages/PackagesPromoBanner";
+import PackagesSeoContent from "@/components/packages/PackagesSeoContent";
+import PackagesTestimonials from "@/components/packages/PackagesTestimonials";
+import PackagesThemeContent from "@/components/packages/PackagesThemeContent";
 import PackagesThemeTiles from "@/components/packages/PackagesThemeTiles";
+import PackagesWhyTravel from "@/components/packages/PackagesWhyTravel";
 import { buildListingHref } from "@/lib/packageBooking";
+import { resolveHomeBlocks } from "@/lib/packageHomeApi";
 import { getFamousPackages } from "@/lib/tourPackages";
 import { formatFromPrice, getCityImage, getCityMeta } from "@/lib/tourDestinations";
 
 /**
  * Home page. Every destination, theme and package tile is a real link into the
  * listing (`/packages?...`) or product (`/packages/[slug]`) pages — no popups.
+ *
+ * `homeConfig` is the admin-managed content (see `lib/packageHomeApi.js`). When it
+ * is missing the page renders exactly its built-in content.
  */
-export default function PackagesPageClient({ states = [], cities = [] }) {
+export default function PackagesPageClient({ states = [], cities = [], homeConfig = null }) {
   const famousPackages = getFamousPackages();
+  const blocks = resolveHomeBlocks(homeConfig);
+
+  // Consecutive theme-content blocks alternate their image side
+  let contentIndex = 0;
+
+  const renderBlock = ({ type, section }) => {
+    switch (type) {
+      case "theme":
+        return <PackagesThemeTiles config={section} />;
+      case "content":
+        return <PackagesThemeContent block={section} reverse={contentIndex++ % 2 === 1} />;
+      case "state":
+        return <PackagesExploreStates states={states} config={section} />;
+      case "city":
+        return (
+          <>
+            <CityChoiceBridge />
+            <PackagesPopularCities cities={cities} config={section} />
+          </>
+        );
+      case "country":
+        return (
+          <>
+            <PlaceBridge
+              dark
+              videoSrc="/videos/beyond-india.mp4"
+              kicker="Beyond India"
+              title="The same plan, a little further from home."
+              detail="A wider set of countries we already know how to run. The desk writes the days either way."
+            />
+            <PackagesExploreCountries config={section} />
+          </>
+        );
+      case "tail":
+        return (
+          <>
+            <AllPackagesCatalog />
+            <PackagesHowItWorks />
+            <PackagesPromoBanner />
+          </>
+        );
+      case "whyChoose":
+        return <PackagesWhyTravel config={section} />;
+      case "testimonial":
+        return <PackagesTestimonials config={section} />;
+      case "cta":
+        return <PackagesCtaBanner config={section} />;
+      case "faq":
+        return <PackagesFAQ config={section} />;
+      case "seoContent":
+        return <PackagesSeoContent config={section} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="bg-[#f6f3ee]">
-      <PackagesHeroSearch states={states} cities={cities} />
+      <PackagesHeroSearch
+        states={states}
+        cities={cities}
+        header={homeConfig?.header ?? null}
+        stats={homeConfig?.stats ?? null}
+      />
+      <PackagesAnnouncement config={homeConfig?.announcement ?? null} />
       <PackagesContentMarquee />
       <FamousPackagesSection packages={famousPackages} />
-      <PackagesThemeTiles />
-      <PackagesExploreStates states={states} />
-      <CityChoiceBridge />
-      <PackagesPopularCities cities={cities} />
-      <PlaceBridge
-        dark
-        videoSrc="/videos/beyond-india.mp4"
-        kicker="Beyond India"
-        title="The same plan, a little further from home."
-        detail="A wider set of countries we already know how to run. The desk writes the days either way."
-      />
-      <PackagesExploreCountries />
-      <AllPackagesCatalog />
-      <PackagesHowItWorks />
-      <PackagesPromoBanner />
-      <PackagesFAQ />
+      {blocks.map((block) => (
+        <Fragment key={block.key}>{renderBlock(block)}</Fragment>
+      ))}
     </div>
   );
 }
