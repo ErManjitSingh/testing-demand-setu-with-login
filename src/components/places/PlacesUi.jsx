@@ -59,21 +59,19 @@ export function Container({ className = "", children }) {
   return <div className={`${WRAP} ${className}`}>{children}</div>;
 }
 
-const BAND_TONES = {
-  white: "bg-white",
-  soft: "bg-stone-50",
-  brand: "bg-brand-muted/60",
+const CARD_TONES = {
+  white: "bg-white ring-1 ring-black/5",
+  soft: "bg-white ring-1 ring-black/5",
+  brand: "bg-gradient-to-br from-[#fff7ec] via-[#fdf1e2] to-[#fbe7d0] ring-1 ring-orange-100",
 };
 
-/** Full-width band: gives the page a clear rhythm of sections instead of one long column. */
+/** Home-page style section: a white rounded card sitting on the grey page. */
 export function Band({ tone = "white", labelledBy, id, className = "", children }) {
   return (
-    <section
-      id={id}
-      aria-labelledby={labelledBy}
-      className={`${BAND_TONES[tone] ?? BAND_TONES.white} scroll-mt-28 border-t border-stone-100 first:border-t-0`}
-    >
-      <div className={`${WRAP} py-12 sm:py-16 lg:py-20 ${className}`}>{children}</div>
+    <section id={id} aria-labelledby={labelledBy} className="scroll-mt-28 px-3 py-3 sm:px-6 sm:py-4">
+      <div className={`mx-auto max-w-7xl rounded-2xl p-4 shadow-sm sm:rounded-3xl sm:p-7 lg:p-8 ${CARD_TONES[tone] ?? CARD_TONES.white} ${className}`}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -114,14 +112,14 @@ export function PlacesHero({ breadcrumbs, eyebrow, title, subtitle, image, stats
         {image ? (
           <Image src={image} alt="" fill priority sizes="100vw" className="-z-20 object-cover" />
         ) : null}
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-stone-950/90 via-stone-950/60 to-stone-950/25" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-stone-950/70 via-stone-950/50 to-stone-950/75" />
         <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-stone-950/80 via-transparent to-stone-950/30" />
         <div aria-hidden className="absolute -left-24 -top-24 -z-10 h-80 w-80 rounded-full bg-brand/30 blur-3xl" />
 
-        <div className={`${WRAP} pb-24 pt-7 sm:pb-28 sm:pt-10 lg:pb-36 lg:pt-12`}>
+        <div className={`${WRAP} pb-24 pt-7 sm:pb-28 sm:pt-10 lg:pb-32 lg:pt-12`}>
           <Breadcrumbs items={breadcrumbs} className="pk-fade" />
 
-          <div className="mt-8 max-w-3xl sm:mt-12">
+          <div className="mx-auto mt-8 max-w-3xl text-center sm:mt-12">
             {eyebrow ? (
               <p className="pk-fade-up inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-orange-100 backdrop-blur sm:text-xs">
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand" />
@@ -136,14 +134,14 @@ export function PlacesHero({ breadcrumbs, eyebrow, title, subtitle, image, stats
             </h1>
             {subtitle ? (
               <p
-                className="pk-fade-up mt-4 max-w-2xl text-pretty text-sm font-medium leading-relaxed text-white/85 sm:text-lg"
+                className="pk-fade-up mx-auto mt-4 max-w-2xl text-pretty text-sm font-medium leading-relaxed text-white/85 sm:text-lg"
                 style={{ animationDelay: "120ms" }}
               >
                 {subtitle}
               </p>
             ) : null}
             {children ? (
-              <div className="pk-fade-up mt-7 flex flex-wrap items-center gap-3" style={{ animationDelay: "180ms" }}>
+              <div className="pk-fade-up mt-7 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "180ms" }}>
                 {children}
               </div>
             ) : null}
@@ -153,7 +151,7 @@ export function PlacesHero({ breadcrumbs, eyebrow, title, subtitle, image, stats
 
       {stats.length ? (
         <div className={`${WRAP} relative z-10 -mt-12 sm:-mt-14 lg:-mt-16`}>
-          <dl className={`grid ${cols} overflow-hidden rounded-3xl bg-white shadow-[0_24px_60px_-24px_rgba(28,25,23,0.35)] ring-1 ring-stone-200/80`}>
+          <dl className={`mx-auto grid max-w-4xl ${cols} overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_-24px_rgba(28,25,23,0.45)] ring-1 ring-black/5 sm:rounded-3xl`}>
             {stats.map((s) => (
               <div
                 key={s.label}
@@ -180,15 +178,12 @@ export function SectionHeader({ eyebrow, title, subtitle, id, action, align = "l
     <div className={`flex flex-col gap-4 ${center ? "items-center text-center" : "sm:flex-row sm:items-end sm:justify-between"}`}>
       <div className={center ? "max-w-2xl" : "max-w-2xl"}>
         {eyebrow ? (
-          <p className={`flex items-center gap-2.5 text-[11px] font-extrabold uppercase tracking-[0.2em] text-brand sm:text-xs ${center ? "justify-center" : ""}`}>
-            <span aria-hidden className="h-0.5 w-7 rounded-full bg-brand" />
-            {eyebrow}
-          </p>
+          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-brand">{eyebrow}</p>
         ) : null}
-        <h2 id={id} className="mt-2.5 text-balance text-2xl font-extrabold leading-tight tracking-tight text-stone-900 sm:text-3xl lg:text-4xl">
+        <h2 id={id} className="mt-1 text-balance text-2xl font-extrabold leading-tight tracking-tight text-stone-950 sm:text-4xl">
           {title}
         </h2>
-        {subtitle ? <p className="mt-3 text-pretty text-sm font-medium leading-relaxed text-stone-600 sm:text-base">{subtitle}</p> : null}
+        {subtitle ? <p className="mt-1 text-pretty text-sm font-medium leading-relaxed text-stone-600 sm:text-base">{subtitle}</p> : null}
       </div>
       {action}
     </div>
@@ -263,7 +258,7 @@ export function PlaceCard({ place, showCity = true, priority = false, className 
   return (
     <Link
       href={href}
-      className={`group flex h-full flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-stone-200 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-24px_rgba(234,88,12,0.45)] hover:ring-brand/40 ${className}`}
+      className={`group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-brand/40 ${className}`}
     >
       <div className="relative aspect-[16/11] overflow-hidden bg-stone-200">
         <CardArt
@@ -328,7 +323,7 @@ export function FeaturedPlaceCard({ place, rank, priority = false }) {
   return (
     <Link
       href={href}
-      className="group relative isolate flex h-full min-h-[22rem] flex-col justify-end overflow-hidden rounded-3xl bg-stone-900 text-white ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl sm:min-h-[26rem]"
+      className="group relative isolate flex h-full min-h-[22rem] flex-col justify-end overflow-hidden rounded-2xl bg-stone-900 text-white ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl sm:min-h-[26rem]"
     >
       <div className="absolute inset-0 -z-10">
         <CardArt
@@ -342,7 +337,7 @@ export function FeaturedPlaceCard({ place, rank, priority = false }) {
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-stone-950/95 via-stone-950/35 to-stone-950/10" />
       <span
         aria-hidden
-        className="absolute left-5 top-4 font-serif text-6xl font-medium leading-none text-white/25 transition group-hover:text-brand/90"
+        className="absolute left-5 top-4 text-6xl font-extrabold leading-none text-white/25 transition group-hover:text-brand/90"
       >
         {String(rank).padStart(2, "0")}
       </span>
@@ -370,7 +365,7 @@ export function DestinationTile({ href, title, subtitle, image, fallback, count,
   return (
     <Link
       href={href}
-      className={`group relative isolate block h-full overflow-hidden rounded-3xl bg-stone-900 text-white ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${className}`}
+      className={`group relative isolate block h-full overflow-hidden rounded-2xl bg-stone-900 text-white ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl ${className}`}
     >
       <SafeImage
         src={image}
@@ -391,7 +386,7 @@ export function DestinationTile({ href, title, subtitle, image, fallback, count,
         <ArrowUpRight className="h-4 w-4" />
       </span>
       <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-        <h3 className={`font-serif font-medium leading-tight ${featured ? "text-3xl sm:text-4xl" : "text-xl sm:text-2xl"}`}>{title}</h3>
+        <h3 className={`font-extrabold leading-tight tracking-tight ${featured ? "text-3xl sm:text-4xl" : "text-lg sm:text-2xl"}`}>{title}</h3>
         {subtitle ? (
           <p className={`mt-1.5 line-clamp-2 text-xs font-medium leading-snug text-white/75 sm:text-sm ${featured ? "" : "hidden sm:block"}`}>{subtitle}</p>
         ) : null}
@@ -450,7 +445,7 @@ export function TypeBreakdown({ places, max = 6 }) {
 
 export function SideCard({ title, icon: Icon, children, className = "" }) {
   return (
-    <div className={`rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-6 ${className}`}>
+    <div className={`rounded-2xl bg-stone-50 p-5 ring-1 ring-black/5 sm:p-6 ${className}`}>
       {title ? (
         <h2 className="flex items-center gap-2.5 text-base font-extrabold text-stone-900">
           {Icon ? (
@@ -478,7 +473,7 @@ export function FaqSection({ faqs, title = "Frequently asked questions", subtitl
         {faqs.map((faq, i) => (
           <details
             key={faq.q}
-            className="group rounded-2xl bg-white ring-1 ring-stone-200 transition open:shadow-lg open:shadow-brand/5 open:ring-brand/40"
+            className="group rounded-xl bg-stone-50 ring-1 ring-black/5 transition open:bg-white open:shadow-lg open:shadow-brand/5 open:ring-brand/40"
             open={i === 0}
           >
             <summary className="flex cursor-pointer list-none items-start gap-3 px-4 py-4 marker:content-none sm:items-center sm:gap-4 sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
@@ -500,16 +495,16 @@ export function FaqSection({ faqs, title = "Frequently asked questions", subtitl
 
 export function CtaBand({ eyebrow, title, text, image, children }) {
   return (
-    <section className="bg-white">
-      <div className={`${WRAP} py-12 sm:py-16`}>
-        <div className="relative isolate overflow-hidden rounded-[2rem] bg-stone-950 px-6 py-10 text-white sm:px-12 sm:py-14 lg:px-16">
+    <section className="px-3 py-3 sm:px-6 sm:py-4">
+      <div className="mx-auto max-w-7xl">
+        <div className="relative isolate overflow-hidden rounded-2xl bg-stone-950 px-6 py-10 text-white shadow-sm sm:rounded-3xl sm:px-12 sm:py-14 lg:px-16">
           {image ? <Image src={image} alt="" fill sizes="100vw" className="-z-20 object-cover opacity-35" /> : null}
           <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-stone-950 via-stone-950/85 to-stone-950/40" />
           <div aria-hidden className="absolute -right-16 -top-24 -z-10 h-80 w-80 rounded-full bg-brand/40 blur-3xl" />
           <div className="flex flex-col gap-7 md:flex-row md:items-center md:justify-between">
             <div className="max-w-xl">
               {eyebrow ? <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-orange-200">{eyebrow}</p> : null}
-              <h2 className="mt-2 text-balance text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl lg:text-4xl">{title}</h2>
+              <h2 className="mt-2 text-balance text-2xl font-extrabold leading-tight tracking-tight sm:text-4xl">{title}</h2>
               {text ? <p className="mt-3 text-sm font-medium leading-relaxed text-white/75 sm:text-base">{text}</p> : null}
             </div>
             <div className="flex shrink-0 flex-wrap gap-3">{children}</div>
@@ -585,7 +580,7 @@ export function PackagesStrip({ packages, title, subtitle }) {
           <Link
             key={pkg.slug}
             href={`/packages/${pkg.slug}`}
-            className="group flex flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-stone-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-brand/40"
+            className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-brand/40"
           >
             <div className="relative aspect-[16/10] overflow-hidden">
               <Image

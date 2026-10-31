@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BadgeCheck, Headset, ShieldCheck, Sparkles, Star, Users } from "lucide-react";
+import { BadgeCheck, Headset, Heart, Landmark, Mountain, Search, ShieldCheck, Sparkles, Star, Users, Waves } from "lucide-react";
 import { useMemo, useState } from "react";
 import TripSearchBar from "@/components/packages/shared/TripSearchBar";
 import { buildListingHref } from "@/lib/packageBooking";
@@ -503,6 +503,17 @@ function FormField({ label, children, className = "" }) {
   );
 }
 
+/** Shortcut tabs that jump straight to a filtered listing (like the "Honeymoon / Pilgrimage" tabs on big travel sites). */
+const SHORTCUTS = [
+  { label: "Honeymoon", theme: "honeymoon", icon: Heart },
+  { label: "Pilgrimage", theme: "spiritual", icon: Landmark },
+  { label: "Mountains", theme: "mountains", icon: Mountain },
+  { label: "Beaches", theme: "beaches", icon: Waves },
+];
+
+const TAB_BASE =
+  "relative flex shrink-0 items-center justify-center gap-2 whitespace-nowrap px-4 py-3.5 text-sm font-bold transition sm:flex-1 sm:px-3";
+
 export default function PackagesHeroSearch({ states = [], cities = [], header = null, stats = null }) {
   const [mode, setMode] = useState("search");
 
@@ -515,107 +526,85 @@ export default function PackagesHeroSearch({ states = [], cities = [], header = 
   return (
     <section className="relative isolate -mt-20 overflow-hidden bg-stone-950 sm:-mt-24">
       <HeroBackground poster={header?.poster || HERO_POSTER} />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,rgba(12,10,9,0.9)_0%,rgba(12,10,9,0.6)_46%,rgba(12,10,9,0.35)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/30" />
-      <div aria-hidden className="pointer-events-none absolute -left-24 top-1/3 hidden h-72 w-72 rounded-full bg-orange-500/20 blur-3xl pk-drift lg:block" />
-      <div aria-hidden className="pointer-events-none absolute -right-20 bottom-10 hidden h-80 w-80 rounded-full bg-amber-400/15 blur-3xl pk-drift lg:block" style={{ animationDelay: "-4s" }} />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black/70" />
 
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-8 px-4 pb-10 pt-28 sm:gap-10 sm:px-6 sm:pb-16 sm:pt-36 lg:min-h-screen lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-14 lg:pt-40">
-        <div className="animate-hero-enter">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-14 pt-28 sm:px-6 sm:pb-20 sm:pt-36">
+        <div className="animate-hero-enter text-center">
           <span className="pk-glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-orange-100">
             <Sparkles className="h-3.5 w-3.5 text-amber-300" />
             Tour packages · India &amp; the world
           </span>
 
-          <h1 className="mt-5 font-serif text-[2.7rem] font-medium leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-7xl">
+          <h1 className="mx-auto mt-4 max-w-4xl text-balance font-serif text-[2rem] font-medium leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-[3.4rem]">
             {headlineParts.length > 0 ? (
-              headlineParts.map((part, index) =>
-                index === headlineParts.length - 1 && headlineParts.length > 1 ? (
-                  <span key={part} className="text-shimmer mt-2 block italic">
-                    {part}
-                  </span>
-                ) : (
-                  <span key={part} className="block">
-                    {part}
-                  </span>
-                )
-              )
+              headlineParts.map((part, index) => (
+                <span
+                  key={part}
+                  className={`block whitespace-nowrap sm:inline-block ${
+                    index === headlineParts.length - 1 && headlineParts.length > 1 ? "italic text-orange-300" : "sm:mr-3"
+                  }`}
+                >
+                  {part}
+                </span>
+              ))
             ) : (
               <>
-                <span className="block">Every Country.</span>
-                <span className="block">Every State.</span>
-                <span className="block">Every City.</span>
-                <span className="text-shimmer mt-2 block italic">One Journey.</span>
+                <span className="block whitespace-nowrap sm:mr-3 sm:inline-block">Every Country.</span>
+                <span className="block whitespace-nowrap sm:mr-3 sm:inline-block">Every State.</span>
+                <span className="block whitespace-nowrap sm:mr-3 sm:inline-block">Every City.</span>
+                <span className="block whitespace-nowrap italic text-orange-300 sm:inline-block">One Journey.</span>
               </>
             )}
           </h1>
 
-          {header?.description ? (
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">{header.description}</p>
-          ) : null}
-
-          <ul className="mt-7 space-y-3">
-            {HERO_PERKS.map((perk) => (
-              <li key={perk} className="flex items-center gap-2.5 text-sm font-semibold text-white/90 sm:text-base">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-brand">
-                  ✓
-                </span>
-                {perk}
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-8 hidden grid-cols-4 gap-4 sm:grid">
-            {heroStats.map((item) => (
-              <div key={item.label} className="flex flex-col items-start gap-2.5 border-l border-white/15 pl-4 first:border-l-0 first:pl-0">
-                <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/12 text-orange-200 ring-1 ring-white/15">
-                  <item.icon className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="text-lg font-extrabold leading-none text-white">{item.value}</p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-white/60">{item.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-white/80 sm:text-base">
+            {header?.description || HERO_PERKS.join(" · ")}
+          </p>
         </div>
 
-        <div className="w-full animate-hero-enter" style={{ animationDelay: "120ms" }}>
-          <div className="rounded-[2rem] bg-white shadow-[0_40px_90px_-28px_rgba(0,0,0,0.65)] ring-1 ring-white/40">
-            <div className="p-2">
-              <div role="tablist" aria-label="How would you like to start?" className="grid grid-cols-2 gap-1 rounded-[1.4rem] bg-stone-100 p-1">
-                {MODES.map((item) => (
+        <div className="mt-7 animate-hero-enter sm:mt-9" style={{ animationDelay: "120ms" }}>
+          <div className="rounded-2xl bg-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-white/40">
+            <div
+              role="tablist"
+              aria-label="How would you like to start?"
+              className="no-scrollbar flex overflow-x-auto rounded-t-2xl border-b border-stone-200 bg-brand-muted"
+            >
+              {MODES.map((item) => {
+                const active = mode === item.id;
+                return (
                   <button
                     key={item.id}
                     type="button"
                     role="tab"
-                    aria-selected={mode === item.id}
+                    aria-selected={active}
                     onClick={() => setMode(item.id)}
-                    className={`rounded-[1.1rem] px-3 py-3 text-sm font-extrabold transition duration-300 ${
-                      mode === item.id ? "bg-white text-stone-950 shadow-md" : "text-stone-500 hover:text-stone-900"
-                    }`}
+                    className={`${TAB_BASE} ${active ? "bg-white text-brand" : "text-stone-600 hover:text-stone-950"}`}
                   >
+                    {item.id === "search" ? <Search className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
                     {item.label}
+                    {active ? <span aria-hidden className="absolute inset-x-0 bottom-0 h-0.5 bg-brand" /> : null}
                   </button>
-                ))}
-              </div>
+                );
+              })}
+              {SHORTCUTS.map(({ label, theme, icon: Icon }) => (
+                <Link
+                  key={theme}
+                  href={buildListingHref({ themes: [theme] })}
+                  className={`${TAB_BASE} text-stone-600 hover:bg-white/70 hover:text-brand`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </Link>
+              ))}
             </div>
 
-            <div className="px-5 pb-6 pt-3 sm:px-7 sm:pb-7">
+            <div className="px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
               {mode === "search" ? (
                 <div key="search" className="pk-fade">
-                  <div className="mb-4">
-                    <p className="text-xl font-extrabold tracking-tight text-stone-950">Where to next?</p>
-                    <p className="mt-0.5 text-sm text-stone-500">
-                      Pick a place, your dates and your people — we show every matching trip with live prices.
-                    </p>
-                  </div>
-                  <TripSearchBar layout="stack" showBudget />
-
-                 
+                  <TripSearchBar layout="wide" showBudget />
                 </div>
               ) : (
-                <div key="plan" className="pk-fade">
+                <div key="plan" className="pk-fade mx-auto max-w-3xl pb-2">
                   <div className="mb-4">
                     <p className="text-xl font-extrabold tracking-tight text-stone-950">Plan your trip</p>
                     <p className="mt-0.5 text-sm text-stone-500">Share the trip. We send the plan.</p>
@@ -624,11 +613,25 @@ export default function PackagesHeroSearch({ states = [], cities = [], header = 
                 </div>
               )}
 
-              <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-stone-400">
+              <p className="mt-1 flex items-center justify-center gap-2 text-center text-[11px] font-semibold text-stone-400">
                 <ShieldCheck className="h-4 w-4 text-emerald-500" />
                 Free itinerary changes · Pay 25% to confirm · No hidden charges
               </p>
             </div>
+          </div>
+
+          <div className="mt-6 hidden grid-cols-4 gap-4 sm:grid">
+            {heroStats.map((item) => (
+              <div key={item.label} className="flex items-center justify-center gap-3 text-white">
+                <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white/12 text-orange-200 ring-1 ring-white/15">
+                  <item.icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-lg font-extrabold leading-none">{item.value}</p>
+                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-white/65">{item.label}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

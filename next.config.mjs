@@ -7,6 +7,17 @@ const nextConfig = {
         destination: "/accommodations",
         permanent: false,
       },
+      // Places guide: state URLs read "places-to-visit-in-<state>". Send old un-prefixed URLs there (308).
+      {
+        source: "/places/india/:state((?!places-to-visit-in-)[^/]+)",
+        destination: "/places/india/places-to-visit-in-:state",
+        permanent: true,
+      },
+      {
+        source: "/places/india/:state((?!places-to-visit-in-)[^/]+)/:rest*",
+        destination: "/places/india/places-to-visit-in-:state/:rest*",
+        permanent: true,
+      },
     ];
   },
   images: {

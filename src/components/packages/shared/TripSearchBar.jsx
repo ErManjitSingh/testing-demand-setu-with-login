@@ -45,6 +45,7 @@ export default function TripSearchBar({
   };
 
   const stack = layout === "stack";
+  const wide = layout === "wide";
 
   const date = (
     <label className={`flex items-center gap-3 px-4 py-3 ${stack ? fieldShell : "rounded-2xl transition hover:bg-stone-50 focus-within:bg-stone-50"}`}>
@@ -64,7 +65,7 @@ export default function TripSearchBar({
   );
 
   const budget = showBudget ? (
-    <label className={`flex items-center gap-3 px-4 py-3 ${fieldShell}`}>
+    <label className={`flex items-center gap-3 px-4 py-3 ${wide ? "rounded-2xl transition hover:bg-stone-50 focus-within:bg-stone-50" : fieldShell}`}>
       <Wallet className="h-5 w-5 shrink-0 text-brand" />
       <span className="min-w-0 flex-1">
         <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-stone-500">Budget / person</span>
@@ -82,6 +83,32 @@ export default function TripSearchBar({
       </span>
     </label>
   ) : null;
+
+  if (wide) {
+    // One row of divided cells with the big button straddling the bottom edge (home hero)
+    return (
+      <form onSubmit={submit} role="search" aria-label="Search tour packages" className={`relative pb-7 ${className}`}>
+        <div className="grid rounded-2xl border border-stone-300 bg-white sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:divide-x lg:divide-stone-200">
+          <DestinationInput value={draft.q} onChange={(q) => patch({ q })} suggestions={suggestions} />
+          {date}
+          <TravellersPicker
+            variant="hero"
+            label="Adults & children"
+            value={draft.travellers}
+            onChange={(travellers) => patch({ travellers })}
+          />
+          {budget}
+        </div>
+        <button
+          type="submit"
+          className="pk-sweep group absolute bottom-0 left-1/2 inline-flex -translate-x-1/2 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand to-orange-500 px-12 py-3.5 text-base font-extrabold uppercase tracking-wider text-white shadow-lg shadow-brand/40 transition hover:brightness-110 active:scale-[0.98] sm:px-16 sm:text-lg"
+        >
+          <Search className="h-5 w-5 transition group-hover:scale-110" />
+          Search
+        </button>
+      </form>
+    );
+  }
 
   if (stack) {
     return (

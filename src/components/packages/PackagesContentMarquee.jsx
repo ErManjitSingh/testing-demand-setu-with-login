@@ -11,7 +11,8 @@ const MARQUEE_ITEMS = [
 
 export default function PackagesContentMarquee() {
   return (
-    <section className="overflow-hidden py-5" aria-label="Why travellers choose Demand Setu">
+    <section className="px-3 py-3 sm:px-6 sm:py-4" aria-label="Why travellers choose Demand Setu">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-full bg-white py-3 shadow-sm ring-1 ring-black/5">
       <div className="animate-marquee-ltr flex w-max">
         {[0, 1].map((set) => (
           <div key={set} className="flex items-center gap-10 pr-10">
@@ -26,6 +27,7 @@ export default function PackagesContentMarquee() {
             ))}
           </div>
         ))}
+      </div>
       </div>
     </section>
   );

@@ -216,7 +216,7 @@ export function PlacesFilterBar({ filters, states, types, resultCount }) {
   };
 
   return (
-    <div className="relative rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-5" aria-busy={pending}>
+    <div className="relative rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:p-5" aria-busy={pending}>
       {pending ? <span aria-hidden className="absolute inset-x-6 top-0 h-0.5 animate-pulse rounded-full bg-brand" /> : null}
 
       <form

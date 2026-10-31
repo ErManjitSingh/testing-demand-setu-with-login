@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { getPackageImage } from "@/lib/tourPackages";
 import PhoneNumberField from "@/components/booking/PhoneNumberField";
-import TravellersPicker from "@/components/packages/shared/TravellersPicker";
 import {
   buildTripNotes,
   getRoomsNeeded,
@@ -352,13 +351,6 @@ export default function PackageEnquiryForm({
                   ))}
                 </div>
               </Field>
-            </div>
-
-            <div>
-              <span className="mb-1 block text-xs font-bold text-foreground">
-                Travellers <span className="text-brand">*</span>
-              </span>
-              <TravellersPicker inline value={travellers} onChange={setTravellers} />
             </div>
 
             {submitError && (

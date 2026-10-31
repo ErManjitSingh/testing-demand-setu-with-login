@@ -18,7 +18,7 @@ import { flattenPlaces, getPlacesIndexSafe, sortNearest, sortRecommended, toCard
 import { breadcrumbItems, breadcrumbJsonLd, buildPlacesMetadata, faqJsonLd, itemListJsonLd, listNames } from "@/lib/places/placesSeo";
 import { PLACE_TYPES, PLACE_TYPE_BY_ID, DEFAULT_PLACE_TYPE, placesHref } from "@/lib/places/placesText";
 
-const TITLE = "Places to Visit in India – Tourist Places, Attractions & Sightseeing";
+const TITLE = "Places to Visit in India – Tourist Places & Attractions";
 const DESCRIPTION =
   "Discover places to visit across India — temples, lakes, passes, waterfalls, treks and sightseeing spots by state and city, with distances, drive times and cab fares.";
 
@@ -46,7 +46,7 @@ export default async function PlacesIndexPage({ searchParams }) {
 
   if (!index) {
     return (
-      <div className="bg-white">
+      <div className="bg-stone-100">
         <PlacesHero
           breadcrumbs={crumbs}
           eyebrow="Explore India"
@@ -109,7 +109,7 @@ export default async function PlacesIndexPage({ searchParams }) {
   const bento = index.states.length >= 5;
 
   return (
-    <div className="bg-white">
+    <div className="bg-stone-100">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs),

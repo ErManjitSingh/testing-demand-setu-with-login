@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import AnimateIn from "@/components/packages/AnimateIn";
+import HomeSection from "@/components/packages/HomeSection";
 
 const FEATURES = [
   {
@@ -57,59 +57,37 @@ export default function PackagesWhyTravel({ config = null }) {
     : FEATURES;
 
   return (
-    <section className="relative isolate overflow-hidden bg-stone-950 py-16 text-white sm:py-24">
-      <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-orange-600/35 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-24 -z-10 h-96 w-96 rounded-full bg-amber-500/15 blur-3xl" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.07] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:26px_26px]"
-      />
-
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-        <AnimateIn className="lg:sticky lg:top-28 lg:self-start">
-          <span className="pk-glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-orange-100">
-            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-            Why Demand Setu
-          </span>
-          <h2 className="mt-5 font-serif text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl">
-            {config?.title || "Why travel with Demand Setu?"}
-          </h2>
-          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-white/70 sm:text-base">
-            From first enquiry to your return flight, one trip desk handles the details so you can enjoy every moment of the
-            journey.
-          </p>
-          <Link
-            href="/contact-us"
-            className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-stone-950 transition hover:bg-orange-50"
-          >
-            Talk to a trip expert
-            <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-          </Link>
-        </AnimateIn>
-
-        <ol className="grid gap-4 sm:grid-cols-2">
-          {features.map((item, index) => {
-            const Icon = pickIcon(item.title, index);
-            return (
-              <AnimateIn key={`${item.title}-${index}`} as="li" delay={index * 80} className="h-full">
-                <div className="group relative h-full overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 transition duration-500 hover:-translate-y-1 hover:border-orange-400/50 hover:bg-white/[0.08]">
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute -right-1 -top-3 font-serif text-7xl font-semibold leading-none text-white/[0.06] transition group-hover:text-orange-400/20"
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-[0_12px_28px_-10px_rgba(249,115,22,0.8)]">
-                    <Icon className="h-6 w-6" />
-                  </span>
-                  <h3 className="mt-5 text-lg font-semibold leading-snug">{item.title}</h3>
-                  {item.desc ? <p className="mt-2 text-sm leading-relaxed text-white/65">{item.desc}</p> : null}
-                </div>
-              </AnimateIn>
-            );
-          })}
-        </ol>
-      </div>
-    </section>
+    <HomeSection
+      headingId="why-choose"
+      eyebrow="Why Demand Setu"
+      title={config?.title || "Why travel with Demand Setu?"}
+      subtitle="From first enquiry to your return flight, one trip desk handles the details so you can enjoy every moment of the journey."
+      action={
+        <Link
+          href="/contact-us"
+          className="group inline-flex items-center gap-2 self-start rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-dark sm:self-auto"
+        >
+          Talk to a trip expert
+          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+        </Link>
+      }
+    >
+      <ol className="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+        {features.map((item, index) => {
+          const Icon = pickIcon(item.title, index);
+          return (
+            <li key={`${item.title}-${index}`} className="group flex items-start gap-4 rounded-2xl p-3 transition hover:bg-brand-muted/70">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-muted text-brand ring-1 ring-brand/15 transition group-hover:bg-brand group-hover:text-white">
+                <Icon className="h-6 w-6" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-base font-extrabold leading-snug text-stone-950">{item.title}</h3>
+                {item.desc ? <p className="mt-1 text-sm leading-relaxed text-stone-600">{item.desc}</p> : null}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </HomeSection>
   );
 }

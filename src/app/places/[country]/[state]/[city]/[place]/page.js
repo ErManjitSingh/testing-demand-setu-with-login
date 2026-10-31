@@ -29,6 +29,7 @@ import {
   PLACES_COUNTRY,
   PLACE_TYPE_BY_ID,
   cabFares,
+  cleanText,
   formatDuration,
   formatKm,
   formatRupees,
@@ -36,10 +37,14 @@ import {
   parseStateSegment,
   placeSummary,
   placesHref,
-  truncate,
 } from "@/lib/places/placesText";
 
 export const revalidate = 21600;
+
+// Render on first request, then cache (ISR).
+export function generateStaticParams() {
+  return [];
+}
 
 async function load(country, stateSegment, citySlug, placeSlug) {
   const { slug, canonical } = parseStateSegment(stateSegment);
@@ -49,6 +54,13 @@ async function load(country, stateSegment, citySlug, placeSlug) {
   return hit ? { ...hit, canonical } : null;
 }
 
+/** First full sentence of the backend description (avoids a mid-sentence cut in the meta description). */
+function firstSentence(text) {
+  const t = cleanText(text);
+  const m = t.match(/^.{20,}?[.!?](?=\s|$)/);
+  return m ? m[0] : t;
+}
+
 export async function generateMetadata({ params }) {
   const { country, state: s, city: c, place: p } = await params;
   const hit = await load(country, s, c, p);
@@ -56,8 +68,8 @@ export async function generateMetadata({ params }) {
 
   const { state, city, place } = hit;
   return buildPlacesMetadata({
-    title: `${place.name}, ${city.name} – Travel Guide & Distance`,
-    description: `${truncate(place.description, 110)} ${placeSummary(place)}`.trim(),
+    title: `${place.name}, ${city.name} – Travel Guide`,
+    description: `${placeSummary(place)} ${firstSentence(place.description)}`.trim(),
     path: placesHref.place(state.slug, city.slug, place.slug),
     image: placeImage(place),
     noindex: isThinPlace(place),
@@ -118,7 +130,7 @@ export default async function PlaceDetailPage({ params }) {
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-stone-100">
       <JsonLd data={[breadcrumbJsonLd(crumbs), attractionJsonLd({ place, path, image: heroImage }), faqJsonLd(faqs)]} />
 
       <PlacesHero
@@ -214,7 +226,7 @@ export default async function PlaceDetailPage({ params }) {
               </dl>
             </SideCard>
 
-            <div className="relative isolate overflow-hidden rounded-3xl bg-stone-950 p-6 text-white">
+            <div className="relative isolate overflow-hidden rounded-2xl bg-stone-950 p-6 text-white">
               <div aria-hidden className="absolute -right-10 -top-12 -z-10 h-44 w-44 rounded-full bg-brand/45 blur-3xl" />
               <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 text-orange-200">
                 <MessageCircle aria-hidden className="h-5 w-5" />

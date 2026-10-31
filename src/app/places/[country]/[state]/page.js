@@ -36,6 +36,11 @@ import { PLACES_COUNTRY, parseStateSegment, placesHref } from "@/lib/places/plac
 
 export const revalidate = 21600;
 
+// Render on first request, then cache (ISR).
+export function generateStaticParams() {
+  return [];
+}
+
 async function load(country, stateSegment) {
   const { slug, canonical } = parseStateSegment(stateSegment);
   if (country !== PLACES_COUNTRY.slug) return null;
@@ -52,8 +57,8 @@ export async function generateMetadata({ params }) {
   const { state } = hit;
   const cities = state.cities.filter((c) => c.places.length);
   return buildPlacesMetadata({
-    title: `Places to Visit in ${state.name} – ${state.placeCount} Tourist Places & Attractions`,
-    description: `Top places to visit in ${state.name}: ${listNames(cities, 4)} and more. ${state.placeCount} tourist places with distances, drive times and cab fares.`,
+    title: `Places to Visit in ${state.name}`,
+    description: `${state.placeCount} best places to visit in ${state.name} — ${listNames(cities, 4)} and more. See distances, drive times, cab fares and ready-made tour packages.`,
     path: placesHref.state(state.slug),
     image: getStateImage(state.name),
   });
@@ -85,7 +90,7 @@ export default async function StatePlacesPage({ params }) {
   );
 
   return (
-    <div className="bg-white">
+    <div className="bg-stone-100">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs),

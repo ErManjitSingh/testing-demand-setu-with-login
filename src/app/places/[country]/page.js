@@ -21,6 +21,11 @@ import { PLACES_COUNTRY, placesHref } from "@/lib/places/placesText";
 
 export const revalidate = 21600;
 
+// Render on first request, then cache (ISR).
+export function generateStaticParams() {
+  return [];
+}
+
 async function load(country) {
   if (country !== PLACES_COUNTRY.slug) return null;
   // Errors propagate on purpose: a transient API failure must not be cached as a 404.
@@ -34,7 +39,7 @@ export async function generateMetadata({ params }) {
 
   const total = index.states.reduce((n, s) => n + s.placeCount, 0);
   return buildPlacesMetadata({
-    title: "Places to Visit in India – Top Tourist Destinations by State",
+    title: "Places to Visit in India – By State",
     description: `Explore ${total} tourist places across ${index.states.length} Indian states — ${listNames(index.states, 4)} and more. Distances, drive times and cab fares included.`,
     path: placesHref.country(),
     image: getStateImage(index.states[0]?.name),
@@ -68,7 +73,7 @@ export default async function CountryPlacesPage({ params }) {
   const rest = popular.slice(3);
 
   return (
-    <div className="bg-white">
+    <div className="bg-stone-100">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs),

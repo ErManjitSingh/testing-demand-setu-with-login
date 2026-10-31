@@ -1,10 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { buildListingHref } from "@/lib/packageBooking";
-import ExploreSectionHeader from "@/components/packages/ExploreSectionHeader";
-import { snapRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
+import HomeRail, { RailCard } from "@/components/packages/HomeRail";
 import { getStateImage } from "@/components/state/stateImageMap";
 import {
   formatFromPrice,
@@ -47,12 +44,10 @@ function pickStates(states, limit = 5) {
   return picked.slice(0, limit);
 }
 
-// The 12-column grid below is designed for 8 tiles
-const MAX_STATE_TILES = 8;
+// The rail scrolls, so it can show more than a fixed grid could
+const MAX_STATE_TILES = 12;
 
 export default function PackagesExploreStates({ states = [], config = null }) {
-  const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
-
   // Admin-managed tiles when available, otherwise the built-in list
   const shown = config?.items?.length
     ? limitItems(config.items, config.maxVisible, MAX_STATE_TILES)
@@ -60,72 +55,27 @@ export default function PackagesExploreStates({ states = [], config = null }) {
   if (shown.length === 0) return null;
 
   return (
-    <section className="bg-white py-14 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <ExploreSectionHeader
-          scriptLabel="Explore India"
-          title={config?.title || "States"}
-          subtitle="Discover the diversity of India, state by state"
-          count={`${shown.length} states`}
-          onScrollPrev={scrollPrev}
-          onScrollNext={scrollNext}
-        />
-
-        <div ref={scrollerRef} className={`${snapRowClass} lg:auto-rows-[188px] lg:grid-cols-12 lg:gap-3`}>
-          {shown.map((entry, index) => {
-            const stateName = entry.name;
-            const fromPrice = entry.fromPrice ?? getStartingPrice(stateName, 4999);
-            const cities = getStateCities(stateName);
-            const feature = index === 0;
-            const place = [
-              "lg:col-span-8 lg:row-span-2",
-              "lg:col-span-4",
-              "lg:col-span-4",
-              "lg:col-span-3",
-              "lg:col-span-3",
-              "lg:col-span-6",
-              "lg:col-span-6",
-              "lg:col-span-6",
-            ][index];
-
-            return (
-              <Link
-                key={stateName}
-                data-snap-card
-                href={buildListingHref({ q: stateName })}
-                aria-label={`${stateName} tour packages`}
-                className={`group relative w-[calc(100vw-3.25rem)] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-xl sm:w-[280px] lg:h-full lg:w-auto ${place || ""}`}
-              >
-                <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full">
-                  <Image
-                    src={entry.image || getStateImage(stateName)}
-                    alt={stateName}
-                    fill
-                    loading="lazy"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                    sizes="320px"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/15 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-                    <h3 className={`font-serif font-medium leading-none ${feature ? "text-4xl sm:text-5xl" : "text-2xl"}`}>
-                      {stateName}
-                    </h3>
-                    <div className="mt-3 flex items-end justify-between gap-2">
-                      <p className="line-clamp-2 text-xs leading-snug text-white/80">
-                        {entry.tagline ||
-                          (cities.length > 0 ? cities.slice(0, 2).join(" · ") : getStateTagline(stateName))}
-                      </p>
-                      <p className="shrink-0 text-sm font-semibold text-orange-200">
-                        {formatFromPrice(fromPrice)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </section>
+    <HomeRail
+      id="states"
+      title={config?.title || "States"}
+      subtitle="Discover the diversity of India, state by state"
+    >
+      {shown.map((entry) => {
+        const stateName = entry.name;
+        const fromPrice = entry.fromPrice ?? getStartingPrice(stateName, 4999);
+        const cities = getStateCities(stateName);
+        return (
+          <RailCard
+            key={stateName}
+            href={buildListingHref({ q: stateName })}
+            ariaLabel={`${stateName} tour packages`}
+            image={entry.image || getStateImage(stateName)}
+            title={stateName}
+            sub={entry.tagline || (cities.length > 0 ? cities.slice(0, 2).join(" · ") : getStateTagline(stateName))}
+            price={formatFromPrice(fromPrice)}
+          />
+        );
+      })}
+    </HomeRail>
   );
 }

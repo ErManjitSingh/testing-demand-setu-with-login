@@ -24,9 +24,9 @@ export default function PackagesCtaBanner({ config }) {
   );
 
   return (
-    <section className="bg-[#f6f3ee] px-4 py-12 sm:px-6 sm:py-16">
+    <section className="px-3 py-3 sm:px-6 sm:py-4">
       <AnimateIn direction="scale">
-        <div className="relative isolate mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-stone-950 text-white shadow-[0_40px_80px_-40px_rgba(124,45,18,0.7)] sm:rounded-[2.5rem]">
+        <div className="relative isolate mx-auto max-w-7xl overflow-hidden rounded-2xl bg-stone-950 text-white shadow-sm sm:rounded-3xl">
           {image ? (
             <>
               <Image
@@ -44,10 +44,10 @@ export default function PackagesCtaBanner({ config }) {
           )}
           <span aria-hidden className="absolute -left-20 -top-20 -z-10 h-72 w-72 rounded-full bg-orange-500/30 blur-3xl" />
 
-          <div className="grid items-center gap-10 px-6 py-12 sm:px-12 sm:py-16 lg:grid-cols-[1.25fr_0.75fr] lg:gap-14 lg:px-16 lg:py-20">
+          <div className="grid items-center gap-10 px-5 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1.25fr_0.75fr] lg:gap-12 lg:px-14 lg:py-16">
             <div>
-              <p className="font-serif text-lg italic text-orange-200">Ready when you are</p>
-              <h2 className="mt-2 font-serif text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-orange-200">Ready when you are</p>
+              <h2 className="mt-2 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
                 {heading}
               </h2>
               {description ? (

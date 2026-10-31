@@ -31,6 +31,11 @@ import { PLACES_COUNTRY, parseStateSegment, placesHref } from "@/lib/places/plac
 
 export const revalidate = 21600;
 
+// Render on first request, then cache (ISR).
+export function generateStaticParams() {
+  return [];
+}
+
 async function load(country, stateSegment, citySlug) {
   const { slug, canonical } = parseStateSegment(stateSegment);
   if (country !== PLACES_COUNTRY.slug) return null;
@@ -47,7 +52,7 @@ export async function generateMetadata({ params }) {
   const { state, city } = hit;
   const places = [...city.places].sort(sortRecommended);
   return buildPlacesMetadata({
-    title: `Places to Visit in ${city.name} – ${places.length} Tourist Places & Sightseeing`,
+    title: `${places.length} Best Places to Visit in ${city.name}`,
     description: `Best places to visit in ${city.name}, ${state.name}: ${listNames(places, 5)} and more. Distances, drive times and cab fares for every spot.`,
     path: placesHref.city(state.slug, city.slug),
     image: places.find((p) => p.image)?.image ?? getStateImage(state.name),
@@ -82,7 +87,7 @@ export default async function CityPlacesPage({ params }) {
   const enquiryProps = { title: `${city.name} trip`, location: `${city.name}, ${state.name}`, state: state.name, city: city.name, image: heroImage };
 
   return (
-    <div className="bg-white">
+    <div className="bg-stone-100">
       <JsonLd
         data={[
           breadcrumbJsonLd(crumbs),
@@ -123,7 +128,7 @@ export default async function CityPlacesPage({ params }) {
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-32 lg:self-start">
-            <div className="relative isolate overflow-hidden rounded-3xl bg-stone-950 p-6 text-white">
+            <div className="relative isolate overflow-hidden rounded-2xl bg-stone-950 p-6 text-white">
               <div aria-hidden className="absolute -right-10 -top-12 -z-10 h-44 w-44 rounded-full bg-brand/45 blur-3xl" />
               <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 text-orange-200">
                 <MessageCircle aria-hidden className="h-5 w-5" />

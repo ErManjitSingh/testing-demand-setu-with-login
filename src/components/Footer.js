@@ -5,6 +5,7 @@ import { FOOTER_SERVICES, getFooterDestinations } from "@/lib/footerLinks";
 const QUICK_LINKS = [
   { label: "About Us", href: "/about-us" },
   { label: "Contact Us", href: "/contact-us" },
+  { label: "Places to Visit", href: "/places" },
   { label: "Travel Blog", href: "/travel-blog" },
   { label: "Testimonials", href: "/testimonials" },
   { label: "FAQ", href: "/faq" },
