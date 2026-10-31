@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { buildListingHref } from "@/lib/packageBooking";
+import { useCallback, useState } from "react";
+import PackageEnquiryForm from "@/components/booking/PackageEnquiryForm";
 import ExploreSectionHeader from "@/components/packages/ExploreSectionHeader";
 import { snapRowClass, useSnapScroll } from "@/components/packages/useSnapScroll";
 import {
@@ -34,6 +34,25 @@ function toCountryCard(item, builtIn) {
 
 export default function PackagesExploreCountries({ config = null }) {
   const { scrollerRef, scrollPrev, scrollNext } = useSnapScroll();
+  const [enquiry, setEnquiry] = useState(null);
+  const closeEnquiry = useCallback(() => setEnquiry(null), []);
+
+  // Clicking a country opens the query form instead of a listing page
+  const openEnquiry = useCallback(
+    (country) =>
+      setEnquiry({
+        id: `country-${country.name}`,
+        title: `${country.name} tour`,
+        duration: "Flexible",
+        location: country.name,
+        country: country.name,
+        state: "",
+        city: "",
+        destination: country.name,
+        image: country.image,
+      }),
+    []
+  );
   const all = getInternationalCountries();
 
   // Admin-managed order when available, otherwise featured first (original behaviour)
@@ -58,7 +77,7 @@ export default function PackagesExploreCountries({ config = null }) {
         <div ref={scrollerRef} className={`${snapRowClass} lg:grid-cols-4`}>
           {countries.map((country) => (
             <div key={country.name} data-snap-card className="w-[calc(100vw-3.25rem)] shrink-0 snap-start sm:w-[250px] lg:w-auto">
-              <CountryCard country={country} />
+              <CountryCard country={country} onSelect={openEnquiry} />
             </div>
           ))}
         </div>
@@ -74,17 +93,20 @@ export default function PackagesExploreCountries({ config = null }) {
           ))}
         </div>
       </div>
+
+      <PackageEnquiryForm open={Boolean(enquiry)} onClose={closeEnquiry} tourPackage={enquiry} />
     </section>
   );
 }
 
-function CountryCard({ country }) {
+function CountryCard({ country, onSelect }) {
   return (
     <article>
-      <Link
-        href={buildListingHref({ q: country.name })}
-        aria-label={`${country.name} tour packages`}
-        className="group relative block h-full w-full overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-xl"
+      <button
+        type="button"
+        onClick={() => onSelect(country)}
+        aria-label={`Enquire about ${country.name} tour packages`}
+        className="group relative block h-full w-full cursor-pointer overflow-hidden rounded-2xl text-left shadow-sm ring-1 ring-black/5 transition duration-500 hover:-translate-y-1 hover:shadow-xl"
       >
         <div className="relative aspect-[4/5]">
           <Image
@@ -111,7 +133,7 @@ function CountryCard({ country }) {
             </div>
           </div>
         </div>
-      </Link>
+      </button>
     </article>
   );
 }
