@@ -168,14 +168,16 @@ export function StaysList({ hotels }) {
       {hotels.map((hotel, i) => (
         <AnimateIn key={hotel.id} delay={i * 80}>
           <article className="group flex h-full overflow-hidden rounded-3xl bg-white ring-1 ring-stone-200/70 transition duration-300 hover:shadow-lg hover:ring-brand/30">
-            <div className="relative w-32 shrink-0 sm:w-40">
-              <Image
-                src={hotel.image}
-                alt={hotel.name}
-                fill
-                sizes="160px"
-                className="object-cover transition duration-700 group-hover:scale-110"
-              />
+            <div className="relative w-32 shrink-0 bg-stone-200 sm:w-40">
+              {hotel.image ? (
+                <Image
+                  src={hotel.image}
+                  alt={hotel.name}
+                  fill
+                  sizes="160px"
+                  className="object-cover transition duration-700 group-hover:scale-110"
+                />
+              ) : null}
             </div>
             <div className="min-w-0 flex-1 p-4">
               <p className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-brand">

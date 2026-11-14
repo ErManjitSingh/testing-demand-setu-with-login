@@ -1,31 +1,70 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import PackageDetailPage from "@/components/packages/detail/PackageDetailPage";
 import { parseFilters } from "@/lib/packageFilters";
+import { buildPackagePath, buildPackageSlug, extractPackageId, searchParamsToQuery } from "@/lib/packagePath";
 import { buildPackageDetail, getSimilarPackages } from "@/lib/tourPackageDetails";
-import { getListingPackages } from "@/lib/tourPackageMeta";
+import { getListingPackages, getPackageMeta } from "@/lib/tourPackageMeta";
+import { fetchPackageById, fetchPackagesByState, fetchPackagesByTheme } from "@/lib/tourPackagesApi";
 import { getSiteUrl } from "@/lib/siteConfig";
 import { todayInputValue } from "@/lib/tourTravellers";
 
-function findPackage(slug) {
-  return getListingPackages().find((p) => p.slug === slug) ?? null;
+function findStaticPackage(slug) {
+  const id = extractPackageId(slug);
+  return (
+    getListingPackages().find((p) => p.slug === slug || p.id === id || p.slug === id) ?? null
+  );
+}
+
+async function resolvePackage(slug) {
+  const staticPkg = findStaticPackage(slug);
+  const base = staticPkg
+    ? staticPkg
+    : await fetchPackageById(extractPackageId(slug)).then((fromApi) =>
+        fromApi ? { ...fromApi, meta: getPackageMeta(fromApi) } : null
+      );
+  if (!base) return null;
+  return { ...base, slug: buildPackageSlug(base) };
+}
+
+async function resolveSimilar(pkg) {
+  if (pkg.themes?.[0]) {
+    const { packages } = await fetchPackagesByTheme(pkg.themes[0], { page: 1, limit: 8 });
+    return packages
+      .filter((p) => p.id !== pkg.id)
+      .slice(0, 4)
+      .map((p) => ({ ...p, meta: getPackageMeta(p) }));
+  }
+  if (pkg.state) {
+    const { packages } = await fetchPackagesByState(pkg.state, { page: 1, limit: 8 });
+    return packages
+      .filter((p) => p.id !== pkg.id)
+      .slice(0, 4)
+      .map((p) => ({ ...p, meta: getPackageMeta(p) }));
+  }
+  return getSimilarPackages(pkg, 4)
+    .map((p) => getListingPackages().find((x) => x.id === p.id))
+    .filter(Boolean);
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const pkg = findPackage(slug);
+  const pkg = await resolvePackage(slug);
   if (!pkg) return { title: "Package not found" };
 
-  const title = `${pkg.title} — ${pkg.duration} tour package`;
-  const description = `${pkg.description} ${pkg.duration} from ₹${pkg.price.toLocaleString("en-IN")} per person. Day-wise itinerary, hotels, inclusions and instant estimate.`;
+  const path = buildPackagePath(pkg);
+  const title = pkg.metaTitle || `${pkg.title} — ${pkg.duration} tour package`;
+  const description =
+    pkg.metaDescription ||
+    `${pkg.description} ${pkg.duration}${pkg.price ? ` from ₹${pkg.price.toLocaleString("en-IN")} per person` : ""}.`;
 
   return {
     title,
     description,
-    alternates: { canonical: `/packages/${pkg.slug}` },
+    alternates: { canonical: pkg.canonicalTag || path },
     openGraph: {
       title: `${pkg.title} | Demand Setu Tours`,
       description,
-      url: `/packages/${pkg.slug}`,
+      url: path,
       images: pkg.image ? [{ url: pkg.image, alt: pkg.title }] : undefined,
     },
   };
@@ -33,16 +72,19 @@ export async function generateMetadata({ params }) {
 
 export default async function PackageDetailRoute({ params, searchParams }) {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
-  const pkg = findPackage(slug);
+  const pkg = await resolvePackage(slug);
   if (!pkg) notFound();
 
-  const detail = buildPackageDetail(pkg);
-  const all = getListingPackages();
-  const similar = getSimilarPackages(pkg, 4)
-    .map((p) => all.find((x) => x.id === p.id))
-    .filter(Boolean);
+  const canonicalPath = buildPackagePath(pkg);
+  // Keep pretty URLs canonical: bare id or stale name → redirect.
+  if (`/packages/${slug}` !== canonicalPath) {
+    const qs = searchParamsToQuery(query);
+    redirect(qs ? `${canonicalPath}?${qs}` : canonicalPath);
+  }
 
-  // Carry over date + travellers chosen on the listing page / hero search.
+  const detail = buildPackageDetail(pkg);
+  const similar = await resolveSimilar(pkg);
+
   const parsed = parseFilters(query);
   const today = todayInputValue();
   const initialBooking = {
@@ -57,7 +99,7 @@ export default async function PackageDetailRoute({ params, searchParams }) {
     name: pkg.title,
     description: pkg.description,
     image: pkg.image,
-    url: `${siteUrl}/packages/${pkg.slug}`,
+    url: `${siteUrl}${canonicalPath}`,
     brand: { "@type": "Brand", name: "Demand Setu Tours" },
     aggregateRating: {
       "@type": "AggregateRating",
@@ -67,9 +109,9 @@ export default async function PackageDetailRoute({ params, searchParams }) {
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",
-      price: pkg.price,
+      price: pkg.price || undefined,
       availability: "https://schema.org/InStock",
-      url: `${siteUrl}/packages/${pkg.slug}`,
+      url: `${siteUrl}${canonicalPath}`,
     },
   };
 

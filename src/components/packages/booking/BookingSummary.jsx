@@ -56,7 +56,9 @@ export default function BookingSummary({ pkg, booking, pricing, payNow, balance,
   return (
     <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_24px_60px_-24px_rgba(28,25,23,0.35)] ring-1 ring-stone-200/80">
       <div className="relative h-40 sm:h-44">
-        <Image src={pkg.image} alt="" fill sizes="400px" className="object-cover" />
+        {pkg.image ? (
+          <Image src={pkg.image} alt="" fill sizes="400px" className="object-cover" />
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-5 text-white">
           <p className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.16em] text-orange-200">

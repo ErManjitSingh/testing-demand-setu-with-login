@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import HomeRail, { RailCard } from "@/components/packages/HomeRail";
+import { buildPackagePath } from "@/lib/packagePath";
 import {
   filterPackages,
   formatPackagePrice,
@@ -20,6 +21,9 @@ export default function AllPackagesCatalog() {
     () => filterPackages(allPackages, category).slice(0, 12),
     [allPackages, category]
   );
+
+  // Catalogue is empty until dynamic packages are wired in — don't show a blank rail.
+  if (allPackages.length === 0) return null;
 
   return (
     <HomeRail
@@ -66,7 +70,7 @@ export default function AllPackagesCatalog() {
         <RailCard
           key={pkg.id}
           size="lg"
-          href={`/packages/${pkg.slug}`}
+          href={buildPackagePath(pkg)}
           image={getPackageImage(pkg)}
           title={pkg.title}
           sub={`${pkg.duration} · ★ ${pkg.rating}`}

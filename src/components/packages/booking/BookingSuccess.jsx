@@ -59,7 +59,9 @@ export default function BookingSuccess({ pkg, booking, pricing, contact, booking
 
         <div className="mt-8 grid gap-4 text-left sm:grid-cols-[160px_1fr]">
           <div className="relative hidden h-full min-h-[150px] overflow-hidden rounded-2xl sm:block">
-            <Image src={pkg.image} alt="" fill sizes="160px" className="object-cover" />
+            {pkg.image ? (
+              <Image src={pkg.image} alt="" fill sizes="160px" className="object-cover" />
+            ) : null}
           </div>
           <div className="space-y-2.5 rounded-2xl bg-stone-50 p-4 text-sm font-semibold text-stone-800">
             <p className="font-serif text-xl leading-tight text-stone-900">{pkg.title}</p>

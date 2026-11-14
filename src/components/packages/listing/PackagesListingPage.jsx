@@ -35,8 +35,7 @@ import {
   sortPackages,
 } from "@/lib/packageFilters";
 import { buildSearchSuggestions } from "@/lib/packageSearch";
-import { getListingPackages, getPackagePriceBounds } from "@/lib/tourPackageMeta";
-import { DEFAULT_PACKAGE_IMAGE } from "@/lib/tourPackages";
+import { getPackagePriceBounds } from "@/lib/tourPackageMeta";
 
 function budgetIdFromPrice(price, bounds) {
   const [min, max] = price;
@@ -57,12 +56,18 @@ function useLockScroll(locked) {
   }, [locked]);
 }
 
-export default function PackagesListingPage({ initialFilters }) {
-  const allPackages = useMemo(() => getListingPackages(), []);
+export default function PackagesListingPage({
+  initialFilters,
+  initialPackages = [],
+  stripQueryKeys = [],
+  routeLabel = "",
+}) {
   const bounds = useMemo(() => getPackagePriceBounds(), []);
   const wishlist = useWishlist();
 
   const [filters, setFilters] = useState(initialFilters);
+  const [allPackages, setAllPackages] = useState(initialPackages);
+  const [loadingPackages, setLoadingPackages] = useState(false);
   const [draft, setDraft] = useState(() => ({
     q: initialFilters.q,
     date: initialFilters.date,
@@ -73,7 +78,48 @@ export default function PackagesListingPage({ initialFilters }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [enquiry, setEnquiry] = useState(null);
   const resultsRef = useRef(null);
+  const fetchKeyRef = useRef(
+    `${initialFilters.themes[0] || ""}|${String(initialFilters.place || "").trim()}|${String(initialFilters.q || "").trim()}`
+  );
   useLockScroll(drawerOpen);
+
+  // Keep catalogue in sync when theme / city / destination filters change after the first paint.
+  useEffect(() => {
+    const theme = filters.themes[0] || "";
+    const place = String(filters.place || "").trim();
+    const state = filters.q.trim();
+    const key = `${theme}|${place}|${state}`;
+    if (key === fetchKeyRef.current) return undefined;
+    fetchKeyRef.current = key;
+
+    let cancelled = false;
+    const params = new URLSearchParams({ limit: "48" });
+    if (theme) params.set("theme", theme);
+    else if (place) params.set("place", place);
+    else if (state) params.set("state", state);
+
+    setLoadingPackages(true);
+    const request =
+      theme || place || state
+        ? fetch(`/api/tour-packages?${params}`).then((res) => res.json())
+        : Promise.resolve({ packages: [] });
+
+    request
+      .then((payload) => {
+        if (cancelled) return;
+        setAllPackages(Array.isArray(payload?.packages) ? payload.packages : []);
+      })
+      .catch(() => {
+        if (!cancelled) setAllPackages([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingPackages(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filters.themes, filters.place, filters.q]);
 
   const patchFilters = useCallback((patch) => setFilters((f) => ({ ...f, ...patch })), []);
   const patchDraft = useCallback((patch) => setDraft((d) => ({ ...d, ...patch })), []);
@@ -91,7 +137,10 @@ export default function PackagesListingPage({ initialFilters }) {
   }, [filters.q, filters.date, filters.travellers, filters.price, bounds]);
 
   // Shareable URL without triggering a navigation.
-  const queryString = useMemo(() => filtersToQuery(filters), [filters]);
+  const queryString = useMemo(
+    () => filtersToQuery(filters, { strip: stripQueryKeys }),
+    [filters, stripQueryKeys]
+  );
   useEffect(() => {
     const url = `${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
     window.history.replaceState(window.history.state, "", url);
@@ -103,9 +152,12 @@ export default function PackagesListingPage({ initialFilters }) {
 
   const runSearch = useCallback(() => {
     const preset = BUDGET_PRESETS.find((b) => b.id === draft.budget) ?? BUDGET_PRESETS[0];
+    const query = draft.q.trim();
     setFilters((f) => ({
       ...f,
-      q: draft.q,
+      // Free-text search uses state API; clear city `place` so it doesn't stick.
+      place: "",
+      q: query,
       date: draft.date,
       travellers: draft.travellers,
       price: [preset.min ?? bounds.min, preset.max ?? bounds.max],
@@ -133,10 +185,20 @@ export default function PackagesListingPage({ initialFilters }) {
 
   const suggestions = useMemo(() => buildSearchSuggestions(allPackages), [allPackages]);
 
-  const slideImages = useMemo(() => {
-    const map = {};
-    allPackages.forEach((p) => (map[p.id] = p.image));
-    return map;
+  const heroSlides = useMemo(() => {
+    const seen = new Set();
+    const slides = [];
+    for (const p of allPackages) {
+      if (!p.image || seen.has(p.image)) continue;
+      seen.add(p.image);
+      slides.push({
+        id: p.id,
+        label: p.state || p.location || p.title,
+        src: p.image,
+      });
+      if (slides.length >= 5) break;
+    }
+    return slides;
   }, [allPackages]);
 
   const results = useMemo(() => {
@@ -178,7 +240,7 @@ export default function PackagesListingPage({ initialFilters }) {
         country: "India",
         state: "",
         city: "",
-        image: DEFAULT_PACKAGE_IMAGE,
+        image: "",
       }),
     [filters.q, openEnquiry]
   );
@@ -190,7 +252,7 @@ export default function PackagesListingPage({ initialFilters }) {
         onDraftChange={patchDraft}
         onSearch={runSearch}
         suggestions={suggestions}
-        slideImages={slideImages}
+        slides={heroSlides}
         total={allPackages.length}
       />
 
@@ -230,7 +292,9 @@ export default function PackagesListingPage({ initialFilters }) {
                     <h2 id="results-heading" className="text-xl font-extrabold tracking-tight text-stone-900 sm:text-2xl">
                       {results.length} {results.length === 1 ? "trip" : "trips"}{" "}
                       <span className="font-medium text-stone-500">
-                        {filters.q.trim() ? `for “${filters.q.trim()}”` : "to explore"}
+                        {routeLabel || filters.place?.trim() || filters.q.trim()
+                          ? `for “${routeLabel || filters.place.trim() || filters.q.trim()}”`
+                          : "to explore"}
                       </span>
                     </h2>
                   </div>

@@ -324,7 +324,7 @@ export default function BookingFlow({ pkg, hotels, departures, initialBooking })
           <ChevronRight className="h-3.5 w-3.5 text-stone-300" />
           <Link href="/packages" className="transition hover:text-brand">Packages</Link>
           <ChevronRight className="h-3.5 w-3.5 text-stone-300" />
-          <Link href={`/packages/${pkg.slug}`} className="transition hover:text-brand">{pkg.title}</Link>
+          <Link href={pkg.slug ? `/packages/${pkg.slug}` : "/packages"} className="transition hover:text-brand">{pkg.title}</Link>
           <ChevronRight className="h-3.5 w-3.5 text-stone-300" />
           <span className="text-stone-900">Book</span>
         </nav>

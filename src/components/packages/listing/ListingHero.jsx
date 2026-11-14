@@ -19,14 +19,6 @@ import { useInView } from "@/hooks/useInView";
 import { BUDGET_PRESETS } from "@/lib/packageFilters";
 import { todayInputValue } from "@/lib/tourTravellers";
 
-const SLIDES = [
-  { id: "ladakh-escape", label: "Ladakh" },
-  { id: "kerala-backwaters", label: "Kerala" },
-  { id: "rajasthan-heritage", label: "Rajasthan" },
-  { id: "maldives-paradise", label: "Maldives" },
-  { id: "kashmir-paradise", label: "Kashmir" },
-];
-
 function CountUp({ to, decimals = 0, suffix = "" }) {
   const { ref, inView } = useInView({ rootMargin: "0px" });
   const [value, setValue] = useState(0);
@@ -64,18 +56,25 @@ export default function ListingHero({
   onDraftChange,
   onSearch,
   suggestions,
-  slideImages,
+  slides = [],
   total,
 }) {
   const [slide, setSlide] = useState(0);
   const minDate = useMemo(() => todayInputValue(), []);
+  const heroSlides = useMemo(
+    () => (Array.isArray(slides) ? slides.filter((s) => s?.src) : []),
+    [slides]
+  );
+  const slideCount = heroSlides.length;
+  const active = slideCount ? slide % slideCount : 0;
 
   useEffect(() => {
+    if (slideCount < 2) return undefined;
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return undefined;
-    const id = window.setInterval(() => setSlide((s) => (s + 1) % SLIDES.length), 6500);
+    const id = window.setInterval(() => setSlide((s) => (s + 1) % slideCount), 6500);
     return () => window.clearInterval(id);
-  }, []);
+  }, [slideCount]);
 
   const submit = (e) => {
     e.preventDefault();
@@ -85,21 +84,21 @@ export default function ListingHero({
   return (
     <section className="relative isolate bg-stone-950 text-white">
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        {SLIDES.map((s, i) => (
+        {heroSlides.map((s, i) => (
           <div
             key={s.id}
             aria-hidden
             className={`absolute inset-0 transition-opacity duration-[1600ms] ease-in-out ${
-              i === slide ? "opacity-100" : "opacity-0"
+              i === active ? "opacity-100" : "opacity-0"
             }`}
           >
             <Image
-              src={slideImages[s.id]}
+              src={s.src}
               alt=""
               fill
               priority={i === 0}
               sizes="100vw"
-              className={`object-cover ${i === slide ? "packages-hero-bg-active" : ""}`}
+              className={`object-cover ${i === active ? "packages-hero-bg-active" : ""}`}
             />
           </div>
         ))}
@@ -231,17 +230,23 @@ export default function ListingHero({
             <ShieldCheck className="h-4 w-4 text-emerald-300" />
             Free itinerary changes · Pay 25% to confirm
           </p>
-          <div className="flex items-center gap-1.5" aria-hidden>
-            {SLIDES.map((s, i) => (
-              <span
-                key={s.id}
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  i === slide ? "w-8 bg-orange-400" : "w-1.5 bg-white/40"
-                }`}
-              />
-            ))}
-          </div>
-          <p className="hidden sm:block">Now showing · {SLIDES[slide].label}</p>
+          {slideCount > 0 ? (
+            <>
+              <div className="flex items-center gap-1.5" aria-hidden>
+                {heroSlides.map((s, i) => (
+                  <span
+                    key={s.id}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      i === active ? "w-8 bg-orange-400" : "w-1.5 bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="hidden sm:block">Now showing · {heroSlides[active]?.label}</p>
+            </>
+          ) : (
+            <span />
+          )}
         </div>
       </div>
     </section>

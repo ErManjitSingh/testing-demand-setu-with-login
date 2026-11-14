@@ -151,6 +151,7 @@ function ActionButton({ icon: Icon, label, active, onClick }) {
 function ImageSlider({ images, alt, compact = false }) {
   const ref = useRef(null);
   const [index, setIndex] = useState(0);
+  const photos = (Array.isArray(images) ? images : []).filter(Boolean);
   const arrow = compact ? "h-6 w-6" : "h-8 w-8";
   const go = (dir) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth, behavior: "smooth" });
   const onScroll = () => {
@@ -158,16 +159,20 @@ function ImageSlider({ images, alt, compact = false }) {
     if (el) setIndex(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));
   };
 
+  if (photos.length === 0) {
+    return <div className={`rounded-2xl bg-stone-100 ${compact ? "aspect-[4/5]" : "aspect-[5/2]"}`} aria-hidden />;
+  }
+
   return (
     <div className="group relative overflow-hidden rounded-2xl bg-stone-100">
       <div ref={ref} onScroll={onScroll} className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto scroll-smooth">
-        {images.map((src, i) => (
+        {photos.map((src, i) => (
           <div key={src} className={`relative w-full shrink-0 snap-center ${compact ? "aspect-[4/5]" : "aspect-[5/2]"}`}>
             <Image src={src} alt={`${alt} — photo ${i + 1}`} fill sizes={compact ? "144px" : "400px"} className="object-cover" />
           </div>
         ))}
       </div>
-      {images.length > 1 ? (
+      {photos.length > 1 ? (
         <>
           <button
             type="button"
@@ -186,13 +191,13 @@ function ImageSlider({ images, alt, compact = false }) {
             <ChevronRight className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
           </button>
           <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
-            {images.map((src, i) => (
+            {photos.map((src, i) => (
               <span key={src} className={`h-1.5 rounded-full bg-white shadow transition-all ${i === index ? "w-5" : "w-1.5 opacity-60"}`} />
             ))}
           </div>
           {!compact ? (
             <span className="pointer-events-none absolute right-2 top-2 rounded-full bg-stone-950/60 px-2 py-0.5 text-[10px] font-extrabold text-white">
-              {index + 1}/{images.length}
+              {index + 1}/{photos.length}
             </span>
           ) : null}
         </>

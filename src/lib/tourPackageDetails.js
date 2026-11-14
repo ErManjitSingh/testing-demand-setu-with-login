@@ -1,11 +1,9 @@
-import { getStateImage } from "@/components/state/stateImageMap";
-import { COUNTRIES, getCityImage } from "@/lib/tourDestinations";
 import {
   HOTEL_CATEGORIES,
   getPackageMeta,
   hashString,
 } from "@/lib/tourPackageMeta";
-import { TOUR_PACKAGES, getPackageImage } from "@/lib/tourPackages";
+import { TOUR_PACKAGES } from "@/lib/tourPackages";
 import {
   calculateMealDelta,
   categoryStars,
@@ -20,20 +18,6 @@ import {
  * new package in tourPackages.js automatically gets a full page. Swap any section for
  * real CMS / API data later — the shape returned here is what the UI consumes.
  */
-
-const THEME_IMAGE_POOL = {
-  mountains: ["Ladakh", "Himachal Pradesh", "Sikkim", "Uttarakhand", "Jammu & Kashmir"],
-  beaches: ["Goa", "Kerala", "Pondicherry", "Thailand", "Sri Lanka"],
-  heritage: ["Rajasthan", "Karnataka", "Delhi", "Gujarat", "Telangana", "Uttar Pradesh"],
-  spiritual: ["Uttarakhand", "Punjab", "Uttar Pradesh", "Tirupati"],
-  wildlife: ["Assam", "Meghalaya", "Karnataka", "Madhya Pradesh", "Kerala"],
-  honeymoon: ["Kerala", "Himachal Pradesh", "Jammu & Kashmir", "Goa"],
-  adventure: ["Ladakh", "Himachal Pradesh", "Uttarakhand", "Sikkim"],
-  city: ["Maharashtra", "Delhi", "Telangana", "Karnataka"],
-  family: ["Goa", "Rajasthan", "Kerala", "Tamil Nadu"],
-};
-
-const FILLER_STATES = ["Himachal Pradesh", "Kerala", "Rajasthan", "Goa", "Sikkim", "Uttarakhand", "Karnataka", "Gujarat"];
 
 const HOTEL_AREAS = ["City Centre", "Old Town", "Riverside", "Beachfront", "Hill View", "Lakeside", "Garden District", "Market Quarter"];
 
@@ -59,43 +43,15 @@ function isoDate(date) {
 
 /* ------------------------------ gallery ------------------------------ */
 
-const UNKNOWN_PLACE_IMAGE = getStateImage("__unknown__");
-
-function buildGallery(pkg, meta, stops) {
-  const images = [getPackageImage(pkg)];
-  images.push(getStateImage(pkg.state));
-  const country = COUNTRIES.find((c) => c.name === pkg.country);
-  if (country?.image) images.push(country.image);
-  stops.forEach((stop) => images.push(getCityImage(stop)));
-
-  // Fill with themed imagery so the gallery always feels full.
-  const seed = hashString(pkg.id);
-  meta.themes.forEach((theme, i) => {
-    const pool = THEME_IMAGE_POOL[theme] ?? [];
-    if (pool.length) images.push(getStateImage(pick(pool, seed, i)));
-  });
-  meta.themes.forEach((theme, i) => {
-    const pool = THEME_IMAGE_POOL[theme] ?? [];
-    if (pool.length) images.push(getStateImage(pick(pool, seed, i + 2)));
-  });
-
-  // Last-resort filler so the bento gallery never has empty tiles.
-  FILLER_STATES.forEach((_, i) => images.push(getStateImage(pick(FILLER_STATES, seed, i))));
-
-  // Places without a dedicated photo resolve to a generic placeholder — drop those.
-  const gallery = uniq(images).filter((src, i) => i === 0 || src !== UNKNOWN_PLACE_IMAGE);
-  const captions = [
-    pkg.title,
-    ...stops,
-    ...pkg.highlights,
-    "Local life",
-    "Where you will stay",
-    "Golden hour",
-  ];
+function buildGallery(pkg) {
+  // Only photos attached to the package — never invent state/theme fillers.
+  const gallery = uniq(
+    [...(Array.isArray(pkg.images) ? pkg.images : []), pkg.image].filter(Boolean)
+  );
   return gallery.slice(0, 8).map((src, i) => ({
     src,
-    alt: `${pkg.title} — ${captions[i] ?? "photo"}`,
-    caption: captions[i] ?? pkg.title,
+    alt: `${pkg.title} — photo ${i + 1}`,
+    caption: pkg.title,
   }));
 }
 
@@ -391,7 +347,7 @@ export function buildPackageDetail(pkg, fromDate = new Date()) {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const gallery = buildGallery(pkg, meta, stops);
+  const gallery = buildGallery(pkg);
   const hotels = buildHotels(pkg, meta, stops, gallery);
   const rawItinerary = buildItinerary(pkg, meta, stops, hotels);
   const { hotels: stayHotels, itinerary } = alignStaysToItinerary(hotels, rawItinerary);

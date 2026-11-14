@@ -144,7 +144,9 @@ export default function LeadDialog({ open, onClose, pkg, booking, pricing }) {
         {/* Summary */}
         <div className="relative hidden bg-[#fbf3ea] md:block">
           <div className="relative h-44">
-            <Image src={pkg.image} alt="" fill sizes="400px" className="object-cover" />
+            {pkg.image ? (
+              <Image src={pkg.image} alt="" fill sizes="400px" className="object-cover" />
+            ) : null}
             <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 text-white">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-orange-200">Your trip</p>

@@ -36,7 +36,7 @@ import AnimatedPrice from "@/components/packages/shared/AnimatedPrice";
 import { getThemeIcon } from "@/components/packages/shared/themeIcons";
 import TripSearchBar from "@/components/packages/shared/TripSearchBar";
 import WishlistButton from "@/components/packages/shared/WishlistButton";
-import { DEFAULT_CUSTOMISATION, buildBookingHref, priceBooking } from "@/lib/packageBooking";
+import { DEFAULT_CUSTOMISATION, buildBookingHref, buildListingHref, priceBooking } from "@/lib/packageBooking";
 import { THEME_BY_ID } from "@/lib/tourPackageMeta";
 import { formatPackagePrice } from "@/lib/tourPackages";
 import PackageEnquiryForm from "@/components/booking/PackageEnquiryForm";
@@ -171,7 +171,7 @@ export default function PackageDetailPage({ pkg, detail, similar, initialBooking
           <ChevronRight className="h-3.5 w-3.5 text-stone-300" />
           <Link href="/packages" className="transition hover:text-brand">Packages</Link>
           <ChevronRight className="h-3.5 w-3.5 text-stone-300" />
-          <Link href={`/packages?q=${encodeURIComponent(pkg.state)}`} className="transition hover:text-brand">{pkg.state}</Link>
+          <Link href={pkg.state ? buildListingHref({ q: pkg.state }) : "/packages"} className="transition hover:text-brand">{pkg.state}</Link>
           <ChevronRight className="h-3.5 w-3.5 text-stone-300" />
           <span className="text-stone-900">{pkg.title}</span>
         </nav>

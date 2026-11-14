@@ -4,6 +4,7 @@ import {
   THEME_BY_ID,
   getPackagePriceBounds,
 } from "@/lib/tourPackageMeta";
+import { buildPackageSlug } from "@/lib/packagePath";
 import {
   DEFAULT_CHILD_AGE,
   TRAVELLER_LIMITS,
@@ -71,6 +72,7 @@ export function createDefaultFilters() {
   const { min, max } = getPackagePriceBounds();
   return {
     q: "",
+    place: "",
     date: "",
     travellers: { adults: 2, children: 0, infants: 0, childAges: [] },
     themes: [],
@@ -114,9 +116,13 @@ export function parseFilters(params = {}) {
   const region = get("region");
   const date = get("date");
 
+  const place = String(get("place") ?? "").slice(0, 80);
+  const q = String(get("q") ?? "").slice(0, 80);
+
   return {
     ...defaults,
-    q: String(get("q") ?? "").slice(0, 80),
+    q: q || place,
+    place,
     date: /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? "")) ? date : "",
     travellers: { adults, children, infants, childAges: syncChildAges(ages, children) },
     themes: list(get("themes")).filter((t) => themeIds.has(t)),
@@ -137,12 +143,17 @@ export function parseFilters(params = {}) {
 }
 
 /** Serialise filters into a compact query string (only non-default values). */
-export function filtersToQuery(filters) {
+export function filtersToQuery(filters, { strip = [] } = {}) {
   const defaults = createDefaultFilters();
   const p = new URLSearchParams();
   const t = filters.travellers;
+  const skip = new Set(strip);
 
-  if (filters.q.trim()) p.set("q", filters.q.trim());
+  if (!skip.has("place") && filters.place?.trim()) p.set("place", filters.place.trim());
+  if (!skip.has("q")) {
+    if (filters.q.trim() && filters.q.trim() !== filters.place?.trim()) p.set("q", filters.q.trim());
+    else if (filters.q.trim() && !filters.place?.trim()) p.set("q", filters.q.trim());
+  }
   if (filters.date) p.set("date", filters.date);
   if (t.adults !== 2) p.set("adults", String(t.adults));
   if (t.children) {
@@ -150,7 +161,7 @@ export function filtersToQuery(filters) {
     p.set("ages", t.childAges.join(","));
   }
   if (t.infants) p.set("infants", String(t.infants));
-  if (filters.themes.length) p.set("themes", filters.themes.join(","));
+  if (!skip.has("themes") && filters.themes.length) p.set("themes", filters.themes.join(","));
   if (filters.region !== "all") p.set("region", filters.region);
   if (filters.durations.length) p.set("dur", filters.durations.join(","));
   if (filters.price[0] !== defaults.price[0]) p.set("min", String(filters.price[0]));
@@ -185,7 +196,8 @@ export function applyFilters(packages, filters) {
 
   return packages.filter((pkg) => {
     const { meta } = pkg;
-    if (!matchesQuery(pkg, filters.q)) return false;
+    // Place API already scoped the list — don't re-filter by free-text `q`.
+    if (!filters.place?.trim() && !matchesQuery(pkg, filters.q)) return false;
     if (filters.region === "india" && meta.international) return false;
     if (filters.region === "international" && !meta.international) return false;
     if (filters.themes.length && !filters.themes.some((t) => meta.themes.includes(t))) return false;
@@ -230,7 +242,8 @@ export function sortPackages(packages, sort) {
 export function describeActiveFilters(filters) {
   const defaults = createDefaultFilters();
   const chips = [];
-  if (filters.q.trim()) chips.push({ key: "q", label: `“${filters.q.trim()}”` });
+  if (filters.place?.trim()) chips.push({ key: "place", label: filters.place.trim() });
+  else if (filters.q.trim()) chips.push({ key: "q", label: `“${filters.q.trim()}”` });
   filters.themes.forEach((t) => chips.push({ key: `theme:${t}`, label: THEME_BY_ID[t]?.label ?? t }));
   if (filters.region !== "all") {
     chips.push({ key: "region", label: filters.region === "india" ? "India" : "International" });
@@ -258,6 +271,8 @@ export function removeFilterChip(filters, key) {
   switch (kind) {
     case "q":
       return { ...filters, q: "" };
+    case "place":
+      return { ...filters, place: "", q: filters.q === filters.place ? "" : filters.q };
     case "theme":
       return { ...filters, themes: filters.themes.filter((t) => t !== value) };
     case "region":
@@ -277,8 +292,12 @@ export function removeFilterChip(filters, key) {
   }
 }
 
-/** Build a /packages link carrying search context (used by cards and quick links). */
-export function buildDetailHref(slug, filters) {
+/** Build a /packages/{name}-{id} link carrying search context (used by cards and quick links). */
+export function buildDetailHref(slugOrPkg, filters) {
+  const slug =
+    typeof slugOrPkg === "string"
+      ? slugOrPkg
+      : buildPackageSlug(slugOrPkg || {});
   const p = new URLSearchParams();
   if (filters?.date) p.set("date", filters.date);
   const t = filters?.travellers;

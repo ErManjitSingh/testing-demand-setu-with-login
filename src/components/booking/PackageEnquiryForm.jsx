@@ -177,6 +177,8 @@ export default function PackageEnquiryForm({
     }
   };
 
+  const packageImage = getPackageImage(tourPackage);
+
   const panel = (
     <div
       className={
@@ -188,14 +190,10 @@ export default function PackageEnquiryForm({
       }
     >
       {!embedded && (
-        <div className="relative h-28 shrink-0 overflow-hidden sm:h-32">
-          <Image
-            src={getPackageImage(tourPackage)}
-            alt=""
-            fill
-            className="object-cover"
-            sizes="512px"
-          />
+        <div className="relative h-28 shrink-0 overflow-hidden bg-stone-800 sm:h-32">
+          {packageImage ? (
+            <Image src={packageImage} alt="" fill className="object-cover" sizes="512px" />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-stone-950/20" />
           <div
             className={`absolute inset-x-0 bottom-0 px-5 pb-4 pr-12 ${

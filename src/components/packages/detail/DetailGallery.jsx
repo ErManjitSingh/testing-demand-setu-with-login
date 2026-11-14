@@ -93,9 +93,12 @@ function Lightbox({ images, index, onClose, onChange }) {
 /** Bento-style mosaic + fullscreen lightbox. */
 export default function DetailGallery({ images, badge }) {
   const [open, setOpen] = useState(null);
-  const grid = images.slice(0, 5);
-  const extra = Math.max(0, images.length - 5);
+  const photos = Array.isArray(images) ? images.filter((img) => img?.src) : [];
+  const grid = photos.slice(0, 5);
+  const extra = Math.max(0, photos.length - 5);
   const close = useCallback(() => setOpen(null), []);
+
+  if (photos.length === 0) return null;
 
   const tile = (img, i, className) => (
     <button
@@ -132,7 +135,7 @@ export default function DetailGallery({ images, badge }) {
       <div className="relative">
         {/* Mobile: swipeable strip */}
         <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 sm:hidden">
-          {images.map((img, i) => (
+          {photos.map((img, i) => (
             <button
               key={img.src}
               type="button"
@@ -165,12 +168,12 @@ export default function DetailGallery({ images, badge }) {
           className="absolute bottom-4 right-4 hidden items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-extrabold text-stone-900 shadow-xl transition hover:scale-105 active:scale-95 sm:inline-flex"
         >
           <Images className="h-4 w-4 text-brand" />
-          View all {images.length} photos
+          View all {photos.length} photos
           <Maximize2 className="h-3.5 w-3.5 text-stone-400" />
         </button>
       </div>
 
-      {open != null ? <Lightbox images={images} index={open} onClose={close} onChange={setOpen} /> : null}
+      {open != null ? <Lightbox images={photos} index={open} onClose={close} onChange={setOpen} /> : null}
     </>
   );
 }

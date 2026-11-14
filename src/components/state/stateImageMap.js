@@ -26,6 +26,8 @@ export const STATE_IMAGE_MAP = {
     "https://images.pexels.com/photos/32702512/pexels-photo-32702512.jpeg",
   "Jammu & Kashmir":
     "https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=1200&q=80",
+  "Jammu and Kashmir":
+    "https://images.unsplash.com/photo-1598091383021-15ddea10925d?w=1200&q=80",
   Karnataka:
     "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=1200&q=80",
   Kerala:

@@ -144,15 +144,17 @@ function StayPanel({ pkg, hotels, booking, onChange, dateFactor }) {
           return (
             <li key={stay.index} className="overflow-hidden rounded-3xl border border-stone-200 bg-white">
               <div className="flex flex-col sm:flex-row">
-                <div className="relative h-40 w-full shrink-0 sm:h-auto sm:w-52">
-                  <Image
-                    key={chosen.image}
-                    src={chosen.image}
-                    alt={chosen.name}
-                    fill
-                    sizes="(min-width:640px) 208px, 100vw"
-                    className="pk-fade object-cover"
-                  />
+                <div className="relative h-40 w-full shrink-0 bg-stone-200 sm:h-auto sm:w-52">
+                  {chosen.image ? (
+                    <Image
+                      key={chosen.image}
+                      src={chosen.image}
+                      alt={chosen.name}
+                      fill
+                      sizes="(min-width:640px) 208px, 100vw"
+                      className="pk-fade object-cover"
+                    />
+                  ) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 to-transparent" />
                   <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-extrabold text-stone-900">
                     <MapPin className="h-3 w-3 text-brand" />

@@ -22,7 +22,7 @@ import WishlistButton from "@/components/packages/shared/WishlistButton";
 import { buildDetailHref, isInSeason, monthIndexFromDate } from "@/lib/packageFilters";
 import { calculateTripPrice } from "@/lib/tourPackageDetails";
 import { THEME_BY_ID } from "@/lib/tourPackageMeta";
-import { formatPackagePrice } from "@/lib/tourPackages";
+import { formatPackagePrice, getPackageImage } from "@/lib/tourPackages";
 import { formatTravellerSummary, totalTravellers } from "@/lib/tourTravellers";
 
 function Facts({ pkg }) {
@@ -55,7 +55,7 @@ function Price({ pkg, filters, estimate }) {
 
 export default function ListingPackageCard({ pkg, filters, view = "grid", index = 0, onEnquire, priority = false }) {
   const { meta } = pkg;
-  const href = buildDetailHref(pkg.slug, filters);
+  const href = buildDetailHref(pkg, filters);
   const month = monthIndexFromDate(filters.date);
   const hasDate = month != null;
   const inSeason = hasDate && isInSeason(meta.bestTime, month);
@@ -75,6 +75,7 @@ export default function ListingPackageCard({ pkg, filters, view = "grid", index 
   const isList = view === "list";
   const delay = Math.min(index, 8) * 55;
   const travellerCount = totalTravellers(filters.travellers);
+  const imageSrc = getPackageImage(pkg);
 
   return (
     <article
@@ -84,16 +85,18 @@ export default function ListingPackageCard({ pkg, filters, view = "grid", index 
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Media */}
-      <div className={`relative overflow-hidden ${isList ? "min-h-[240px]" : "aspect-[4/3]"}`}>
+      <div className={`relative overflow-hidden bg-stone-200 ${isList ? "min-h-[240px]" : "aspect-[4/3]"}`}>
         <Link href={href} className="absolute inset-0" aria-label={`View ${pkg.title}`} tabIndex={-1}>
-          <Image
-            src={pkg.image}
-            alt={pkg.title}
-            fill
-            priority={priority}
-            sizes={isList ? "(min-width:768px) 320px, 100vw" : "(min-width:1280px) 340px, (min-width:640px) 45vw, 100vw"}
-            className="object-cover transition duration-[900ms] ease-out group-hover:scale-110"
-          />
+          {imageSrc ? (
+            <Image
+              src={imageSrc}
+              alt={pkg.title}
+              fill
+              priority={priority}
+              sizes={isList ? "(min-width:768px) 320px, 100vw" : "(min-width:1280px) 340px, (min-width:640px) 45vw, 100vw"}
+              className="object-cover transition duration-[900ms] ease-out group-hover:scale-110"
+            />
+          ) : null}
         </Link>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-stone-950/25" />
 

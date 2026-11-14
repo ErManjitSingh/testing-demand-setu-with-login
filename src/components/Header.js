@@ -16,8 +16,7 @@ import { useCategoryExplore } from "@/hooks/useCategoryExplore";
 import { useGuestAuth } from "@/hooks/useGuestAuth";
 
 const navLinks = [
-  { href: "/", label: "Home", explore: null, icon: "home" },
-  { href: "/packages", label: "Packages", explore: null, icon: "package" },
+  { href: "/", label: "Tour Package", explore: null, icon: "package", alsoActive: ["/packages"] },
   { href: "/accommodations", label: "Stays", explore: null, icon: "bed" },
   { href: "/listings", label: "Explore", explore: "all", icon: "compass" },
   { href: null, label: "Hotels", explore: "hotel", icon: "hotel" },
@@ -197,9 +196,8 @@ export default function Header() {
 }
 
 function NavItem({ link, pathname, onExplore, onNavigate, mobile = false, dark = false }) {
-  const isActive =
-    link.href &&
-    (link.href === "/" ? pathname === "/" : pathname === link.href || pathname.startsWith(`${link.href}/`));
+  const matches = (href) => (href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`));
+  const isActive = Boolean(link.href) && (matches(link.href) || (link.alsoActive ?? []).some(matches));
 
   const className = mobile
     ? `flex items-center gap-3 rounded-2xl px-3 py-3 text-left text-[15px] font-medium ${

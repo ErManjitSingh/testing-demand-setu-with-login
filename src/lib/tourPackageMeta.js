@@ -101,8 +101,10 @@ export function hashString(input = "") {
 }
 
 export function getPackageMeta(pkg) {
-  const [themes, stars, bestTime, difficulty, mealPlan, pickup, flightsIncluded] =
+  const [rawThemes, stars, bestTime, difficulty, mealPlan, rawPickup, flightsIncluded] =
     RAW_META[pkg.id] ?? FALLBACK_META;
+  const themes = Array.isArray(pkg.themes) && pkg.themes.length ? pkg.themes : rawThemes;
+  const pickup = pkg.pickup || rawPickup;
   const { nights, days } = parseDuration(pkg.duration);
   const seed = hashString(pkg.id);
   const international = pkg.country !== "India";
@@ -140,7 +142,8 @@ export function getListingPackages() {
 }
 
 export function getPackagePriceBounds() {
-  const prices = TOUR_PACKAGES.map((p) => p.price);
+  const prices = TOUR_PACKAGES.map((p) => p.price).filter((n) => Number.isFinite(n));
+  if (!prices.length) return { min: 0, max: 100000 };
   const min = Math.floor(Math.min(...prices) / 1000) * 1000;
   const max = Math.ceil(Math.max(...prices) / 5000) * 5000;
   return { min, max };

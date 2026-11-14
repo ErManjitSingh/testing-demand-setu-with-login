@@ -1,7 +1,11 @@
 import PackagesListingPage from "@/components/packages/listing/PackagesListingPage";
 import { parseFilters } from "@/lib/packageFilters";
-import { TOUR_PACKAGES } from "@/lib/tourPackages";
+import { getPackageMeta } from "@/lib/tourPackageMeta";
+import { buildPackagePath } from "@/lib/packagePath";
+import { fetchPackagesForFilters } from "@/lib/tourPackagesApi";
 import { getSiteUrl } from "@/lib/siteConfig";
+
+export const revalidate = 300;
 
 export const metadata = {
   title: "Tour Packages — India & International Holidays",
@@ -20,15 +24,17 @@ export default async function PackagesPage({ searchParams }) {
   const query = await searchParams;
   const initialFilters = parseFilters(query);
   const siteUrl = getSiteUrl();
+  const fetched = await fetchPackagesForFilters(initialFilters);
+  const initialPackages = fetched.packages.map((pkg) => ({ ...pkg, meta: getPackageMeta(pkg) }));
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Demand Setu tour packages",
-    itemListElement: TOUR_PACKAGES.slice(0, 20).map((pkg, i) => ({
+    itemListElement: initialPackages.slice(0, 20).map((pkg, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${siteUrl}/packages/${pkg.slug}`,
+      url: `${siteUrl}${buildPackagePath(pkg)}`,
       name: pkg.title,
     })),
   };
@@ -39,7 +45,7 @@ export default async function PackagesPage({ searchParams }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
-      <PackagesListingPage initialFilters={initialFilters} />
+      <PackagesListingPage initialFilters={initialFilters} initialPackages={initialPackages} />
     </>
   );
 }

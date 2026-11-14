@@ -69,7 +69,7 @@ export default function PackagesThemeTiles({ config = null }) {
             <span className="block px-3 py-3 text-center">
               <span className="block text-[13px] font-extrabold uppercase tracking-wide text-stone-900">{theme.label}</span>
               <span className="mt-1 inline-block rounded-full border border-brand/30 bg-brand-muted px-2.5 py-0.5 text-[11px] font-bold text-brand">
-                {counts[theme.id] ?? 0} trips
+                {(counts[theme.id] ?? 0) > 0 ? `${counts[theme.id]} trips` : "Explore"}
               </span>
             </span>
           </Link>

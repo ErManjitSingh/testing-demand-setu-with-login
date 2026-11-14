@@ -13,6 +13,8 @@ import {
   serialiseStopMeals,
 } from "@/lib/tourCustomize";
 import { calculateTripPrice } from "@/lib/tourPackageDetails";
+import { buildPackageSlug } from "@/lib/packagePath";
+import { buildTourPackagesPath } from "@/lib/tourPackagesRoutes";
 
 /** Shared helpers for the product page -> booking page hand-off. */
 
@@ -39,7 +41,11 @@ export const SPECIAL_REQUESTS = [
 ];
 
 /** Query string that carries the booking card state onto the booking page. */
-export function buildBookingHref(slug, booking = {}) {
+export function buildBookingHref(slugOrPkg, booking = {}) {
+  const slug =
+    typeof slugOrPkg === "string"
+      ? slugOrPkg
+      : buildPackageSlug(slugOrPkg || {});
   const p = new URLSearchParams();
   if (booking.date) p.set("date", booking.date);
   const t = booking.travellers;
@@ -109,10 +115,21 @@ export function createBookingRef() {
   return `DS-${out}`;
 }
 
-/** Link to the listing page for a free-text place / package search. */
-export function buildListingHref({ q = "", themes = [], region = "", sort = "" } = {}) {
+/** Link to listing: clean `/tour-packages/{slug}` for single theme / state / city. */
+export function buildListingHref({ q = "", place = "", themes = [], region = "", sort = "" } = {}) {
+  const singleTheme = themes.length === 1 && !q && !place && !region && !sort;
+  if (singleTheme) return buildTourPackagesPath({ theme: themes[0] });
+  if (place && !q && themes.length === 0 && !region && !sort) {
+    return buildTourPackagesPath({ place });
+  }
+  if (q && !place && themes.length === 0 && !region && !sort) {
+    return buildTourPackagesPath({ state: q });
+  }
+
   const p = new URLSearchParams();
-  if (q) p.set("q", q);
+  if (place) p.set("place", place);
+  if (q && q !== place) p.set("q", q);
+  else if (q && !place) p.set("q", q);
   if (themes.length) p.set("themes", themes.join(","));
   if (region) p.set("region", region);
   if (sort) p.set("sort", sort);

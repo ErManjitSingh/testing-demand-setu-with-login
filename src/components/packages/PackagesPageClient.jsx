@@ -5,17 +5,14 @@ import AllPackagesCatalog from "@/components/packages/AllPackagesCatalog";
 import FamousPackagesSection from "@/components/packages/FamousPackagesSection";
 import PackagesAnnouncement from "@/components/packages/PackagesAnnouncement";
 import PackagesContentMarquee from "@/components/packages/PackagesContentMarquee";
-import PackagesCtaBanner from "@/components/packages/PackagesCtaBanner";
 import PackagesExploreCountries from "@/components/packages/PackagesExploreCountries";
 import PackagesExploreStates from "@/components/packages/PackagesExploreStates";
 import PackagesFAQ from "@/components/packages/PackagesFAQ";
 import PackagesHeroSearch from "@/components/packages/PackagesHeroSearch";
 import PackagesPopularCities from "@/components/packages/PackagesPopularCities";
 import PackagesPromoBanner from "@/components/packages/PackagesPromoBanner";
-import PackagesSeoContent from "@/components/packages/PackagesSeoContent";
 import PackagesThemeContent from "@/components/packages/PackagesThemeContent";
 import PackagesThemeTiles from "@/components/packages/PackagesThemeTiles";
-import PackagesWhyTravel from "@/components/packages/PackagesWhyTravel";
 import { buildListingHref } from "@/lib/packageBooking";
 import { resolveHomeBlocks } from "@/lib/packageHomeApi";
 import { getFamousPackages } from "@/lib/tourPackages";
@@ -69,17 +66,11 @@ export default function PackagesPageClient({ states = [], cities = [], homeConfi
             <PackagesPromoBanner />
           </>
         );
-      case "whyChoose":
-        return <PackagesWhyTravel config={section} />;
       case "testimonial":
         // "Guest stories" section is intentionally not shown on the home page
         return null;
-      case "cta":
-        return <PackagesCtaBanner config={section} />;
       case "faq":
         return <PackagesFAQ config={section} />;
-      case "seoContent":
-        return <PackagesSeoContent config={section} />;
       default:
         return null;
     }
@@ -95,7 +86,9 @@ export default function PackagesPageClient({ states = [], cities = [], homeConfi
       />
       <PackagesAnnouncement config={homeConfig?.announcement ?? null} />
       <PackagesContentMarquee />
-      <FamousPackagesSection packages={famousPackages} />
+      {homeConfig?.hidden?.includes("famousPackage") ? null : (
+        <FamousPackagesSection packages={famousPackages} config={homeConfig?.famousPackage ?? null} />
+      )}
       {blocks.map((block) => (
         <Fragment key={block.key}>{renderBlock(block)}</Fragment>
       ))}
@@ -139,7 +132,7 @@ function CityChoiceBridge() {
             return (
               <Link
                 key={item.city}
-                href={buildListingHref({ q: item.city })}
+                href={buildListingHref({ place: item.city })}
                 aria-label={`${item.city} tour packages`}
                 className="group relative aspect-[3/4] overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl"
               >

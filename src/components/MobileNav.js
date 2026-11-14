@@ -6,12 +6,11 @@ import { useCategoryExplore } from "@/hooks/useCategoryExplore";
 import { isListingsSlugPath } from "@/lib/listingsSlug";
 
 const tabs = [
-  { href: "/", label: "Home", explore: null, match: (p) => p === "/" },
   {
-    href: "/packages",
-    label: "Packages",
+    href: "/",
+    label: "Tour Package",
     explore: null,
-    match: (p) => p === "/packages" || p?.startsWith("/packages/"),
+    match: (p) => p === "/" || p === "/packages" || p?.startsWith("/packages/"),
   },
   { href: "/accommodations", label: "Stays", explore: null, match: (p) => p === "/accommodations" },
   {
@@ -99,7 +98,7 @@ export default function MobileNav() {
 function TabIcon({ name, active }) {
   const stroke = active ? 2.5 : 1.5;
   const cls = `h-5 w-5 ${active ? "text-white" : ""}`;
-  if (name === "Home" || name === "Stays") {
+  if (name === "Stays") {
     return (
       <svg className={cls} fill={active ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 0 : stroke}>
         {active && <path d="M11.47 3.841a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.061l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 101.061 1.06l8.689-8.69z" />}
@@ -107,7 +106,7 @@ function TabIcon({ name, active }) {
       </svg>
     );
   }
-  if (name === "Packages") {
+  if (name === "Tour Package") {
     return (
       <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={stroke}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V5.25A2.25 2.25 0 0111.25 3h1.5A2.25 2.25 0 0115 5.25v1.5M4.5 6.75h15a1.5 1.5 0 011.5 1.5v10.5a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V8.25a1.5 1.5 0 011.5-1.5zM3 13.5h18" />

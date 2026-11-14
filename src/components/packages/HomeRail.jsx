@@ -112,14 +112,16 @@ export function RailCard({ href, onClick, image, title, sub, price, badge, size 
 
   const inner = (
     <>
-      <Image
-        src={image}
-        alt=""
-        fill
-        loading="lazy"
-        sizes={size === "lg" ? "240px" : "190px"}
-        className="object-cover transition duration-700 group-hover:scale-105"
-      />
+      {image ? (
+        <Image
+          src={image}
+          alt=""
+          fill
+          loading="lazy"
+          sizes={size === "lg" ? "240px" : "190px"}
+          className="object-cover transition duration-700 group-hover:scale-105"
+        />
+      ) : null}
       <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
       {badge ? (
         <span className="absolute left-2.5 top-2.5 rounded-full bg-white px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-stone-900">

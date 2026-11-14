@@ -1,9 +1,8 @@
 "use client";
 
-import { Check, ChevronDown, RotateCcw, Star } from "lucide-react";
+import { Check, ChevronDown, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { getThemeIcon } from "@/components/packages/shared/themeIcons";
-import { PERK_FILTERS, RATING_OPTIONS } from "@/lib/packageFilters";
 import { DURATION_BUCKETS, PACKAGE_THEMES } from "@/lib/tourPackageMeta";
 
 const inr = (n) => `₹${n.toLocaleString("en-IN")}`;
@@ -136,30 +135,6 @@ export default function FilterPanel({
         </button>
       </div>
 
-      <Section title="Destination type">
-        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-stone-100 p-1">
-          {[
-            { id: "all", label: "All" },
-            { id: "india", label: "India" },
-            { id: "international", label: "Abroad" },
-          ].map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => onChange({ region: opt.id })}
-              aria-pressed={filters.region === opt.id}
-              className={`rounded-xl py-2 text-xs font-extrabold transition ${
-                filters.region === opt.id
-                  ? "bg-white text-brand shadow-sm"
-                  : "text-stone-500 hover:text-stone-800"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </Section>
-
       <Section title="Trip style">
         <div className="flex flex-wrap gap-2">
           {PACKAGE_THEMES.map((theme) => {
@@ -205,71 +180,6 @@ export default function FilterPanel({
         </div>
       </Section>
 
-      <Section title="Guest rating">
-        <div className="flex flex-wrap gap-2">
-          {RATING_OPTIONS.map((opt) => {
-            const active = filters.rating === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => onChange({ rating: opt.value })}
-                aria-pressed={active}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-bold transition active:scale-95 ${
-                  active
-                    ? "border-amber-400 bg-amber-50 text-amber-800"
-                    : "border-stone-200 bg-white text-stone-700 hover:border-amber-300"
-                }`}
-              >
-                {opt.value ? <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> : null}
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </Section>
-
-      <Section title="Hotel category" defaultOpen={false}>
-        <div className="flex gap-2">
-          {[3, 4, 5].map((stars) => {
-            const active = filters.stars.includes(stars);
-            return (
-              <button
-                key={stars}
-                type="button"
-                onClick={() => toggleIn("stars", stars)}
-                aria-pressed={active}
-                className={`flex-1 rounded-xl border py-2.5 text-xs font-extrabold transition active:scale-95 ${
-                  active
-                    ? "border-brand bg-brand-muted text-brand"
-                    : "border-stone-200 bg-white text-stone-700 hover:border-brand/40"
-                }`}
-              >
-                {stars}★
-              </button>
-            );
-          })}
-        </div>
-      </Section>
-
-      <Section title="Inclusions & extras" defaultOpen={false}>
-        <div>
-          {PERK_FILTERS.map((perk) => (
-            <CheckRow
-              key={perk.id}
-              checked={filters.perks.includes(perk.id)}
-              onChange={() => toggleIn("perks", perk.id)}
-            >
-              {perk.label}
-            </CheckRow>
-          ))}
-          {filters.perks.includes("inseason") && !filters.date ? (
-            <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
-              Pick a travel date in the search bar to use this filter.
-            </p>
-          ) : null}
-        </div>
-      </Section>
     </div>
   );
 }

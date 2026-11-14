@@ -50,6 +50,53 @@ const DEFAULT_SEQUENCE = ["theme", "state", "city", "country", "tail", "faq"];
 
 const text = (value) => (value === undefined || value === null ? "" : String(value).trim());
 
+/**
+ * Admin / packagemaker theme slugs → our listing filter ids (`PACKAGE_THEMES`).
+ * Without this map, only wildlife / adventure / family survive and Trips by mood shows 3 tiles.
+ */
+const THEME_SLUG_ALIASES = {
+  mountains: "mountains",
+  mountain: "mountains",
+  "hill-station": "mountains",
+  hillstation: "mountains",
+  hills: "mountains",
+  beaches: "beaches",
+  beach: "beaches",
+  island: "beaches",
+  islands: "beaches",
+  heritage: "heritage",
+  cultural: "heritage",
+  culture: "heritage",
+  spiritual: "spiritual",
+  religious: "spiritual",
+  pilgrimage: "spiritual",
+  wildlife: "wildlife",
+  nature: "wildlife",
+  honeymoon: "honeymoon",
+  couple: "honeymoon",
+  romantic: "honeymoon",
+  adventure: "adventure",
+  city: "city",
+  holiday: "city",
+  "city-break": "city",
+  "city-breaks": "city",
+  family: "family",
+};
+
+function resolveThemeId(slug, name = "") {
+  const raw = text(slug).toLowerCase();
+  if (raw && THEME_BY_ID[raw]) return raw;
+  if (raw && THEME_SLUG_ALIASES[raw]) return THEME_SLUG_ALIASES[raw];
+
+  const label = text(name).toLowerCase();
+  if (!label) return "";
+  const byLabel = PACKAGE_THEMES_FOR_LABEL.find((t) => t.label.toLowerCase() === label);
+  return byLabel?.id || "";
+}
+
+// Local copy of labels so we can match admin names without a circular import shape.
+const PACKAGE_THEMES_FOR_LABEL = Object.values(THEME_BY_ID);
+
 /** Returns the URL only when next/image is allowed to load it, otherwise "". */
 export function safeImageUrl(value) {
   const raw = text(value);
@@ -131,13 +178,16 @@ function normalizeSection(raw, themeNames) {
     }
 
     case "theme": {
-      // Only themes the listing page can filter by (slug = theme id) are kept
+      // Admin may send packagemaker slugs (hill-station, beach…); map them onto our filter ids.
       const items = (Array.isArray(raw.items) ? raw.items : [])
-        .map((item) => ({
-          id: text(item?.slug),
-          label: text(item?.name) || THEME_BY_ID[text(item?.slug)]?.label || "",
-          image: safeImageUrl(item?.image),
-        }))
+        .map((item) => {
+          const themeId = resolveThemeId(item?.slug, item?.name);
+          return {
+            id: themeId,
+            label: text(item?.name) || THEME_BY_ID[themeId]?.label || "",
+            image: safeImageUrl(item?.image),
+          };
+        })
         .filter((item) => item.id && THEME_BY_ID[item.id] && item.label);
       if (!items.length) return null;
       return { ...base, items };
@@ -145,12 +195,12 @@ function normalizeSection(raw, themeNames) {
 
     case "content": {
       const html = sanitizeSeoHtml(raw.content);
-      const themeId = text(raw.themeSlug);
+      const themeId = resolveThemeId(raw.themeSlug, raw.title);
       if (!html || !plainSeoText(html)) return null;
       return {
         ...base,
         themeId: THEME_BY_ID[themeId] ? themeId : "",
-        themeLabel: themeNames[themeId] || THEME_BY_ID[themeId]?.label || "",
+        themeLabel: themeNames[text(raw.themeSlug)] || THEME_BY_ID[themeId]?.label || "",
         html,
         image: safeImageUrl(raw.image),
       };
@@ -210,6 +260,47 @@ function normalizeSection(raw, themeNames) {
     default:
       return null;
   }
+}
+
+/**
+ * "Famous Packages" block (`type: "famousPackage"`). Each item carries a snapshot of a backend
+ * package (`item.package`). Rendering stays in the existing Famous Packages section — this only
+ * supplies its content. Returns null when there is nothing usable, so the built-in packages show.
+ */
+function normalizeFamousPackages(raw) {
+  if (!raw) return null;
+
+  const seen = new Set();
+  const items = (Array.isArray(raw.items) ? raw.items : [])
+    .slice()
+    .sort((a, b) => (Number(a?.order) || 0) - (Number(b?.order) || 0))
+    .map((item) => {
+      const pkg = item?.package ?? {};
+      const id = text(pkg._id || item?.packageId);
+      const status = text(pkg.status).toLowerCase();
+      return {
+        id,
+        name: text(pkg.packageName).replace(/\s+/g, " "),
+        image: safeImageUrl(pkg.image),
+        state: text(pkg.state),
+        duration: text(pkg.duration),
+        priceTag: text(pkg.priceTag),
+        disabled: Boolean(status) && status !== "enabled",
+      };
+    })
+    .filter((item) => {
+      if (!item.id || !item.name || item.disabled || seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+
+  if (!items.length) return null;
+  return {
+    title: text(raw.title) || text(raw.heading),
+    subtitle: plainSeoText(raw.subHeading),
+    items,
+    maxVisible: Math.max(0, Number(raw.maxVisible) || 0),
+  };
 }
 
 function normalizeHeader(raw) {
@@ -274,6 +365,7 @@ export function normalizePackageHome(doc) {
     stats: normalizeStats(visible.find((s) => s.type === "stats")),
     announcement,
     sections,
+    famousPackage: normalizeFamousPackages(visible.find((s) => s.type === "famousPackage")),
     hidden: [...hidden],
   };
 }
@@ -305,12 +397,17 @@ export const fetchPackageHomeConfig = cache(async () => {
  * them off. The "tail" block (all packages, how it works, promo banner) is
  * website-only and always follows the last destination block.
  */
+// Sections the home page intentionally does not show, even if the admin has them saved
+const NOT_SHOWN_ON_HOME = new Set(["whyChoose", "cta", "seoContent"]);
+
 export function resolveHomeBlocks(config) {
   if (!config) {
     return DEFAULT_SEQUENCE.map((type) => ({ key: type, type, section: null }));
   }
 
-  const blocks = config.sections.map((section) => ({ key: section.id, type: section.type, section }));
+  const blocks = config.sections
+    .filter((section) => !NOT_SHOWN_ON_HOME.has(section.type))
+    .map((section) => ({ key: section.id, type: section.type, section }));
 
   for (const type of LEGACY_TYPES) {
     if (blocks.some((block) => block.type === type) || config.hidden.includes(type)) continue;

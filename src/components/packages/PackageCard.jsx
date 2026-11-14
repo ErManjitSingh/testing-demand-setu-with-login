@@ -58,19 +58,23 @@ export default function PackageCard({ tourPackage, onViewDetails, variant = "def
       ((tourPackage.originalPrice - tourPackage.price) / tourPackage.originalPrice) * 100
     );
 
+  const imageSrc = getPackageImage(tourPackage);
+
   if (variant === "hero") {
     return (
       <article className="overflow-hidden rounded-[1.75rem] border border-stone-200/80 bg-white shadow-[0_8px_40px_-12px_rgba(28,25,23,0.12)]">
         <div className="grid lg:grid-cols-[1.15fr_1fr]">
-          <div className="relative aspect-[16/11] lg:aspect-auto lg:min-h-[440px]">
-            <Image
-              src={getPackageImage(tourPackage)}
-              alt={tourPackage.title}
-              fill
-              priority
-              sizes="(max-width:1024px) 100vw, 55vw"
-              className="object-cover"
-            />
+          <div className="relative aspect-[16/11] bg-stone-200 lg:aspect-auto lg:min-h-[440px]">
+            {imageSrc ? (
+              <Image
+                src={imageSrc}
+                alt={tourPackage.title}
+                fill
+                priority
+                sizes="(max-width:1024px) 100vw, 55vw"
+                className="object-cover"
+              />
+            ) : null}
             {tourPackage.badge && (
               <span className="absolute left-5 top-5 rounded-full bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-900 shadow-lg">
                 {tourPackage.badge}
@@ -141,15 +145,17 @@ export default function PackageCard({ tourPackage, onViewDetails, variant = "def
   return (
     <article className="group flex h-full flex-col">
       <div className="relative overflow-hidden rounded-[1.25rem] bg-stone-100">
-        <div className="relative aspect-[4/5] overflow-hidden">
-          <Image
-            src={getPackageImage(tourPackage)}
-            alt={tourPackage.title}
-            fill
-            loading="lazy"
-            sizes="(max-width:640px) 100vw, 33vw"
-            className="object-cover transition duration-700 ease-out group-hover:scale-[1.04]"
-          />
+        <div className="relative aspect-[4/5] overflow-hidden bg-stone-200">
+          {imageSrc ? (
+            <Image
+              src={imageSrc}
+              alt={tourPackage.title}
+              fill
+              loading="lazy"
+              sizes="(max-width:640px) 100vw, 33vw"
+              className="object-cover transition duration-700 ease-out group-hover:scale-[1.04]"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-stone-950/50 via-transparent to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
 
           <div className="absolute left-4 top-4 flex flex-col gap-2">

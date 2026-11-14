@@ -39,7 +39,7 @@ export default function PackagesPopularCities({ cities = [], config = null }) {
         return (
           <RailCard
             key={cityName}
-            href={buildListingHref({ q: cityName })}
+            href={buildListingHref({ place: cityName })}
             ariaLabel={`${cityName} tour packages`}
             image={entry.image || getCityImage(cityName)}
             title={cityName}
